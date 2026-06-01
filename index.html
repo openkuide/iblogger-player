@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iblogger Player</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
+  <style>
+    :root { --bg:#0b0b0f; --panel:#16161d; --fg:#f5f5f7; --muted:#9aa0aa; --accent:#e50914; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Khmer OS", sans-serif; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
+    header { display:flex; align-items:center; gap:10px; padding: 8px 4px 16px; }
+    header .logo { font-size: 22px; font-weight: 800; letter-spacing:.5px; }
+    header .logo span { color: var(--accent); }
+    .player-box { position: relative; width:100%; background:#000; border-radius:12px; overflow:hidden;
+      aspect-ratio: 16 / 9; box-shadow: 0 8px 40px rgba(0,0,0,.5); }
+    video { width:100%; height:100%; display:block; background:#000; }
+    .meta { margin-top: 14px; padding: 14px 16px; background:var(--panel); border-radius:12px; }
+    .meta h1 { font-size: 18px; margin: 0 0 6px; }
+    .meta .src { color: var(--muted); font-size: 12px; word-break: break-all; }
+    .msg { padding: 40px 16px; text-align:center; color: var(--muted); }
+    .msg code { color: var(--fg); background:#000; padding:2px 6px; border-radius:5px; }
+    .err { color: #ff6b6b; }
+    a { color: #6ab7ff; }
+    .hint { margin-top:18px; font-size:13px; color:var(--muted); line-height:1.6; }
+    footer { margin-top: 24px; text-align:center; color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🎬 iblogger<span>·player</span></div>
+    </header>
+
+    <div class="player-box">
+      <video id="video" controls playsinline autoplay></video>
+    </div>
+
+    <div class="meta">
+      <h1 id="title">Loading…</h1>
+      <div class="src" id="srcline"></div>
+      <div id="status" class="msg" style="display:none;"></div>
+    </div>
+
+    <div class="hint">
+      <strong>How to use:</strong> open this page with an <code>?src=</code> query parameter pointing to an
+      <code>.m3u8</code> (HLS) URL. Optionally add <code>&title=</code>.<br />
+      Example: <code>?src=https://example.com/stream/index.m3u8&title=Episode%201</code>
+    </div>
+
+    <footer>Built with <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a> · static · GitHub Pages friendly</footer>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"
+    integrity="sha384-9v3HcdYrO3D+OPDTjZ40RXocgE4GtXVCd3/mCS62JsM93JXgI1afJVuwjFvsu6ni"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const src = params.get("src");
+      const title = params.get("title");
+      const video = document.getElementById("video");
+      const titleEl = document.getElementById("title");
+      const srcEl = document.getElementById("srcline");
+      const statusEl = document.getElementById("status");
+
+      function showStatus(html, isErr) {
+        statusEl.style.display = "block";
+        statusEl.className = "msg" + (isErr ? " err" : "");
+        statusEl.innerHTML = html;
+      }
+
+      document.title = title ? title + " · iblogger player" : "iblogger Player";
+      titleEl.textContent = title || (src ? "Now playing" : "No video selected");
+      srcEl.textContent = src || "";
+
+      if (!src) {
+        titleEl.textContent = "No video selected";
+        showStatus("Add a <code>?src=&lt;m3u8-url&gt;</code> parameter to play a stream.", false);
+        video.style.display = "none";
+        return;
+      }
+
+      const isHls = /\.m3u8(\?|$)/i.test(src) || /index\.single$/i.test(src) || true; // assume HLS
+
+      if (window.Hls && Hls.isSupported() && isHls) {
+        const hls = new Hls({ enableWorker: true });
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
+        hls.on(Hls.Events.ERROR, (e, data) => {
+          if (data.fatal) {
+            // Note: only static, trusted strings go into innerHTML. The source URL
+            // is shown via srcEl (textContent) above — never interpolated into HTML.
+            showStatus(
+              "⚠️ Could not load this stream.<br>This is usually a <strong>CORS</strong> restriction on the source server, " +
+              "or the link is offline. The source URL is shown above.", true);
+          }
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Safari native HLS
+        video.src = src;
+        video.play().catch(()=>{});
+        video.addEventListener("error", () =>
+          showStatus("⚠️ Could not load this stream (CORS or offline).", true));
+      } else {
+        showStatus("Your browser can't play HLS and hls.js failed to load.", true);
+      }
+    })();
+  </script>
+</body>
+</html>

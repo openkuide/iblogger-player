@@ -4,111 +4,1437 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>iblogger Player</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'><defs><linearGradient id='g' x1='0' y1='0' x2='24' y2='24' gradientUnits='userSpaceOnUse'><stop stop-color='%237aa8ff'/><stop offset='1' stop-color='%23a98bff'/></linearGradient></defs><rect x='2' y='4' width='20' height='16' rx='4.5' stroke='url(%23g)' stroke-width='1.7'/><path d='M6 4v16M18 4v16' stroke='url(%23g)' stroke-width='1.4' stroke-opacity='0.55'/><path d='M10.2 9.1c0-.66.72-1.07 1.29-.73l4 2.4a.85.85 0 0 1 0 1.46l-4 2.4a.85.85 0 0 1-1.29-.73V9.1Z' fill='url(%23g)'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.css"
+    integrity="sha384-5BmbLhDCa8GBRCnYFcoSA/ZyH7eflvXv+JVmSoUwuW57rcon/PWZSoVDkR7mLHwR"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
   <style>
-    :root { --bg:#0b0b0f; --panel:#16161d; --fg:#f5f5f7; --muted:#9aa0aa; --accent:#e50914; }
+    /* ── Apple-inspired design system ───────────────────────────── */
+    :root {
+      /* Dark (default) */
+      --bg:#000000;
+      --bg-elev:rgba(255, 255, 255, 0.06);
+      --bg-elev-2:rgba(255, 255, 255, 0.09);
+      --hairline:rgba(255, 255, 255, 0.12);
+      --fg:#f5f5f7;
+      --fg-2:rgba(245, 245, 247, 0.65);
+      --fg-3:rgba(245, 245, 247, 0.4);
+      --accent:#0a84ff;            /* systemBlue (dark) */
+      --shadow:0 20px 60px rgba(0, 0, 0, 0.55);
+      --radius:22px;
+      --radius-sm:14px;
+      --blur:saturate(180%) blur(20px);
+      /* Inter for Latin/numerals; Battambang auto-covers Khmer glyphs. */
+      --font: "Inter", "Battambang", -apple-system, BlinkMacSystemFont,
+        "Segoe UI", system-ui, Roboto, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:#f2f2f7;
+        --bg-elev:rgba(255, 255, 255, 0.7);
+        --bg-elev-2:rgba(255, 255, 255, 0.92);
+        --hairline:rgba(0, 0, 0, 0.08);
+        --fg:#1d1d1f;
+        --fg-2:rgba(29, 29, 31, 0.62);
+        --fg-3:rgba(29, 29, 31, 0.38);
+        --accent:#007aff;          /* systemBlue (light) */
+        --shadow:0 20px 50px rgba(0, 0, 0, 0.12);
+      }
+    }
+
     * { box-sizing: border-box; }
-    html, body { margin:0; height:100%; background:var(--bg); color:var(--fg);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Khmer OS", sans-serif; }
-    .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
-    header { display:flex; align-items:center; gap:10px; padding: 8px 4px 16px; }
-    header .logo { font-size: 22px; font-weight: 800; letter-spacing:.5px; }
-    header .logo span { color: var(--accent); }
-    .player-box { position: relative; width:100%; background:#000; border-radius:12px; overflow:hidden;
-      aspect-ratio: 16 / 9; box-shadow: 0 8px 40px rgba(0,0,0,.5); }
+
+    html, body {
+      margin:0;
+      min-height:100%;
+      background:var(--bg);
+      color:var(--fg);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Subtle vibrancy wash behind everything */
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      background:
+        radial-gradient(70% 55% at 50% -5%, rgba(10, 132, 255, 0.16), transparent 70%),
+        radial-gradient(45% 45% at 100% 100%, rgba(191, 90, 242, 0.10), transparent 70%);
+      pointer-events:none;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 22px 56px; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding: 4px 4px 30px;
+    }
+    .logo {
+      display:flex;
+      align-items:center;
+      gap:11px;
+      font-size: 21px;
+      font-weight: 600;
+      letter-spacing:-0.02em;
+    }
+    .logo .mark {
+      width:38px;
+      height:38px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+      background:linear-gradient(155deg, var(--bg-elev-2), rgba(0,0,0,0.18));
+      border:1px solid var(--hairline);
+      box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .logo .mark svg { width:22px; height:22px; display:block; }
+    .logo:hover .mark svg .play { transform-origin:center; transition:transform .25s ease; }
+    .logo:hover .mark svg { filter:drop-shadow(0 0 5px rgba(120,170,255,0.4)); }
+    .logo .sub { color: var(--fg-3); font-weight:500; }
+    .pill {
+      margin-left:auto;
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:0.02em;
+      color:var(--fg-2);
+      border:1px solid var(--hairline);
+      padding:6px 13px;
+      border-radius:999px;
+      background:var(--bg-elev);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+    }
+
+    /* ── Retro CRT TV ───────────────────────────────────────────── */
+    .tv {
+      position:relative;
+      padding: 26px 26px 0;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, #3a3a40, #1c1c20 60%, #141417);
+      box-shadow:
+        var(--shadow),
+        0 0 0 1px rgba(255,255,255,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        inset 0 -2px 6px rgba(0,0,0,0.6);
+    }
+    .player-box {
+      position: relative;
+      width:100%;
+      background:#000;
+      border-radius:14px;
+      overflow:hidden;
+      aspect-ratio: 16 / 9;
+      /* Screen recess only — a thin dark rim, no tint over the video itself. */
+      box-shadow: inset 0 0 0 2px #0a0a0c;
+    }
     video { width:100%; height:100%; display:block; background:#000; }
-    .meta { margin-top: 14px; padding: 14px 16px; background:var(--panel); border-radius:12px; }
-    .meta h1 { font-size: 18px; margin: 0 0 6px; }
-    .meta .src { color: var(--muted); font-size: 12px; word-break: break-all; }
-    .msg { padding: 40px 16px; text-align:center; color: var(--muted); }
-    .msg code { color: var(--fg); background:#000; padding:2px 6px; border-radius:5px; }
-    .err { color: #ff6b6b; }
-    a { color: #6ab7ff; }
-    .hint { margin-top:18px; font-size:13px; color:var(--muted); line-height:1.6; }
-    footer { margin-top: 24px; text-align:center; color:var(--muted); font-size:12px; }
+
+    /* TV control strip: power LED + brand + faux speaker grille */
+    .tv-strip {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding: 14px 6px 18px;
+    }
+    .tv-led {
+      width:9px; height:9px; border-radius:50%;
+      background:#ff453a;
+      box-shadow:0 0 8px 1px rgba(255,69,58,0.8);
+      animation: led-breathe 2.4s ease-in-out infinite;
+      flex:0 0 auto;
+    }
+    @keyframes led-breathe {
+      0%,100% { opacity:1; }
+      50% { opacity:.45; }
+    }
+    .tv-power {
+      font-size:10px; font-weight:700; letter-spacing:0.14em;
+      color:rgba(255,255,255,0.45); text-transform:uppercase;
+    }
+    .tv-brand {
+      margin-left:auto;
+      font-size:13px; font-weight:700; letter-spacing:0.12em;
+      color:rgba(255,255,255,0.5);
+      font-family:var(--font);
+    }
+    .tv-grille {
+      display:flex; gap:4px;
+    }
+    .tv-grille span {
+      width:4px; height:16px; border-radius:3px;
+      background:rgba(0,0,0,0.55);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    /* Little feet under the set */
+    .tv-feet {
+      display:flex; justify-content:space-between;
+      padding: 0 60px;
+      margin-top:-2px;
+    }
+    .tv-feet span {
+      width:64px; height:12px;
+      background:linear-gradient(180deg, #141417, #0a0a0c);
+      border-radius:0 0 8px 8px;
+      box-shadow:0 8px 14px rgba(0,0,0,0.5);
+    }
+
+    /* Loading spinner — Apple-style thin ring */
+    .loader {
+      position:absolute;
+      inset:0;
+      z-index:9;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      background:rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: opacity .4s ease;
+    }
+    .loader.hide { opacity:0; pointer-events:none; }
+    .spinner {
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      border:2.5px solid rgba(255, 255, 255, 0.18);
+      border-top-color:#ffffff;
+      animation: spin .8s cubic-bezier(.5,.15,.5,.85) infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader .label { font-size:13px; color:rgba(255,255,255,0.7); letter-spacing:0.01em; }
+
+    /* ── Plyr theming — match Apple/systemBlue accent ───────────── */
+    .player-box .plyr {
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      --plyr-color-main: var(--accent);
+      --plyr-video-control-color: #fff;
+      --plyr-video-control-color-hover: #fff;
+      --plyr-control-radius: 10px;
+      --plyr-range-thumb-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      --plyr-menu-background: rgba(28, 28, 32, 0.92);
+      --plyr-menu-color: #f5f5f7;
+      --plyr-menu-radius: 14px;
+      --plyr-font-family: var(--font);
+      --plyr-font-weight-regular: 500;
+    }
+    .player-box .plyr__control--overlaid {
+      background: rgba(40, 40, 44, 0.55);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+    .player-box .plyr__control--overlaid:hover { background: var(--accent); }
+    /* Frosted control bar to match the vibrancy aesthetic */
+    .player-box .plyr--video .plyr__controls {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      padding-top: 28px;
+    }
+    .player-box .plyr__menu__container {
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+    }
+
+    /* ── Funny ad banner ────────────────────────────────────────── */
+    .ad {
+      margin-top: 14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding: 13px 16px;
+      border:1px solid var(--hairline);
+      border-radius:var(--radius-sm);
+      background:
+        linear-gradient(135deg, rgba(10,132,255,0.12), rgba(191,90,242,0.10)),
+        var(--bg-elev);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+      overflow:hidden;
+    }
+    .ad .ad-tag {
+      flex:0 0 auto;
+      font-size:10px;
+      font-weight:700;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:var(--fg-3);
+      border:1px solid var(--hairline);
+      padding:3px 7px;
+      border-radius:6px;
+    }
+    .ad .ad-text {
+      flex:1 1 auto;
+      min-width:0;
+      font-family:var(--font);
+      font-size:15px;
+      font-weight:400;
+      line-height:1.5;
+      color:var(--fg);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      animation: adpop .45s ease;
+    }
+    @keyframes adpop {
+      from { opacity:0; transform: translateY(4px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .ad .ad-close {
+      flex:0 0 auto;
+      background:transparent;
+      border:none;
+      color:var(--fg-3);
+      font-size:18px;
+      line-height:1;
+      cursor:pointer;
+      padding:4px;
+      border-radius:6px;
+      transition: color .2s ease, background .2s ease;
+    }
+    .ad .ad-close:hover { color:var(--fg); background:var(--bg-elev-2); }
+
+    /* ── Floating ad slider (YouTube-2016 flat-color style) ─────── */
+    .adslide {
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      z-index:60;
+      width:300px;
+      height:160px;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 16px 40px rgba(0,0,0,0.45);
+      isolation:isolate;
+      animation: adslide-in .5s cubic-bezier(.2,.9,.3,1.2) both;
+    }
+    @keyframes adslide-in {
+      from { opacity:0; transform: translateY(28px) scale(.96); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .adslide .track {
+      display:flex;
+      width:100%;
+      height:100%;
+      transition: transform .55s cubic-bezier(.4,0,.2,1);
+    }
+    .adslide .slide {
+      flex:0 0 100%;
+      width:100%;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:8px;
+      padding:18px 22px 30px;
+      color:#fff;
+      font-family:var(--font);
+    }
+    .adslide .slide .big {
+      font-size:21px;
+      font-weight:700;
+      line-height:1.35;
+      text-shadow:0 1px 4px rgba(0,0,0,0.25);
+    }
+    .adslide .slide .small {
+      font-size:13px;
+      font-weight:500;
+      opacity:0.92;
+    }
+    /* Bright flat color blocks, one per slide */
+    .adslide .slide.c0 { background:linear-gradient(150deg,#2f6bff,#1e4fd6); }
+    .adslide .slide.c1 { background:linear-gradient(150deg,#ff4d4f,#d92626); }
+    .adslide .slide.c2 { background:linear-gradient(150deg,#21c36b,#12964e); }
+    .adslide .slide.c3 { background:linear-gradient(150deg,#ff9f0a,#f06a00); }
+    .adslide .as-tag {
+      position:absolute;
+      top:9px;
+      left:11px;
+      z-index:2;
+      font-size:9px;
+      font-weight:700;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+      color:#fff;
+      background:rgba(0,0,0,0.28);
+      padding:3px 7px;
+      border-radius:5px;
+    }
+    .adslide .as-close {
+      position:absolute;
+      top:7px;
+      right:8px;
+      z-index:2;
+      width:24px;
+      height:24px;
+      display:grid;
+      place-items:center;
+      background:rgba(0,0,0,0.28);
+      border:none;
+      color:#fff;
+      font-size:14px;
+      line-height:1;
+      border-radius:50%;
+      cursor:pointer;
+      transition: background .2s ease;
+    }
+    .adslide .as-close:hover { background:rgba(0,0,0,0.5); }
+    .adslide .dots {
+      position:absolute;
+      left:0; right:0; bottom:11px;
+      z-index:2;
+      display:flex;
+      justify-content:center;
+      gap:7px;
+    }
+    .adslide .dots button {
+      width:7px; height:7px;
+      padding:0;
+      border:none;
+      border-radius:50%;
+      background:rgba(255,255,255,0.45);
+      cursor:pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .adslide .dots button.on {
+      background:#fff;
+      transform:scale(1.25);
+    }
+    @media (max-width: 560px) {
+      .adslide {
+        right:10px; left:10px; bottom:10px;
+        width:auto;
+        height:128px;
+      }
+      .adslide .slide .big { font-size:18px; }
+    }
+
+    /* ── Home / browse ──────────────────────────────────────────── */
+    .home-bar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+    .search {
+      flex:1 1 240px;
+      position:relative;
+    }
+    .search input {
+      width:100%;
+      font-family:var(--font);
+      font-size:15px;
+      color:var(--fg);
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:999px;
+      padding:11px 16px 11px 40px;
+      outline:none;
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    .search input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(10,132,255,0.25); }
+    .search input::placeholder { color:var(--fg-3); }
+    .search::before {
+      content:"🔍";
+      position:absolute; left:14px; top:50%; transform:translateY(-50%);
+      font-size:14px; opacity:.6; pointer-events:none;
+    }
+    .sort select {
+      appearance:none; -webkit-appearance:none;
+      font-family:var(--font); font-size:14px; font-weight:500;
+      color:var(--fg);
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:999px;
+      padding:11px 34px 11px 16px;
+      cursor:pointer;
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath fill='%239aa0aa' d='M0 0l4.5 6L9 0z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 14px center;
+    }
+    .sort select:focus { outline:none; border-color:var(--accent); }
+    .genres-bar {
+      display:flex; flex-wrap:wrap; gap:8px;
+      margin-bottom:20px;
+    }
+    .genre-chip {
+      font-family:var(--font);
+      font-size:12.5px; font-weight:600;
+      color:var(--fg-2);
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:999px;
+      padding:7px 14px;
+      cursor:pointer;
+      transition:all .18s ease;
+    }
+    .genre-chip:hover { color:var(--fg); border-color:rgba(255,255,255,0.28); }
+    .genre-chip.active { color:#fff; background:var(--accent); border-color:var(--accent); }
+    .home-count { font-size:13px; color:var(--fg-3); margin:0 4px 14px; font-family:var(--font); }
+    .home-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+      gap:16px;
+    }
+    .home-card {
+      display:block; text-decoration:none; color:inherit;
+      border-radius:14px;
+      transition:transform .18s ease;
+    }
+    .home-card:hover { transform:translateY(-4px); }
+    .home-card:hover .hc-poster { box-shadow:0 14px 34px rgba(0,0,0,0.5); }
+    .hc-poster-wrap { position:relative; }
+    .hc-poster {
+      width:100%; aspect-ratio:2/3; object-fit:cover;
+      border-radius:14px; background:var(--bg-elev-2);
+      border:1px solid var(--hairline);
+      transition:box-shadow .18s ease;
+    }
+    .hc-eps {
+      position:absolute; bottom:8px; right:8px;
+      font-family:var(--font);
+      font-size:11px; font-weight:700; color:#fff;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+      padding:3px 8px; border-radius:999px;
+    }
+    .hc-rating {
+      position:absolute; top:8px; left:8px;
+      font-family:var(--font);
+      font-size:11px; font-weight:700; color:#ffd60a;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+      padding:3px 8px; border-radius:999px;
+    }
+    .hc-title {
+      font-family:var(--font);
+      font-size:13.5px; line-height:1.4; margin-top:9px;
+      color:var(--fg);
+      display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    .hc-year { font-family:var(--font); font-size:12px; color:var(--fg-3); margin-top:2px; }
+    .home-empty { padding:50px 16px; text-align:center; color:var(--fg-3); font-family:var(--font); }
+
+    /* ── Pagination ─────────────────────────────────────────────── */
+    .pager {
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+      gap:6px; margin-top:28px;
+      font-family:var(--font);
+    }
+    .pager button {
+      min-width:38px; height:38px;
+      padding:0 10px;
+      font-size:14px; font-weight:600;
+      color:var(--fg-2);
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:10px;
+      cursor:pointer;
+      transition:all .16s ease;
+    }
+    .pager button:hover:not(:disabled) { color:var(--fg); border-color:rgba(255,255,255,0.28); }
+    .pager button.active {
+      color:#fff; background:var(--accent); border-color:var(--accent);
+      box-shadow:0 4px 12px -3px rgba(10,132,255,0.5);
+    }
+    .pager button:disabled { opacity:.35; cursor:default; }
+    .pager .ellipsis { color:var(--fg-3); padding:0 4px; user-select:none; }
+
+    /* ── Movie info (Netflix-style detail) ──────────────────────── */
+    .info {
+      display:flex;
+      gap:18px;
+      margin-top:22px;
+      padding:20px;
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:var(--radius);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+    }
+    .info .poster {
+      flex:0 0 auto;
+      width:108px;
+      height:154px;
+      border-radius:12px;
+      object-fit:cover;
+      background:var(--bg-elev-2);
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+    }
+    .info .info-body { flex:1 1 auto; min-width:0; }
+    .info h1 { font-size:22px; margin:0 0 4px; font-weight:700; letter-spacing:-0.02em; line-height:1.25; }
+    .info .subtitle { font-size:14px; color:var(--fg-2); margin:0 0 10px; font-family:var(--font); }
+    .info .badges { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
+    .info .badge-i {
+      font-size:12px; font-weight:600; color:var(--fg-2);
+      padding:4px 10px; border-radius:999px;
+      border:1px solid var(--hairline); background:var(--bg-elev-2);
+      font-family:var(--font);
+    }
+    .info .badge-i.star { color:#ffd60a; }       /* systemYellow */
+    .info .desc {
+      font-family:var(--font);
+      font-size:13.5px; line-height:1.65; color:var(--fg-2);
+      margin:0; max-height:6.6em; overflow:hidden;
+    }
+
+    /* ── Episodes ───────────────────────────────────────────────── */
+    .section-title {
+      font-size:15px; font-weight:700; letter-spacing:0.01em;
+      margin:26px 4px 12px; color:var(--fg);
+      font-family:var(--font);
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-title .count { color:var(--fg-3); font-weight:500; font-size:13px; }
+    .episodes {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(58px, 1fr));
+      gap:8px;
+    }
+    .ep-btn {
+      aspect-ratio:1/1;
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; font-weight:600;
+      color:var(--fg-2);
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:12px;
+      cursor:pointer;
+      font-family:var(--font);
+      transition: all .18s ease;
+    }
+    .ep-btn:hover { color:var(--fg); border-color:rgba(255,255,255,0.28); transform:translateY(-2px); }
+    .ep-btn.active {
+      color:#fff; background:var(--accent); border-color:var(--accent);
+      box-shadow:0 4px 14px -2px rgba(10,132,255,0.5);
+    }
+    .ep-btn.final { position:relative; overflow:visible; }
+    .ep-btn.final::after {
+      content:"END";
+      position:absolute;
+      bottom:-7px; right:-5px;
+      font-size:8px; font-weight:800; letter-spacing:0.05em;
+      line-height:1;
+      color:#fff; background:#ff453a;        /* systemRed */
+      padding:2px 4px; border-radius:5px;
+      font-family:var(--font);
+      box-shadow:0 1px 4px rgba(255,69,58,0.5);
+    }
+
+    /* ── Related ────────────────────────────────────────────────── */
+    .related {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+      gap:14px;
+    }
+    .rel-card {
+      display:block; text-decoration:none; color:inherit;
+      border-radius:12px; overflow:hidden;
+      transition: transform .18s ease;
+    }
+    .rel-card:hover { transform:translateY(-3px); }
+    .rel-card:hover .rel-poster { box-shadow:0 10px 28px rgba(0,0,0,0.45); }
+    .rel-poster {
+      width:100%; aspect-ratio:2/3; object-fit:cover;
+      border-radius:12px; background:var(--bg-elev-2);
+      border:1px solid var(--hairline);
+      transition: box-shadow .18s ease;
+    }
+    .rel-title {
+      font-family:var(--font);
+      font-size:12.5px; line-height:1.4; margin-top:8px;
+      color:var(--fg-2);
+      display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+
+    /* ── Meta card ──────────────────────────────────────────────── */
+    .meta {
+      margin-top: 22px;
+      padding: 22px 24px;
+      background:var(--bg-elev);
+      border:1px solid var(--hairline);
+      border-radius:var(--radius);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+    }
+    .meta h1 { font-size: 24px; margin: 0; font-weight:600; letter-spacing:-0.02em; line-height:1.2; }
+
+    /* Collapsible source disclosure */
+    .source { margin-top: 12px; }
+    .source summary {
+      list-style:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      font-weight:500;
+      color:var(--fg-2);
+      user-select:none;
+      transition: color .2s ease;
+    }
+    .source summary::-webkit-details-marker { display:none; }
+    .source summary::before {
+      content:"›";
+      font-size:15px;
+      line-height:1;
+      transition: transform .2s ease;
+      display:inline-block;
+    }
+    .source[open] summary::before { transform: rotate(90deg); }
+    .source summary:hover { color:var(--fg); }
+    .source .src {
+      margin-top: 10px;
+      color: var(--fg-3);
+      font-size: 12px;
+      word-break: break-all;
+      font-family: var(--font-mono);
+      line-height:1.5;
+    }
+    .msg { padding: 24px 8px; text-align:center; color: var(--fg-2); line-height:1.6; font-size:15px; }
+    .msg code {
+      color: var(--fg);
+      background:var(--bg-elev-2);
+      padding:2px 7px;
+      border-radius:6px;
+      font-size:13px;
+      font-family: var(--font-mono);
+    }
+    .err { color: #ff453a; }            /* systemRed */
+    a { color: var(--accent); text-decoration:none; font-weight:500; }
+    a:hover { text-decoration:underline; }
+
+    /* ── Hint ───────────────────────────────────────────────────── */
+    .hint {
+      margin-top:22px;
+      font-size:14px;
+      color:var(--fg-2);
+      line-height:1.7;
+      padding:18px 22px;
+      border:1px solid var(--hairline);
+      border-radius:var(--radius-sm);
+      background:var(--bg-elev);
+      backdrop-filter:var(--blur);
+      -webkit-backdrop-filter:var(--blur);
+    }
+    .hint strong { color:var(--fg); font-weight:600; }
+    .hint code {
+      color: var(--fg);
+      background:var(--bg-elev-2);
+      padding:2px 7px;
+      border-radius:6px;
+      font-size:12.5px;
+      font-family: var(--font-mono);
+    }
+
+    footer { margin-top: 34px; text-align:center; color:var(--fg-3); font-size:12px; }
+
+    @media (max-width: 560px) {
+      .wrap { padding: 24px 16px 40px; }
+      .logo { font-size: 18px; }
+      .meta h1 { font-size: 21px; }
+      .pill { display:none; }
+      .tv { padding: 14px 14px 0; border-radius: 18px; }
+      .tv-feet { padding: 0 36px; }
+      .tv-feet span { width: 48px; }
+      .tv-brand { font-size: 11px; letter-spacing: 0.08em; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">🎬 iblogger<span>·player</span></div>
+      <a class="logo" href="./" style="text-decoration:none;color:inherit;">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7aa8ff"/>
+                <stop offset="1" stop-color="#a98bff"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="4" width="20" height="16" rx="4.5" stroke="url(#logoGrad)" stroke-width="1.7"/>
+            <path d="M6 4v16M18 4v16" stroke="url(#logoGrad)" stroke-width="1.4" stroke-opacity="0.55"/>
+            <path class="play" d="M10.2 9.1c0-.66.72-1.07 1.29-.73l4 2.4a.85.85 0 0 1 0 1.46l-4 2.4a.85.85 0 0 1-1.29-.73V9.1Z" fill="url(#logoGrad)"/>
+          </svg>
+        </span>
+        <span>iblogger <span class="sub">player</span></span>
+      </a>
+      <span class="pill">HLS</span>
     </header>
 
-    <div class="player-box">
-      <video id="video" controls playsinline autoplay></video>
+    <!-- Home / browse view (shown when no ?id= or ?src=) -->
+    <div id="homeView" style="display:none;">
+      <div class="home-bar">
+        <div class="search"><input id="searchInput" type="search" placeholder="ស្វែងរករឿង…" autocomplete="off" /></div>
+        <div class="sort">
+          <select id="sortSelect" aria-label="Sort">
+            <option value="title">តាមឈ្មោះ</option>
+            <option value="year">ឆ្នាំថ្មីៗ</option>
+            <option value="rating">Rating ខ្ពស់</option>
+            <option value="episodes">ភាគច្រើន</option>
+          </select>
+        </div>
+      </div>
+      <div class="genres-bar" id="genresBar"></div>
+      <div class="home-count" id="homeCount"></div>
+      <div class="home-grid" id="homeGrid"></div>
+      <div class="home-empty" id="homeEmpty" style="display:none;">រកមិនឃើញរឿងណាមួយ 😕</div>
+      <div class="pager" id="pager"></div>
     </div>
 
-    <div class="meta">
+    <!-- Player view (shown for ?id= / ?src=) -->
+    <div id="playerView" style="display:none;">
+    <div class="tv">
+      <div class="player-box">
+        <video id="video" playsinline></video>
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <div class="label">Loading…</div>
+        </div>
+      </div>
+      <div class="tv-strip">
+        <span class="tv-led"></span>
+        <span class="tv-power">Power</span>
+        <span class="tv-grille"><span></span><span></span><span></span><span></span></span>
+        <span class="tv-brand">IBLOGGER&nbsp;TV</span>
+      </div>
+    </div>
+    <div class="tv-feet"><span></span><span></span></div>
+
+    <div class="ad" id="ad">
+      <span class="ad-tag">Ad</span>
+      <span class="ad-text" id="adText"></span>
+      <button class="ad-close" id="adClose" aria-label="Close ad" title="បិទ">✕</button>
+    </div>
+
+    <!-- Movie detail (shown for ?id= mode) -->
+    <div class="info" id="info" style="display:none;">
+      <img class="poster" id="poster" alt="" />
+      <div class="info-body">
+        <h1 id="infoTitle"></h1>
+        <p class="subtitle" id="infoSubtitle"></p>
+        <div class="badges" id="infoBadges"></div>
+        <p class="desc" id="infoDesc"></p>
+      </div>
+    </div>
+
+    <!-- Episodes (shown for ?id= mode) -->
+    <div id="episodesWrap" style="display:none;">
+      <div class="section-title">ភាគ <span class="count" id="epCount"></span></div>
+      <div class="episodes" id="episodes"></div>
+    </div>
+
+    <!-- Simple meta (shown for ?src= mode only) -->
+    <div class="meta" id="meta">
       <h1 id="title">Loading…</h1>
-      <div class="src" id="srcline"></div>
+      <details class="source" id="source" style="display:none;">
+        <summary>Source</summary>
+        <div class="src" id="srcline"></div>
+      </details>
       <div id="status" class="msg" style="display:none;"></div>
     </div>
 
-    <div class="hint">
-      <strong>How to use:</strong> open this page with an <code>?src=</code> query parameter pointing to an
-      <code>.m3u8</code> (HLS) URL. Optionally add <code>&title=</code>.<br />
-      Example: <code>?src=https://example.com/stream/index.m3u8&title=Episode%201</code>
+    <!-- Related (shown for ?id= mode) -->
+    <div id="relatedWrap" style="display:none;">
+      <div class="section-title">រឿងដែលទាក់ទង</div>
+      <div class="related" id="related"></div>
     </div>
 
-    <footer>Built with <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a> · static · GitHub Pages friendly</footer>
+    <div class="hint" id="hint">
+      <strong>How to use:</strong> open this page with an <code>?id=</code> (movie) or
+      <code>?src=</code> (direct <code>.m3u8</code>) parameter.<br />
+      Examples: <code>?id=land-of-the-condors&amp;ep=5</code> ·
+      <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code>
+    </div>
+    </div><!-- /#playerView -->
+
+    <footer>Built with <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a></footer>
   </div>
+
+  <!-- Floating rotating ad slider (built by JS, textContent only) -->
+  <aside class="adslide" id="adSlide" aria-label="Advertisement" hidden>
+    <span class="as-tag">Ad</span>
+    <button class="as-close" id="asClose" aria-label="Close ad" title="បិទ">✕</button>
+    <div class="track" id="asTrack"></div>
+    <div class="dots" id="asDots"></div>
+  </aside>
 
   <script
     src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"
     integrity="sha384-9v3HcdYrO3D+OPDTjZ40RXocgE4GtXVCd3/mCS62JsM93JXgI1afJVuwjFvsu6ni"
     crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.js"
+    integrity="sha384-I+WOYmeHMpGhifL4sNlgOjvE/aIyNeReJ8GmAHzi4hy38rtVS/eav1hVJKvMvHrY"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
   <script>
     (function () {
       const params = new URLSearchParams(location.search);
-      const src = params.get("src");
-      const title = params.get("title");
       const video = document.getElementById("video");
-      const titleEl = document.getElementById("title");
-      const srcEl = document.getElementById("srcline");
+      const loader = document.getElementById("loader");
       const statusEl = document.getElementById("status");
 
+      // Locale: ?lang=en switches to English titles; default Khmer.
+      const LANG = (params.get("lang") || "km").toLowerCase() === "en" ? "en" : "km";
+      const t = function (obj) { return (obj && (obj[LANG] || obj.en || obj.km)) || ""; };
+
+      function hideLoader() { loader.classList.add("hide"); }
+      function showLoader(label) {
+        loader.classList.remove("hide");
+        const l = loader.querySelector(".label");
+        if (l && label) l.textContent = label;
+      }
       function showStatus(html, isErr) {
+        hideLoader();
         statusEl.style.display = "block";
         statusEl.className = "msg" + (isErr ? " err" : "");
-        statusEl.innerHTML = html;
+        statusEl.innerHTML = html;          // static trusted strings only
+      }
+      // Safe variant: plain text + an optional <code> chip from dynamic data.
+      function showStatusText(prefix, codeText, suffix, isErr) {
+        hideLoader();
+        statusEl.style.display = "block";
+        statusEl.className = "msg" + (isErr ? " err" : "");
+        statusEl.textContent = prefix;
+        if (codeText != null) {
+          const c = document.createElement("code");
+          c.textContent = codeText;         // dynamic value via textContent — never innerHTML
+          statusEl.appendChild(c);
+          if (suffix) statusEl.appendChild(document.createTextNode(suffix));
+        }
       }
 
-      document.title = title ? title + " · iblogger player" : "iblogger Player";
-      titleEl.textContent = title || (src ? "Now playing" : "No video selected");
-      srcEl.textContent = src || "";
-
-      if (!src) {
-        titleEl.textContent = "No video selected";
-        showStatus("Add a <code>?src=&lt;m3u8-url&gt;</code> parameter to play a stream.", false);
-        video.style.display = "none";
-        return;
-      }
-
-      const isHls = /\.m3u8(\?|$)/i.test(src) || /index\.single$/i.test(src) || true; // assume HLS
-
-      if (window.Hls && Hls.isSupported() && isHls) {
-        const hls = new Hls({ enableWorker: true });
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
-        hls.on(Hls.Events.ERROR, (e, data) => {
-          if (data.fatal) {
-            // Note: only static, trusted strings go into innerHTML. The source URL
-            // is shown via srcEl (textContent) above — never interpolated into HTML.
-            showStatus(
-              "⚠️ Could not load this stream.<br>This is usually a <strong>CORS</strong> restriction on the source server, " +
-              "or the link is offline. The source URL is shown above.", true);
-          }
+      // ── Funny rotating ad banner ──────────────────────────────
+      (function () {
+        const ad = document.getElementById("ad");
+        const adText = document.getElementById("adText");
+        const adClose = document.getElementById("adClose");
+        const ADS = [
+          "📢 មានលក់សណ្ដែកីថ្មីៗ ឆ្ងាញ់ៗ ហ៊ាន! 🥜",
+          "🍵 មានលក់បបរ ក្ដៅៗ ហិហិ មកញ៉ាំបាន! 😋",
+        ];
+        let i = 0;
+        adText.textContent = ADS[0];        // textContent only — never innerHTML
+        const timer = setInterval(function () {
+          i = (i + 1) % ADS.length;
+          adText.style.animation = "none";
+          adText.offsetHeight;              // force reflow to replay animation
+          adText.style.animation = "";
+          adText.textContent = ADS[i];
+        }, 4000);
+        adClose.addEventListener("click", function () {
+          clearInterval(timer);
+          ad.style.display = "none";
         });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        // Safari native HLS
-        video.src = src;
-        video.play().catch(()=>{});
-        video.addEventListener("error", () =>
-          showStatus("⚠️ Could not load this stream (CORS or offline).", true));
+      })();
+
+      // ── Floating rotating ad slider (flat-color blocks) ───────
+      (function () {
+        const box   = document.getElementById("adSlide");
+        const track = document.getElementById("asTrack");
+        const dots  = document.getElementById("asDots");
+        const close = document.getElementById("asClose");
+        if (!box) return;
+
+        // {big, small} — textContent only, never innerHTML (XSS-safe)
+        const SLIDES = [
+          { big: "សណ្ដែកីថ្មីៗ ឆ្ងាញ់ៗ! 🥜", small: "ហ៊ាន! មកញ៉ាំបាន ហិហិ" },
+          { big: "បបរក្ដៅៗ ឆ្ងាញ់ណាស់! 🍲", small: "ឆាបៗ មុនអស់ 😋" },
+          { big: "ទឹកក្រូចស្រស់ៗ 🍊", small: "ត្រជាក់ ផឹកហើយស្រស់ស្រាយ" },
+          { big: "នំបុ័ងក្ដៅ ៗ 🥖", small: "ទើបនឹងដុតចេញ ផ្ដៅ!" },
+        ];
+
+        let i = 0;
+        // Build slides + dots from data (no HTML injection)
+        SLIDES.forEach(function (s, idx) {
+          const slide = document.createElement("div");
+          slide.className = "slide c" + (idx % 4);
+          const big = document.createElement("div");
+          big.className = "big";
+          big.textContent = s.big;
+          const small = document.createElement("div");
+          small.className = "small";
+          small.textContent = s.small;
+          slide.appendChild(big);
+          slide.appendChild(small);
+          track.appendChild(slide);
+
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.setAttribute("aria-label", "Slide " + (idx + 1));
+          dot.addEventListener("click", function () { go(idx, true); });
+          dots.appendChild(dot);
+        });
+
+        const dotEls = Array.prototype.slice.call(dots.children);
+        function render() {
+          track.style.transform = "translateX(-" + (i * 100) + "%)";
+          dotEls.forEach(function (d, idx) {
+            d.classList.toggle("on", idx === i);
+          });
+        }
+        let timer = setInterval(function () { go(i + 1, false); }, 4000);
+        function go(n, manual) {
+          i = (n + SLIDES.length) % SLIDES.length;
+          render();
+          if (manual) {            // restart auto-rotate after manual nav
+            clearInterval(timer);
+            timer = setInterval(function () { go(i + 1, false); }, 4000);
+          }
+        }
+
+        box.hidden = false;
+        render();
+        close.addEventListener("click", function () {
+          clearInterval(timer);
+          box.remove();
+        });
+      })();
+
+      // ── Core playback (hls.js + Plyr), reused by both modes ───
+      let hls = null;
+      const plyrBase = {
+        controls: ["play-large", "play", "progress", "current-time", "mute",
+                   "volume", "settings", "pip", "airplay", "fullscreen"],
+        settings: ["quality", "speed"],
+        autoplay: true,
+        ratio: "16:9",
+      };
+      let onEnded = null;                   // auto-next callback, set in id-mode
+
+      video.addEventListener("playing", hideLoader);
+      video.addEventListener("canplay", hideLoader);
+      video.addEventListener("ended", function () { if (onEnded) onEnded(); });
+
+      function playSource(url) {
+        statusEl.style.display = "none";
+        showLoader("Loading…");
+        // Tear down any previous hls.js session before loading a new episode.
+        if (hls) { try { hls.destroy(); } catch (e) {} hls = null; }
+
+        const isHls = /\.m3u8(\?|$)/i.test(url) || /index\.single$/i.test(url) || true;
+
+        if (window.Hls && Hls.isSupported() && isHls) {
+          hls = new Hls({ enableWorker: true });
+          hls.loadSource(url);
+          hls.on(Hls.Events.MANIFEST_PARSED, function (e, data) {
+            const heights = (data.levels || []).map(function (l) { return l.height; })
+              .filter(Boolean);
+            const unique = Array.from(new Set(heights)).sort(function (a, b) { return b - a; });
+            if (!window.player) {
+              const opts = unique.length > 1 ? {
+                quality: {
+                  default: 0, options: [0].concat(unique), forced: true,
+                  onChange: function (q) {
+                    if (q === 0) { hls.currentLevel = -1; return; }
+                    hls.levels.forEach(function (lvl, i) { if (lvl.height === q) hls.currentLevel = i; });
+                  },
+                },
+                i18n: { qualityLabel: { 0: "Auto" } },
+              } : {};
+              window.player = new Plyr(video, Object.assign({}, plyrBase, opts));
+            }
+            const p = window.player.play && window.player.play();
+            if (p && p.catch) p.catch(function () {});
+          });
+          hls.attachMedia(video);
+          hls.on(Hls.Events.ERROR, function (e, data) {
+            if (data.fatal) {
+              showStatus("⚠️ Could not load this stream.<br>This is usually a " +
+                "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
+            }
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = url;
+          if (!window.player) window.player = new Plyr(video, plyrBase);
+          video.addEventListener("error", function () {
+            showStatus("⚠️ Could not load this stream (CORS or offline).", true);
+          });
+        } else {
+          showStatus("Your browser can't play HLS and hls.js failed to load.", true);
+        }
+      }
+
+      // ── Mode A: ?src= (direct stream) — backward compatible ───
+      const src = params.get("src");
+      const title = params.get("title");
+
+      // ── Mode B: ?id= (movie from db/) ─────────────────────────
+      const id = params.get("id");
+
+      const hintEl = document.getElementById("hint");
+      const metaEl = document.getElementById("meta");
+
+      const playerView = document.getElementById("playerView");
+      const homeView = document.getElementById("homeView");
+
+      if (id) {
+        playerView.style.display = "block";
+        startMovieMode(id, params.get("ep"));
+      } else if (src) {
+        playerView.style.display = "block";
+        startDirectMode(src, title);
       } else {
-        showStatus("Your browser can't play HLS and hls.js failed to load.", true);
+        // No params → home / browse all movies.
+        homeView.style.display = "block";
+        startHomeMode();
+      }
+
+      // ───────────────────────────────────────────────────────────
+      function startDirectMode(url, ttl) {
+        hintEl.style.display = "none";
+        document.title = ttl ? ttl + " · iblogger player" : "iblogger Player";
+        document.getElementById("title").textContent = ttl || "Now playing";
+        document.getElementById("srcline").textContent = url;
+        document.getElementById("source").style.display = "block";
+        playSource(url);
+      }
+
+      function startMovieMode(slug, epParam) {
+        hintEl.style.display = "none";
+        metaEl.style.display = "none";       // movie mode uses the rich .info card
+
+        // Sanitize slug for the fetch path (defense-in-depth; slugs are ascii).
+        const safe = String(slug).replace(/[^a-z0-9-]/gi, "");
+        showLoader("Loading…");
+
+        fetch("db/" + safe + ".json")
+          .then(function (r) { if (!r.ok) throw new Error("not found"); return r.json(); })
+          .then(function (movie) {
+            renderMovie(movie, epParam);
+            loadIndexAndRelated(movie);
+          })
+          .catch(function () {
+            showStatusText("⚠️ រកមិនឃើញរឿងនេះ (", safe, ")។", true);
+          });
+      }
+
+      function renderMovie(movie, epParam) {
+        document.title = t(movie.title) + " · iblogger player";
+
+        // Movie info card.
+        const info = document.getElementById("info");
+        const poster = document.getElementById("poster");
+        if (movie.poster) { poster.src = movie.poster; poster.alt = t(movie.title); }
+        else { poster.style.display = "none"; }
+        document.getElementById("infoTitle").textContent = t(movie.title);
+        const sub = LANG === "km" ? (movie.title.en || "") : (movie.title.km || "");
+        document.getElementById("infoSubtitle").textContent = sub;
+
+        const badges = document.getElementById("infoBadges");
+        badges.textContent = "";
+        function chip(text, cls) {
+          const s = document.createElement("span");
+          s.className = "badge-i" + (cls ? " " + cls : "");
+          s.textContent = text;
+          badges.appendChild(s);
+        }
+        if (movie.rating) chip("★ " + movie.rating, "star");
+        if (movie.year) chip(String(movie.year));
+        if (movie.episodeCount) chip(movie.episodeCount + " ភាគ");
+        (movie.genres || []).slice(0, 4).forEach(function (g) { chip(g); });
+        document.getElementById("infoDesc").textContent = t(movie.description);
+        info.style.display = "flex";
+
+        // Episode grid.
+        const eps = movie.episodes || [];
+        document.getElementById("epCount").textContent = "(" + eps.length + ")";
+        const grid = document.getElementById("episodes");
+        grid.textContent = "";
+
+        // Resolve starting episode: ?ep=N (by ep label or index), else first.
+        let startIdx = 0;
+        if (epParam != null) {
+          const byLabel = eps.findIndex(function (e) { return String(e.ep) === String(epParam); });
+          startIdx = byLabel >= 0 ? byLabel : Math.max(0, Math.min(eps.length - 1, (parseInt(epParam, 10) || 1) - 1));
+        }
+
+        const buttons = [];
+        function selectEp(idx, push) {
+          if (idx < 0 || idx >= eps.length) return;
+          buttons.forEach(function (b, i) { b.classList.toggle("active", i === idx); });
+          buttons[idx].scrollIntoView({ block: "nearest", behavior: "smooth" });
+          playSource(eps[idx].url);
+          document.title = t(eps[idx].title) + " · " + t(movie.title);
+          if (push) {
+            const u = new URL(location.href);
+            u.searchParams.set("ep", eps[idx].ep);
+            history.replaceState(null, "", u);
+          }
+          // Auto-next when this episode ends.
+          onEnded = function () { selectEp(idx + 1, true); };
+        }
+
+        eps.forEach(function (ep, i) {
+          const b = document.createElement("button");
+          b.className = "ep-btn" + (ep.final ? " final" : "");
+          b.textContent = ep.ep || (i + 1);
+          b.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
+          b.addEventListener("click", function () { selectEp(i, true); });
+          grid.appendChild(b);
+          buttons.push(b);
+        });
+        document.getElementById("episodesWrap").style.display = "block";
+
+        selectEp(startIdx, false);
+      }
+
+      function loadIndexAndRelated(movie) {
+        fetch("db/index.json")
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(function (all) {
+            const genres = new Set(movie.genres || []);
+            const related = all
+              .filter(function (m) { return m.slug !== movie.slug; })
+              .map(function (m) {
+                const overlap = (m.genres || []).filter(function (g) { return genres.has(g); }).length;
+                return { m: m, score: overlap };
+              })
+              .filter(function (x) { return x.score > 0; })
+              .sort(function (a, b) { return b.score - a.score; })
+              .slice(0, 12)
+              .map(function (x) { return x.m; });
+
+            if (!related.length) return;
+            const wrap = document.getElementById("related");
+            wrap.textContent = "";
+            related.forEach(function (m) {
+              const a = document.createElement("a");
+              a.className = "rel-card";
+              a.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
+              const img = document.createElement("img");
+              img.className = "rel-poster";
+              img.loading = "lazy";
+              if (m.poster) img.src = m.poster;
+              img.alt = t(m.title);
+              const cap = document.createElement("div");
+              cap.className = "rel-title";
+              cap.textContent = t(m.title);
+              a.appendChild(img);
+              a.appendChild(cap);
+              wrap.appendChild(a);
+            });
+            document.getElementById("relatedWrap").style.display = "block";
+          })
+          .catch(function () {});
+      }
+
+      // ── Mode C: home / browse (no params) ─────────────────────
+      function startHomeMode() {
+        document.title = "iblogger player · រឿងទាំងអស់";
+        const grid = document.getElementById("homeGrid");
+        const countEl = document.getElementById("homeCount");
+        const emptyEl = document.getElementById("homeEmpty");
+        const searchEl = document.getElementById("searchInput");
+        const sortEl = document.getElementById("sortSelect");
+        const genresBar = document.getElementById("genresBar");
+
+        const pagerEl = document.getElementById("pager");
+        const PER_PAGE = 24;
+
+        let all = [];
+        let activeGenre = null;
+        let filtered = [];          // current filtered+sorted list
+        let page = 1;
+
+        fetch("db/index.json")
+          .then(function (r) { if (!r.ok) throw new Error("no index"); return r.json(); })
+          .then(function (data) {
+            all = data;
+            buildGenres();
+            render();
+          })
+          .catch(function () {
+            grid.style.display = "none";
+            emptyEl.style.display = "block";
+            emptyEl.textContent = "⚠️ មិនអាចផ្ទុកបញ្ជីរឿង (db/index.json)។";
+          });
+
+        function buildGenres() {
+          const counts = {};
+          all.forEach(function (m) {
+            (m.genres || []).forEach(function (g) { counts[g] = (counts[g] || 0) + 1; });
+          });
+          const sorted = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+          genresBar.textContent = "";
+          // "All" chip first.
+          const allChip = chip("ទាំងអស់", null);
+          allChip.classList.add("active");
+          sorted.forEach(function (g) { chip(g, g); });
+
+          function chip(label, value) {
+            const c = document.createElement("button");
+            c.className = "genre-chip";
+            c.textContent = label;
+            c.addEventListener("click", function () {
+              activeGenre = value;
+              genresBar.querySelectorAll(".genre-chip").forEach(function (x) { x.classList.remove("active"); });
+              c.classList.add("active");
+              render();
+            });
+            genresBar.appendChild(c);
+            return c;
+          }
+        }
+
+        // Filter + sort the whole catalog, then reset to page 1.
+        function render() {
+          const q = (searchEl.value || "").trim().toLowerCase();
+          const sort = sortEl.value;
+
+          filtered = all.filter(function (m) {
+            if (activeGenre && !(m.genres || []).includes(activeGenre)) return false;
+            if (q) {
+              const hay = ((m.title.km || "") + " " + (m.title.en || "")).toLowerCase();
+              if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+          });
+
+          filtered.sort(function (a, b) {
+            if (sort === "year") return (b.year || 0) - (a.year || 0);
+            if (sort === "rating") return (b.rating || 0) - (a.rating || 0);
+            if (sort === "episodes") return (b.episodeCount || 0) - (a.episodeCount || 0);
+            return t(a.title).localeCompare(t(b.title));   // title
+          });
+
+          page = 1;
+          renderPage();
+        }
+
+        // Draw just the current page's cards + the pager.
+        function renderPage() {
+          const total = filtered.length;
+          const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+          if (page > pages) page = pages;
+          const start = (page - 1) * PER_PAGE;
+          const slice = filtered.slice(start, start + PER_PAGE);
+
+          countEl.textContent = total
+            ? total + " រឿង · ទំព័រ " + page + "/" + pages
+            : "0 រឿង";
+          grid.textContent = "";
+          emptyEl.style.display = total ? "none" : "block";
+
+          slice.forEach(function (m) {
+            const a = document.createElement("a");
+            a.className = "home-card";
+            a.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
+
+            const wrap = document.createElement("div");
+            wrap.className = "hc-poster-wrap";
+            const img = document.createElement("img");
+            img.className = "hc-poster";
+            img.loading = "lazy";
+            if (m.poster) img.src = m.poster;
+            img.alt = t(m.title);
+            wrap.appendChild(img);
+            if (m.rating) {
+              const r = document.createElement("span");
+              r.className = "hc-rating";
+              r.textContent = "★ " + m.rating;
+              wrap.appendChild(r);
+            }
+            if (m.episodeCount) {
+              const e = document.createElement("span");
+              e.className = "hc-eps";
+              e.textContent = m.episodeCount + " ភាគ";
+              wrap.appendChild(e);
+            }
+
+            const cap = document.createElement("div");
+            cap.className = "hc-title";
+            cap.textContent = t(m.title);
+            const yr = document.createElement("div");
+            yr.className = "hc-year";
+            yr.textContent = m.year || "";
+
+            a.appendChild(wrap);
+            a.appendChild(cap);
+            if (m.year) a.appendChild(yr);
+            grid.appendChild(a);
+          });
+
+          renderPager(pages);
+        }
+
+        // Build "« Prev  1 … 4 [5] 6 … 12  Next »" with a windowed page range.
+        function renderPager(pages) {
+          pagerEl.textContent = "";
+          if (pages <= 1) return;
+
+          function goto(p) {
+            page = p;
+            renderPage();
+            // Scroll back up to the grid so the new page starts at the top.
+            document.getElementById("homeGrid").scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          function btn(label, p, opts) {
+            opts = opts || {};
+            const b = document.createElement("button");
+            b.textContent = label;
+            if (opts.active) b.classList.add("active");
+            if (opts.disabled) b.disabled = true;
+            else b.addEventListener("click", function () { goto(p); });
+            pagerEl.appendChild(b);
+          }
+          function ellipsis() {
+            const s = document.createElement("span");
+            s.className = "ellipsis";
+            s.textContent = "…";
+            pagerEl.appendChild(s);
+          }
+
+          btn("‹", page - 1, { disabled: page === 1 });
+
+          // Windowed range: always show first, last, and ±1 around current.
+          const win = [];
+          for (let p = 1; p <= pages; p++) {
+            if (p === 1 || p === pages || Math.abs(p - page) <= 1) win.push(p);
+          }
+          let prev = 0;
+          win.forEach(function (p) {
+            if (p - prev > 1) ellipsis();
+            btn(String(p), p, { active: p === page });
+            prev = p;
+          });
+
+          btn("›", page + 1, { disabled: page === pages });
+        }
+
+        // Debounced search + instant sort (both reset to page 1 via render()).
+        let searchTimer = null;
+        searchEl.addEventListener("input", function () {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(render, 150);
+        });
+        sortEl.addEventListener("change", render);
       }
     })();
   </script>

@@ -14,7 +14,7 @@
 [![No backend](https://img.shields.io/badge/backend-none-21c36b?style=flat-square)](#)
 ![Status](https://img.shields.io/badge/status-live-success?style=flat-square)
 
-[**Live demo**](https://ichamrong.github.io/iblogger-player/) · [Usage](#-usage) · [How it works](#%EF%B8%8F-how-it-works) · [Deploy](#-deploy-github-pages) · [Build the catalog](#-building-the-catalog)
+[**Live demo**](https://iblogger855.github.io/iblogger-player/) · [Usage](#-usage) · [How it works](#%EF%B8%8F-how-it-works) · [Deploy](#-deploy-github-pages) · [Build the catalog](#-building-the-catalog)
 
 </div>
 
@@ -45,7 +45,7 @@ The page has two modes, chosen by the URL query string.
 Open the site with no parameters to browse the full catalog:
 
 ```
-https://ichamrong.github.io/iblogger-player/
+https://iblogger855.github.io/iblogger-player/
 ```
 
 Search, filter by genre, sort, and click a title to open it.
@@ -53,7 +53,7 @@ Search, filter by genre, sort, and click a title to open it.
 ### 2. Player mode — by catalog ID
 
 ```
-https://ichamrong.github.io/iblogger-player/?id=<SLUG>
+https://iblogger855.github.io/iblogger-player/?id=<SLUG>
 ```
 
 Loads a title from `db/<slug>.json`, shows its episode list, and plays the first episode.
@@ -61,7 +61,7 @@ Loads a title from `db/<slug>.json`, shows its episode list, and plays the first
 ### 3. Player mode — direct stream (no catalog)
 
 ```
-https://ichamrong.github.io/iblogger-player/?src=<M3U8_URL>&title=<TITLE>
+https://iblogger855.github.io/iblogger-player/?src=<M3U8_URL>&title=<TITLE>
 ```
 
 Backward-compatible direct-play mode for any `.m3u8` URL.

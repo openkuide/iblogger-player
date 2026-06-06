@@ -12,8 +12,8 @@
     href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" />
   <link
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.css"
-    integrity="sha384-5BmbLhDCa8GBRCnYFcoSA/ZyH7eflvXv+JVmSoUwuW57rcon/PWZSoVDkR7mLHwR"
+    href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css"
+    integrity="sha512-7ygWwJCkEsI7sNqXtHyZv+W9eCZwAgNcYwaV7tdLvWtDxTmASJLyigHOhufdziF812S99GnAM8JuDIc2+Ppkiw=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer" />
   <style>
@@ -221,36 +221,115 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader .label { font-size:13px; color:rgba(255,255,255,0.7); letter-spacing:0.01em; }
 
-    /* ── Plyr theming — match Apple/systemBlue accent ───────────── */
-    .player-box .plyr {
-      width:100%;
-      height:100%;
-      border-radius:14px;
-      --plyr-color-main: var(--accent);
-      --plyr-video-control-color: #fff;
-      --plyr-video-control-color-hover: #fff;
-      --plyr-control-radius: 10px;
-      --plyr-range-thumb-shadow: 0 1px 3px rgba(0,0,0,0.4);
-      --plyr-menu-background: rgba(28, 28, 32, 0.92);
-      --plyr-menu-color: #f5f5f7;
-      --plyr-menu-radius: 14px;
-      --plyr-font-family: var(--font);
-      --plyr-font-weight-regular: 500;
+    /* ── Video.js custom styling ────────────────────────────────── */
+    .player-box .video-js {
+      width: 100% !important;
+      height: 100% !important;
+      background-color: #000;
+      font-family: var(--font);
+      border-radius: 14px;
+      overflow: hidden;
     }
-    .player-box .plyr__control--overlaid {
-      background: rgba(40, 40, 44, 0.55);
+    
+    /* Center the big play button and style it elegantly */
+    .video-js .vjs-big-play-button {
+      background-color: rgba(40, 40, 44, 0.55) !important;
+      border: 1px solid var(--hairline) !important;
+      border-radius: 50% !important;
+      width: 64px !important;
+      height: 64px !important;
+      line-height: 62px !important;
+      margin-top: -32px !important;
+      margin-left: -32px !important;
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
+      transition: background-color 0.25s, transform 0.25s, border-color 0.25s !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
-    .player-box .plyr__control--overlaid:hover { background: var(--accent); }
-    /* Frosted control bar to match the vibrancy aesthetic */
-    .player-box .plyr--video .plyr__controls {
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-      padding-top: 28px;
+    .video-js:hover .vjs-big-play-button,
+    .video-js .vjs-big-play-button:focus {
+      background-color: var(--accent) !important;
+      transform: scale(1.1);
+      border-color: var(--accent) !important;
     }
-    .player-box .plyr__menu__container {
+
+    /* Hide the default Video.js loading spinner, as we use a custom one */
+    .video-js .vjs-loading-spinner {
+      display: none !important;
+    }
+
+    /* Control bar styling */
+    .video-js .vjs-control-bar {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)) !important;
+      height: 48px;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    /* Customize sliders and progress color */
+    .video-js .vjs-play-progress {
+      background-color: var(--accent) !important;
+    }
+    .video-js .vjs-volume-level {
+      background-color: var(--accent) !important;
+    }
+    .video-js .vjs-slider {
+      background-color: rgba(255, 255, 255, 0.18) !important;
+      border-radius: 4px;
+      height: 4px;
+    }
+    .video-js .vjs-progress-holder {
+      height: 4px;
+    }
+    
+    /* Make the mouse/hover scrub bar rounder */
+    .video-js .vjs-load-progress {
+      border-radius: 4px;
+    }
+    .video-js .vjs-load-progress div {
+      background: rgba(255, 255, 255, 0.25) !important;
+      border-radius: 4px;
+    }
+
+    /* Control bar buttons hover styling */
+    .video-js .vjs-button:hover {
+      color: var(--accent);
+    }
+
+    /* Styling for quality menu button and its popup list */
+    .video-js .vjs-quality-button {
+      cursor: pointer;
+    }
+    .video-js .vjs-menu-button-popup .vjs-menu {
+      left: -3em !important;
+      width: 10em !important;
+      bottom: 1.5em !important;
+    }
+    .video-js .vjs-menu-content {
+      background-color: rgba(28, 28, 32, 0.95) !important;
+      border-radius: 12px !important;
+      border: 1px solid var(--hairline) !important;
       backdrop-filter: var(--blur);
       -webkit-backdrop-filter: var(--blur);
+      padding: 6px 0 !important;
+      box-shadow: var(--shadow);
+    }
+    .video-js .vjs-menu-item {
+      border-radius: 6px !important;
+      margin: 2px 6px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      text-transform: none !important;
+      font-family: var(--font) !important;
+      transition: background-color 0.2s;
+    }
+    .video-js .vjs-menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      color: #fff !important;
+    }
+    .video-js .vjs-menu-item.vjs-selected {
+      background-color: var(--accent) !important;
+      color: #fff !important;
     }
 
     /* ── Funny ad banner ────────────────────────────────────────── */
@@ -810,7 +889,7 @@
     <div id="playerView" style="display:none;">
     <div class="tv">
       <div class="player-box">
-        <video id="video" playsinline></video>
+        <video id="video" class="video-js vjs-default-skin" playsinline></video>
         <div class="loader" id="loader">
           <div class="spinner"></div>
           <div class="label">Loading…</div>
@@ -872,7 +951,7 @@
     </div>
     </div><!-- /#playerView -->
 
-    <footer>Built with <a href="https://github.com/video-dev/hls.js" target="_blank" rel="noopener">hls.js</a></footer>
+    <footer>Built with <a href="https://videojs.com" target="_blank" rel="noopener">Video.js</a></footer>
   </div>
 
   <!-- Floating rotating ad slider (built by JS, textContent only) -->
@@ -884,13 +963,13 @@
   </aside>
 
   <script
-    src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"
-    integrity="sha384-9v3HcdYrO3D+OPDTjZ40RXocgE4GtXVCd3/mCS62JsM93JXgI1afJVuwjFvsu6ni"
+    src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"
+    integrity="sha512-t2qFs5xQ9zghHZmMq6pKOKZfdN9XzliTKOo7SVUvpzX/20ugCr7M1OHPJ4Y9jtan+0TxM6WbqRFzMppgCP9OHQ=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
   <script
-    src="https://cdn.jsdelivr.net/npm/plyr@3.8.4/dist/plyr.min.js"
-    integrity="sha384-I+WOYmeHMpGhifL4sNlgOjvE/aIyNeReJ8GmAHzi4hy38rtVS/eav1hVJKvMvHrY"
+    src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/4.1.0/videojs-contrib-quality-levels.min.js"
+    integrity="sha512-4g1DTVgyZD/SQCdZm9T6MorR+NLAdRl+Xw8NieiqPBPRNhRqstdt8rEerjgSZ9CZCGCL24PtzIVSPKzcUKU66w=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
   <script>
@@ -1017,68 +1096,166 @@
         });
       })();
 
-      // ── Core playback (hls.js + Plyr), reused by both modes ───
-      let hls = null;
-      const plyrBase = {
-        controls: ["play-large", "play", "progress", "current-time", "mute",
-                   "volume", "settings", "pip", "airplay", "fullscreen"],
-        settings: ["quality", "speed"],
-        autoplay: true,
-        ratio: "16:9",
-      };
+      // ── Core playback (Video.js), reused by both modes ───
       let onEnded = null;                   // auto-next callback, set in id-mode
 
-      video.addEventListener("playing", hideLoader);
-      video.addEventListener("canplay", hideLoader);
-      video.addEventListener("ended", function () { if (onEnded) onEnded(); });
+      // Register custom Quality menu component in Video.js
+      const MenuButton = videojs.getComponent('MenuButton');
+      const MenuItem = videojs.getComponent('MenuItem');
+
+      class QualityMenuItem extends MenuItem {
+        constructor(player, options) {
+          super(player, options);
+          this.levelIndex = options.levelIndex;
+        }
+
+        handleClick(event) {
+          super.handleClick(event);
+          const qualityLevels = this.player_.qualityLevels();
+          
+          for (let i = 0; i < qualityLevels.length; i++) {
+            if (this.levelIndex === -1) {
+              qualityLevels[i].enabled = true; // Auto
+            } else {
+              qualityLevels[i].enabled = (i === this.levelIndex);
+            }
+          }
+          
+          // Update selected status in menu
+          const menuButton = this.player_.controlBar.getChild('QualityMenuButton');
+          if (menuButton) {
+            menuButton.items.forEach(item => {
+              item.selected(item === this);
+            });
+          }
+        }
+      }
+
+      class QualityMenuButton extends MenuButton {
+        constructor(player, options) {
+          super(player, options);
+          this.controlText('Quality');
+        }
+
+        buildCSSClass() {
+          return `vjs-quality-button vjs-icon-cog ${super.buildCSSClass()}`;
+        }
+
+        createItems() {
+          const items = [];
+          const qualityLevels = this.player_.qualityLevels();
+          if (!qualityLevels) return items;
+
+          let autoEnabled = true;
+          let activeIndex = -1;
+          let enabledCount = 0;
+
+          for (let i = 0; i < qualityLevels.length; i++) {
+            if (qualityLevels[i].enabled) {
+              enabledCount++;
+              activeIndex = i;
+            }
+          }
+          if (enabledCount === 1) {
+            autoEnabled = false;
+          }
+
+          items.push(new QualityMenuItem(this.player_, {
+            label: 'Auto',
+            levelIndex: -1,
+            selected: autoEnabled
+          }));
+
+          const uniqueHeights = new Set();
+          const levels = [];
+          for (let i = 0; i < qualityLevels.length; i++) {
+            const h = qualityLevels[i].height;
+            if (h && !uniqueHeights.has(h)) {
+              uniqueHeights.add(h);
+              levels.push({
+                index: i,
+                height: h
+              });
+            }
+          }
+
+          levels.sort((a, b) => b.height - a.height);
+
+          levels.forEach(level => {
+            items.push(new QualityMenuItem(this.player_, {
+              label: level.height + 'p',
+              levelIndex: level.index,
+              selected: !autoEnabled && level.index === activeIndex
+            }));
+          });
+
+          this.items = items;
+          return items;
+        }
+      }
+
+      videojs.registerComponent('QualityMenuButton', QualityMenuButton);
 
       function playSource(url) {
         statusEl.style.display = "none";
         showLoader("Loading…");
-        // Tear down any previous hls.js session before loading a new episode.
-        if (hls) { try { hls.destroy(); } catch (e) {} hls = null; }
 
         const isHls = /\.m3u8(\?|$)/i.test(url) || /index\.single$/i.test(url) || true;
 
-        if (window.Hls && Hls.isSupported() && isHls) {
-          hls = new Hls({ enableWorker: true });
-          hls.loadSource(url);
-          hls.on(Hls.Events.MANIFEST_PARSED, function (e, data) {
-            const heights = (data.levels || []).map(function (l) { return l.height; })
-              .filter(Boolean);
-            const unique = Array.from(new Set(heights)).sort(function (a, b) { return b - a; });
-            if (!window.player) {
-              const opts = unique.length > 1 ? {
-                quality: {
-                  default: 0, options: [0].concat(unique), forced: true,
-                  onChange: function (q) {
-                    if (q === 0) { hls.currentLevel = -1; return; }
-                    hls.levels.forEach(function (lvl, i) { if (lvl.height === q) hls.currentLevel = i; });
-                  },
-                },
-                i18n: { qualityLabel: { 0: "Auto" } },
-              } : {};
-              window.player = new Plyr(video, Object.assign({}, plyrBase, opts));
-            }
-            const p = window.player.play && window.player.play();
-            if (p && p.catch) p.catch(function () {});
-          });
-          hls.attachMedia(video);
-          hls.on(Hls.Events.ERROR, function (e, data) {
-            if (data.fatal) {
-              showStatus("⚠️ Could not load this stream.<br>This is usually a " +
-                "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
+        if (!window.player) {
+          window.player = videojs(video, {
+            controls: true,
+            autoplay: true,
+            preload: 'auto',
+            playbackRates: [0.5, 1, 1.25, 1.5, 2],
+            controlBar: {
+              children: [
+                'playToggle',
+                'volumePanel',
+                'currentTimeDisplay',
+                'timeDivider',
+                'durationDisplay',
+                'progressControl',
+                'playbackRateMenuButton',
+                'QualityMenuButton',
+                'fullscreenToggle'
+              ]
             }
           });
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = url;
-          if (!window.player) window.player = new Plyr(video, plyrBase);
-          video.addEventListener("error", function () {
-            showStatus("⚠️ Could not load this stream (CORS or offline).", true);
+
+          // Bind events
+          window.player.on("playing", hideLoader);
+          window.player.on("waiting", function () { showLoader("Buffering…"); });
+          window.player.on("canplay", hideLoader);
+          window.player.on("ended", function () { if (onEnded) onEnded(); });
+          window.player.on("error", function () {
+            showStatus("⚠️ Could not load this stream.<br>This is usually a " +
+              "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
+          });
+
+          // Handle quality levels event
+          const qualityLevels = window.player.qualityLevels();
+          qualityLevels.on('addqualitylevel', function () {
+            const qButton = window.player.controlBar.getChild('QualityMenuButton');
+            if (qButton) {
+              qButton.update();
+            }
           });
         } else {
-          showStatus("Your browser can't play HLS and hls.js failed to load.", true);
+          // Clear any previous error before loading new source
+          window.player.error(null);
         }
+
+        const mimeType = isHls ? 'application/x-mpegURL' : 'video/mp4';
+        window.player.src({
+          src: url,
+          type: mimeType
+        });
+
+        window.player.ready(function () {
+          const p = window.player.play();
+          if (p && p.catch) p.catch(function () {});
+        });
       }
 
       // ── Mode A: ?src= (direct stream) — backward compatible ───

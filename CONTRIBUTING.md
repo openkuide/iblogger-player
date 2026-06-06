@@ -90,7 +90,7 @@ The entire web application UI is located inside a single file: [index.html](file
 
 - **Markup & Layout**: Structured in HTML5 within the `<body>`.
 - **Styling**: Tailored in Vanilla CSS under `<style>`. It implements an Apple-inspired dark/light design system with a retro CRT TV bezel, scanlines, and glow details.
-- **Client Logic**: Vanilla JavaScript handles router-free query parameter navigation (`?id=slug` or `?src=url`), fetches JSON metadata, manages Plyr control overlays, and handles catalog search/sorting/pagination.
+- **Client Logic**: Vanilla JavaScript handles router-free query parameter navigation (`?id=slug` or `?src=url`), fetches JSON metadata, manages Video.js controls, and handles catalog search/sorting/pagination.
 
 ### Running Locally for Development
 
@@ -117,7 +117,7 @@ Since there is no compilation step, you can run and test your changes instantly:
 * **Responsive Design**: Ensure any layout changes work perfectly on mobile screens (max-width `560px`).
 * **Design Tokens**: When changing colors or shadows, use the predefined CSS custom properties in `:root`:
   - `--bg`, `--fg`, `--accent`, `--hairline`, `--radius`, `--blur`.
-* **Zero Dependencies**: Keep the app framework-free. External libraries like `hls.js` and `plyr` should only be loaded over CDN with Subresource Integrity (SRI) pins.
+* **Zero Dependencies**: Keep the app framework-free. External libraries like `video.js` should only be loaded over CDN with Subresource Integrity (SRI) pins.
 
 ---
 

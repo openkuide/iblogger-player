@@ -8,8 +8,7 @@
 
 <br/>
 
-[![Made with hls.js](https://img.shields.io/badge/player-hls.js-2f6bff?style=flat-square)](https://github.com/video-dev/hls.js)
-[![Plyr](https://img.shields.io/badge/UI-Plyr%203.8-a98bff?style=flat-square)](https://github.com/sampotts/plyr)
+[![Made with Video.js](https://img.shields.io/badge/player-Video.js-007aff?style=flat-square)](https://github.com/videojs/video.js)
 [![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-181717?style=flat-square&logo=github)](https://pages.github.com/)
 [![No backend](https://img.shields.io/badge/backend-none-21c36b?style=flat-square)](#)
 ![Status](https://img.shields.io/badge/status-live-success?style=flat-square)
@@ -25,8 +24,8 @@
 - 🎬 **Two modes in one page** — a browsable **movie catalog** (home) and a focused **player** view.
 - 📺 **Retro CRT design** — dark, glassy Apple-inspired UI with a CRT-TV bezel, scanlines, and a power LED.
 - 🔌 **Pure static** — one `index.html` + a JSON `db/`. No server, no framework, no build tooling at runtime.
-- ⚡ **HLS streaming** via [hls.js](https://github.com/video-dev/hls.js), with native HLS fallback on Safari.
-- 🎛️ **Polished controls** through [Plyr](https://github.com/sampotts/plyr) — quality menu, speed, PiP, AirPlay, fullscreen.
+- ⚡ **HLS streaming** and robust playback via [Video.js](https://github.com/videojs/video.js).
+- 🎛️ **Polished controls** through Video.js — custom quality menu, speed selection, PiP, fullscreen.
 - 🗂️ **Catalog browsing** — 150 titles with search, genre filter, sort, and pagination (20 / 50 / 100 per page).
 - 📑 **Episode lists** — per-title episodes with an `END` badge on finales and **auto-play next**.
 - 🔗 **Related titles** — suggestions computed by shared genre.
@@ -86,14 +85,13 @@ Backward-compatible direct-play mode for any `.m3u8` URL.
 │      ├─ ?id=slug  ──► fetch db/<slug>.json ─► episode list│
 │      └─ ?src=url  ──► play stream directly                │
 │                                                           │
-│  hls.js (CDN, SRI-pinned) ──► attaches to <video>         │
-│  Plyr  (CDN, SRI-pinned) ──► control skin                 │
+│  Video.js (CDN, SRI-pinned) ──► plays media & custom skin │
 └─────────────────────────────────────────────────────────┘
 ```
 
 - **Routing** is entirely client-side off the query string — works on a static host.
 - **Data** lives in [`db/`](db/): `index.json` (slim catalog) + one `<slug>.json` per title (full detail + episode URLs).
-- **CDN dependencies** (hls.js, Plyr, Google Fonts) are loaded over HTTPS and pinned with [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity).
+- **CDN dependencies** (Video.js, Google Fonts) are loaded over HTTPS and pinned with [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity).
 - **All paths are relative** (`db/...`, not `/db/...`), so the site works correctly under a project-page subpath.
 
 ---
@@ -145,7 +143,7 @@ The browser can only play a stream if the **`.m3u8` host sends `Access-Control-A
 
 ## 🙏 Built with
 
-[hls.js](https://github.com/video-dev/hls.js) · [Plyr](https://github.com/sampotts/plyr) · [Inter](https://rsms.me/inter/) + [Battambang](https://fonts.google.com/specimen/Battambang) fonts · GitHub Pages
+[Video.js](https://videojs.com) · [Inter](https://rsms.me/inter/) + [Battambang](https://fonts.google.com/specimen/Battambang) fonts · GitHub Pages
 
 <div align="center">
 

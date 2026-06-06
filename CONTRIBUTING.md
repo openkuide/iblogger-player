@@ -70,7 +70,7 @@ If you only want to add a single movie, you can modify the database files direct
    ```
 
 > [!NOTE]
-> Make sure both files have matching attributes (slug, titles, year, rating, genres, episodeCount) to keep the search filters and catalog in sync.
+> Make sure both files have matching attributes (slug, titles, year, rating, genres, episodeCount) to keep the search filters and catalog in sync. Also, ensure the movie `slug` is completely unique and does not collide with any existing file in the `db/` folder.
 
 ### Option B: Automatic Rebuild (For bulk import)
 

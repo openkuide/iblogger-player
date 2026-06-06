@@ -125,6 +125,10 @@ Since there is no compilation step, you can run and test your changes instantly:
 
 1. Fork the repository.
 2. Create a feature branch: `git checkout -b feature/my-contribution`.
-3. Commit your changes: `git commit -m "feat: add movie X"` or `git commit -m "design: improve player layout"`.
-4. Push to your branch: `git push origin feature/my-contribution`.
-5. Open a **Pull Request** against the `main` branch.
+3. **Check for Duplicate Slugs**: Ensure the new movie slug does not already exist by checking if `db/<slug>.json` exists, or run:
+   ```bash
+   ls db/ | grep "<slug>"
+   ```
+4. Commit your changes: `git commit -m "feat: add movie X"` or `git commit -m "design: improve player layout"`.
+5. Push to your branch: `git push origin feature/my-contribution`.
+6. Open a **Pull Request** against the `main` branch.

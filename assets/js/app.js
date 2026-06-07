@@ -15,6 +15,7 @@ import { startHomeMode } from './home.js';
   const legalView = document.getElementById("legalView");
   const aboutView = document.getElementById("aboutView");
   const contactView = document.getElementById("contactView");
+  const termsView = document.getElementById("termsView");
 
   // Initialize ads
   initAdBanner();
@@ -30,6 +31,9 @@ import { startHomeMode } from './home.js';
   } else if (pageParam === "contact") {
     if (contactView) contactView.style.display = "block";
     document.title = "iblogger player · Contact Us";
+  } else if (pageParam === "terms") {
+    if (termsView) termsView.style.display = "block";
+    document.title = "iblogger player · Terms of Service";
   } else if (id) {
     if (playerView) playerView.style.display = "block";
     startMovieMode(id, params.get("ep"));

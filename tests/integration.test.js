@@ -375,6 +375,23 @@ async function runTests() {
       console.log('[TEST SUCCESS] Contact page successfully verified.');
     }
 
+    // Test Terms of Service page routing
+    console.log('[TEST RUNNER] Testing Terms of Service page...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?page=terms`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#termsView');
+    const hasTermsContent = await page.evaluate(() => {
+      const body = document.body.textContent;
+      return body.includes('Acceptance of Terms') && 
+             body.includes('Sourced Catalog Index') && 
+             body.includes('ការយល់ព្រមលើលក្ខខណ្ឌ');
+    });
+    if (!hasTermsContent) {
+      console.error('[TEST FAILURE] Terms of Service page failed to load correctly or was missing required sections.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Terms of Service page successfully verified.');
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;

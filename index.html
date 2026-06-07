@@ -684,13 +684,35 @@
     .home-card:hover .hc-overlay { opacity: 1; }
     .home-card:hover .play-btn-circle { transform: scale(1); }
     
-    .hc-poster-wrap { position: relative; overflow: hidden; border-radius: 14px; }
+    .hc-poster-wrap { position: relative; overflow: hidden; border-radius: 14px; background: var(--bg-elev-2); }
     .hc-poster {
       width: 100%; aspect-ratio: 2/3; object-fit: cover;
       border-radius: 14px; background: var(--bg-elev-2);
       border: 1px solid var(--hairline);
-      transition: box-shadow .25s ease; display: block;
+      transition: box-shadow .25s ease, opacity 0.25s ease; display: block;
     }
+    .hc-poster-wrap.img-loading .hc-poster { opacity: 0; }
+    
+    /* Fallback Poster (Gradients + SVG icon + Title) */
+    .hc-fallback-poster {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev-3));
+      border: 1px solid var(--hairline); border-radius: 14px;
+      padding: 12px; gap: 8px; text-align: center; box-sizing: border-box;
+    }
+    .hc-fallback-poster .fallback-icon {
+      width: 32px; height: 32px; color: var(--accent); opacity: 0.6;
+    }
+    .hc-fallback-poster .fallback-title {
+      font-size: 11px; font-weight: 600; color: var(--fg-2);
+      line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
+      font-family: var(--font);
+    }
+    .home-grid.list-mode .hc-fallback-poster { padding: 4px; gap: 0; border-radius: 8px; }
+    .home-grid.list-mode .hc-fallback-poster .fallback-title { display: none; }
+    .home-grid.list-mode .hc-fallback-poster .fallback-icon { width: 18px; height: 18px; }
     /* Play overlay (Glassmorphic) */
     .hc-overlay {
       position: absolute; inset: 0;
@@ -772,27 +794,46 @@
     /* Pagination */
     .pager {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-      gap: 8px; margin-top: 28px; font-family: var(--font);
+      gap: 6px; margin-top: 32px; font-family: var(--font);
     }
-    .pager-info { font-size: 14px; font-weight: 600; color: var(--fg-2); padding: 0 4px; }
     .pager button {
-      min-width: 38px; height: 38px; padding: 0 12px;
-      font-size: 16px; font-weight: 600; color: var(--fg-2);
+      min-width: 38px; height: 38px; padding: 0 10px;
+      font-size: 14px; font-weight: 600; color: var(--fg-2);
       background: var(--bg-elev); border: 1px solid var(--hairline);
-      border-radius: 10px; cursor: pointer; transition: all .16s ease;
+      border-radius: 10px; cursor: pointer; transition: all .2s ease;
       font-family: var(--font);
+      display: flex; align-items: center; justify-content: center;
     }
-    .pager button:hover:not(:disabled) { color: var(--fg); border-color: rgba(255,255,255,0.28); }
-    .pager button:disabled { opacity: .35; cursor: default; }
-    .pager input[type=number] {
-      width: 54px; height: 38px; text-align: center;
+    .pager button:hover:not(:disabled) {
+      color: var(--fg); border-color: rgba(255,255,255,0.25);
+      background: var(--bg-elev-2);
+    }
+    .pager button:disabled { opacity: .3; cursor: default; }
+    .pager button.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), #ff5a92);
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+    }
+    .pager-ellipsis {
+      width: 32px; text-align: center; font-size: 14px; font-weight: 600;
+      color: var(--fg-3); user-select: none;
+    }
+    .pager-jump {
+      display: flex; align-items: center; gap: 8px; margin-left: 12px;
+      font-size: 13px; font-weight: 500; color: var(--fg-2);
+    }
+    .pager-jump input {
+      width: 52px; height: 38px; text-align: center;
       font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--fg);
       background: var(--bg-elev); border: 1px solid var(--hairline);
       border-radius: 10px; outline: none; transition: border-color .18s ease;
+      box-sizing: border-box;
     }
-    .pager input[type=number]:focus { border-color: var(--accent); }
-    .pager input[type=number]::-webkit-inner-spin-button,
-    .pager input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .pager-jump input:focus { border-color: var(--accent); }
+    .pager-jump input::-webkit-inner-spin-button,
+    .pager-jump input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .pager svg { width: 16px; height: 16px; stroke-width: 2.5px; }
 
     /* ── Movie info (Netflix-style detail) ──────────────────────── */
     .info {
@@ -1125,8 +1166,24 @@
 
             <!-- Grid mode -->
             <template v-if="!listView">
-              <div class="hc-poster-wrap">
-                <img class="hc-poster" :src="m.poster||''" :alt="title(m)" loading="lazy" />
+              <div class="hc-poster-wrap" :class="{ 'img-loading': !m.imgLoaded && !m.imgFailed && m.poster, 'img-failed': m.imgFailed || !m.poster }">
+                <!-- Fallback poster if failed/missing -->
+                <div v-if="m.imgFailed || !m.poster" class="hc-fallback-poster">
+                  <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                  <span class="fallback-title">{{ title(m) }}</span>
+                </div>
+                <!-- Main image with smooth load transition -->
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                     @load="m.imgLoaded = true" @error="m.imgFailed = true" />
                 <div class="hc-overlay">
                   <div class="play-btn-circle">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1143,8 +1200,23 @@
 
             <!-- List mode -->
             <template v-else>
-              <div class="hc-poster-wrap">
-                <img class="hc-poster" :src="m.poster||''" :alt="title(m)" loading="lazy" />
+              <div class="hc-poster-wrap" :class="{ 'img-loading': !m.imgLoaded && !m.imgFailed && m.poster, 'img-failed': m.imgFailed || !m.poster }">
+                <!-- Fallback poster if failed/missing -->
+                <div v-if="m.imgFailed || !m.poster" class="hc-fallback-poster">
+                  <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                </div>
+                <!-- Main image with smooth load transition -->
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                     @load="m.imgLoaded = true" @error="m.imgFailed = true" />
                 <div class="hc-overlay">
                   <div class="play-btn-circle">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1173,12 +1245,35 @@
 
         <!-- Pager -->
         <div class="pager" v-if="!loading && pages>1">
-          <button :disabled="page<=1" @click="gotoPage(page-1)">&#x2039;</button>
-          <span class="pager-info">{{ page }} / {{ pages }}</span>
-          <button :disabled="page>=pages" @click="gotoPage(page+1)">&#x203A;</button>
-          <input type="number" :min="1" :max="pages" :value="page"
-                 @change="gotoPage(+$event.target.value)"
-                 title="Go to page" aria-label="Page number" />
+          <!-- Prev button -->
+          <button :disabled="page<=1" @click="gotoPage(page-1)" aria-label="Previous Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Sliding page numbers -->
+          <template v-for="item in pagerItems">
+            <span v-if="item.value === null" class="pager-ellipsis">{{ item.label }}</span>
+            <button v-else :class="{ active: page === item.value }" @click="gotoPage(item.value)">
+              {{ item.label }}
+            </button>
+          </template>
+
+          <!-- Next button -->
+          <button :disabled="page>=pages" @click="gotoPage(page+1)" aria-label="Next Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+
+          <!-- Direct Page Jump -->
+          <div class="pager-jump">
+            <span class="jump-label">ទៅទំព័រ</span>
+            <input type="number" :min="1" :max="pages" :value="page"
+                   @change="gotoPage(+$event.target.value)"
+                   aria-label="Page number input" />
+          </div>
         </div>
 
       </div><!-- /#homeApp -->
@@ -1824,6 +1919,30 @@
               return filtered.value.slice(start, start + PER_PAGE);
             });
 
+            const pagerItems = computed(function() {
+              var range = [];
+              var maxVisible = 5;
+              var start = Math.max(1, page.value - 2);
+              var end = Math.min(pages.value, start + maxVisible - 1);
+
+              if (end - start + 1 < maxVisible) {
+                start = Math.max(1, end - maxVisible + 1);
+              }
+
+              if (start > 1) {
+                range.push({ value: 1, label: "1" });
+                if (start > 2) range.push({ value: null, label: "..." });
+              }
+              for (var i = start; i <= end; i++) {
+                range.push({ value: i, label: String(i) });
+              }
+              if (end < pages.value) {
+                if (end < pages.value - 1) range.push({ value: null, label: "..." });
+                range.push({ value: pages.value, label: String(pages.value) });
+              }
+              return range;
+            });
+
             const hasFilters = computed(function() {
               return activeGenres.value.length > 0 || search.value || yearFilter.value || minRating.value > 0 || countryFilter.value;
             });
@@ -1861,7 +1980,7 @@
             return {
               all, loading, search, activeGenres, sort, yearFilter, minRating, countryFilter,
               page, listView, SORTS, YEARS, RATINGS, COUNTRIES,
-              allGenres, filtered, pages, pageSlice, hasFilters,
+              allGenres, filtered, pages, pageSlice, pagerItems, hasFilters,
               title, toggleGenre, clearAll, gotoPage,
               showFilters, activeFilterCount
             };

@@ -135,6 +135,58 @@ async function runTests() {
       console.log('[TEST SUCCESS] List mode toggled successfully.');
     }
 
+    // Test interactive pagination
+    console.log('[TEST RUNNER] Testing pagination (switching to Page 2)...');
+    // Get the title of the first card on Page 1
+    const firstTitlePage1 = await page.evaluate(() => {
+      return document.querySelector('.home-card .hc-title').textContent.trim();
+    });
+
+    // Find and click page button "2"
+    let page2Btn;
+    const pageButtons = await page.$$('.pager button');
+    for (const btn of pageButtons) {
+      const text = await page.evaluate(el => el.textContent.trim(), btn);
+      if (text === '2') {
+        page2Btn = btn;
+        break;
+      }
+    }
+
+    if (page2Btn) {
+      await page2Btn.click();
+      await new Promise(r => setTimeout(r, 500)); // wait for page load
+
+      const firstTitlePage2 = await page.evaluate(() => {
+        return document.querySelector('.home-card .hc-title').textContent.trim();
+      });
+      console.log(`[TEST RUNNER] Page 1 first title: "${firstTitlePage1}" | Page 2 first title: "${firstTitlePage2}"`);
+      if (firstTitlePage1 === firstTitlePage2) {
+        console.error('[TEST FAILURE] Page content did not change after navigating to Page 2.');
+        testFailed = true;
+      } else {
+        console.log('[TEST SUCCESS] Pagination navigation works successfully.');
+      }
+
+      // Switch back to Page 1
+      console.log('[TEST RUNNER] Navigating back to Page 1...');
+      let page1Btn;
+      for (const btn of pageButtons) {
+        const text = await page.evaluate(el => el.textContent.trim(), btn);
+        if (text === '1') {
+          page1Btn = btn;
+          break;
+        }
+      }
+      if (page1Btn) {
+        await page1Btn.click();
+        await new Promise(r => setTimeout(r, 500));
+      }
+    } else {
+      console.error('[TEST FAILURE] Page 2 button not found.');
+      testFailed = true;
+    }
+
     // Open the filters panel
     console.log('[TEST RUNNER] Opening filters drawer...');
     const filterToggleBtn = await page.waitForSelector('.filter-toggle');

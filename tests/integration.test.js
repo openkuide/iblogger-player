@@ -173,6 +173,57 @@ async function runTests() {
       testFailed = true;
     }
 
+    // Test filtering by country (click "ហុងកុង" / Hong Kong)
+    console.log('[TEST RUNNER] Filtering by country (ហុងកុង)...');
+    let countryBtn;
+    const pills = await page.$$('.filter-rows-wrapper .sort-pill');
+    for (const pill of pills) {
+      const text = await page.evaluate(el => el.textContent.trim(), pill);
+      if (text === 'ហុងកុង') {
+        countryBtn = pill;
+        break;
+      }
+    }
+
+    if (countryBtn) {
+      await countryBtn.click();
+      await new Promise(r => setTimeout(r, 500)); // wait for reactivity
+
+      const hkCount = await page.evaluate(() => {
+        return document.querySelectorAll('.home-card').length;
+      });
+      console.log(`[TEST RUNNER] Hong Kong 2020+ movie count: ${hkCount}`);
+      if (hkCount === 0 || hkCount >= initialCount) {
+        console.error('[TEST FAILURE] Country filtering did not return a valid subset of movies.');
+        testFailed = true;
+      } else {
+        console.log('[TEST SUCCESS] Country filtering works successfully.');
+      }
+
+      // Test clearing filters
+      console.log('[TEST RUNNER] Clicking Clear All...');
+      await page.waitForSelector('.clear-chip');
+      await page.evaluate(() => {
+        const btn = document.querySelector('.clear-chip');
+        if (btn) btn.click();
+      });
+      await new Promise(r => setTimeout(r, 500)); // wait for reset
+
+      const resetCount = await page.evaluate(() => {
+        return document.querySelectorAll('.home-card').length;
+      });
+      console.log(`[TEST RUNNER] Count after clear: ${resetCount}`);
+      if (resetCount !== initialCount) {
+        console.error('[TEST FAILURE] Reset count does not match initial count after clear.');
+        testFailed = true;
+      } else {
+        console.log('[TEST SUCCESS] Filter clearing resets catalog successfully.');
+      }
+    } else {
+      console.error('[TEST FAILURE] ហុងកុង filter pill not found.');
+      testFailed = true;
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;
@@ -184,6 +235,9 @@ async function runTests() {
 
   if (testFailed) {
     console.log('[TEST RESULT] Tests FAILED.');
+    if (consoleErrors.length > 0) {
+      console.error('[TEST RUNNER] Console errors during run:', consoleErrors);
+    }
     process.exit(1);
   } else {
     console.log('[TEST RESULT] All tests PASSED successfully.');

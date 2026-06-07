@@ -1058,7 +1058,7 @@
               </div>
             </div>
 
-            <!-- Year + Rating quick filters -->
+            <!-- Year + Rating + Country quick filters -->
             <div class="filter-rows-wrapper">
               <div class="filter-row">
                 <span class="filter-row-label">ឆ្នាំ</span>
@@ -1074,6 +1074,14 @@
                   <button v-for="r in RATINGS" :key="r.value"
                     class="sort-pill" :class="{active:minRating===r.value}"
                     @click="minRating=r.value">{{ r.label }}</button>
+                </div>
+              </div>
+              <div class="filter-row">
+                <span class="filter-row-label">ប្រទេស</span>
+                <div class="scroll-row">
+                  <button v-for="c in COUNTRIES" :key="c.value"
+                    class="sort-pill" :class="{active:countryFilter===c.value}"
+                    @click="countryFilter=c.value">{{ c.label }}</button>
                 </div>
               </div>
             </div>
@@ -1738,20 +1746,29 @@
           { value: 8, label: "★ 8+" },
         ];
 
+        const COUNTRIES = [
+          { value: "", label: "ទាំងអស់" },
+          { value: "Hong Kong", label: "ហុងកុង" },
+          { value: "China", label: "ចិន" },
+          { value: "Korea", label: "កូរ៉េ" },
+          { value: "Other", label: "ផ្សេងៗ" }
+        ];
+
         const { createApp, ref, computed, watch } = Vue;
 
         createApp({
           setup() {
-            const all          = ref([]);
-            const loading      = ref(true);
-            const search       = ref("");
-            const activeGenres = ref([]);
-            const sort         = ref("title");
-            const yearFilter   = ref("");
-            const minRating    = ref(0);
-            const page         = ref(1);
-            const listView     = ref(false);
-            const showFilters  = ref(false);
+            const all           = ref([]);
+            const loading       = ref(true);
+            const search        = ref("");
+            const activeGenres  = ref([]);
+            const sort          = ref("title");
+            const yearFilter    = ref("");
+            const minRating     = ref(0);
+            const countryFilter = ref("");
+            const page          = ref(1);
+            const listView      = ref(false);
+            const showFilters   = ref(false);
 
             fetch("db/index.json")
               .then(function(r) { if (!r.ok) throw new Error("no index"); return r.json(); })
@@ -1785,6 +1802,7 @@
                 if (yearFilter.value === "2010"  && ((m.year || 0) < 2010 || (m.year || 0) >= 2020)) return false;
                 if (yearFilter.value === "old"   && (m.year || 0) >= 2010) return false;
                 if (minRating.value > 0 && (m.rating || 0) < minRating.value) return false;
+                if (countryFilter.value && m.country !== countryFilter.value) return false;
                 return true;
               });
               list = list.slice().sort(function(a, b) {
@@ -1796,7 +1814,7 @@
               return list;
             });
 
-            watch([search, activeGenres, sort, yearFilter, minRating], function() { page.value = 1; });
+            watch([search, activeGenres, sort, yearFilter, minRating, countryFilter], function() { page.value = 1; });
 
             const pages = computed(function() {
               return Math.max(1, Math.ceil(filtered.value.length / PER_PAGE));
@@ -1807,7 +1825,7 @@
             });
 
             const hasFilters = computed(function() {
-              return activeGenres.value.length > 0 || search.value || yearFilter.value || minRating.value > 0;
+              return activeGenres.value.length > 0 || search.value || yearFilter.value || minRating.value > 0 || countryFilter.value;
             });
 
             const activeFilterCount = computed(function() {
@@ -1815,6 +1833,7 @@
               if (search.value.trim()) count++;
               if (yearFilter.value) count++;
               if (minRating.value > 0) count++;
+              if (countryFilter.value) count++;
               count += activeGenres.value.length;
               return count;
             });
@@ -1826,11 +1845,12 @@
             }
 
             function clearAll() {
-              search.value       = "";
-              activeGenres.value = [];
-              yearFilter.value   = "";
-              minRating.value    = 0;
-              sort.value         = "title";
+              search.value        = "";
+              activeGenres.value  = [];
+              yearFilter.value    = "";
+              minRating.value     = 0;
+              countryFilter.value = "";
+              sort.value          = "title";
             }
 
             function gotoPage(p) {
@@ -1839,8 +1859,8 @@
             }
 
             return {
-              all, loading, search, activeGenres, sort, yearFilter, minRating,
-              page, listView, SORTS, YEARS, RATINGS,
+              all, loading, search, activeGenres, sort, yearFilter, minRating, countryFilter,
+              page, listView, SORTS, YEARS, RATINGS, COUNTRIES,
               allGenres, filtered, pages, pageSlice, hasFilters,
               title, toggleGenre, clearAll, gotoPage,
               showFilters, activeFilterCount

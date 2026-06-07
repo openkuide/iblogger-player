@@ -2,8 +2,17 @@
 
 import { LANG } from './utils.js';
 
+let homeApp = null;
+
 export function startHomeMode() {
   document.title = "iblogger player · រឿងទាំងអស់";
+  if (homeApp) {
+    try {
+      homeApp.unmount();
+    } catch (e) {
+      console.warn("Unmount warning:", e);
+    }
+  }
   const LANG_HOME = LANG;
   const PER_PAGE = 24;
 
@@ -36,7 +45,7 @@ export function startHomeMode() {
   const params = new URLSearchParams(location.search);
   const { createApp, ref, computed, watch } = Vue;
 
-  createApp({
+  const app = createApp({
     setup() {
       const all           = ref([]);
       const loading       = ref(true);
@@ -191,5 +200,7 @@ export function startHomeMode() {
         showFilters, activeFilterCount
       };
     }
-  }).mount("#homeApp");
+  });
+  app.mount("#homeApp");
+  homeApp = app;
 }

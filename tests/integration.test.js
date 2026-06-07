@@ -287,11 +287,11 @@ async function runTests() {
     console.log('[TEST RUNNER] Testing bilingual descriptions on details page...');
     const descKmExists = await page.evaluate(() => {
       const p = document.querySelector('#infoDesc .desc-km');
-      return p && p.textContent.includes('Han Tae Sang គឺជា');
+      return p && p.textContent.includes('ថេសាង') && p.textContent.includes('សហគ្រិន');
     });
     const descEnExists = await page.evaluate(() => {
       const p = document.querySelector('#infoDesc .desc-en');
-      return p && p.textContent.includes('Han Tae Sang is a successful');
+      return p && p.textContent.includes('Han Tae Sang') && p.textContent.includes('cold-blooded');
     });
     
     if (!descKmExists || !descEnExists) {

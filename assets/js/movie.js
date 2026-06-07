@@ -100,7 +100,8 @@ function renderMovie(movie, epParam) {
     const yb = chip(String(movie.year), "clickable-year");
     yb.title = "ស្វែងរករឿងឆ្នាំ " + movie.year + " (Find movies from " + movie.year + ")";
     yb.addEventListener("click", () => {
-      window.location.href = "?year=" + movie.year;
+      history.pushState(null, "", "?year=" + movie.year);
+      window.dispatchEvent(new PopStateEvent('popstate'));
     });
   }
   if (movie.episodeCount) chip(movie.episodeCount + " ភាគ");

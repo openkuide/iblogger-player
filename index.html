@@ -562,9 +562,9 @@
       border-radius: 10px; padding: 0 14px; height: 38px;
       cursor: pointer; transition: all .16s ease;
     }
-    .filter-toggle:hover { color: var(--fg); border-color: rgba(255,255,255,0.24); }
+    .filter-toggle:hover { color: var(--fg); border-color: var(--fg-3); }
     .filter-toggle.active {
-      color: #fff; background: var(--bg-elev-2); border-color: var(--accent);
+      color: var(--fg); background: var(--bg-elev-2); border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(10,132,255,0.15);
     }
     .filter-toggle svg { width: 14px; height: 14px; }
@@ -605,7 +605,7 @@
     .filter-section { display: flex; flex-direction: column; gap: 6px; }
     .filter-section-title {
       font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--fg-3);
+      text-transform: uppercase; color: var(--fg-2);
     }
 
     .scroll-row {
@@ -623,7 +623,7 @@
       border-radius: 999px; padding: 5px 13px;
       cursor: pointer; transition: all .15s ease; white-space: nowrap;
     }
-    .sort-pill:hover { color: var(--fg); border-color: rgba(255,255,255,0.24); }
+    .sort-pill:hover { color: var(--fg); border-color: var(--fg-3); }
     .sort-pill.active {
       color: #fff;
       background: linear-gradient(135deg, #0a84ff 0%, #00b4d8 100%);
@@ -636,7 +636,7 @@
     .filter-row  { display: flex; flex-direction: column; gap: 6px; }
     .filter-row-label {
       font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--fg-3); white-space: nowrap;
+      text-transform: uppercase; color: var(--fg-2); white-space: nowrap;
     }
     @media (min-width: 600px) {
       .filter-row { flex-direction: row; align-items: center; }
@@ -651,7 +651,7 @@
       border-radius: 999px; padding: 5px 12px;
       cursor: pointer; transition: all .15s ease; white-space: nowrap;
     }
-    .genre-chip:hover { color: var(--fg); border-color: rgba(255,255,255,0.24); }
+    .genre-chip:hover { color: var(--fg); border-color: var(--fg-3); }
     .genre-chip.active {
       color: #fff;
       background: linear-gradient(135deg, #0a84ff 0%, #00b4d8 100%);

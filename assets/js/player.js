@@ -100,6 +100,49 @@ class QualityMenuButton extends MenuButton {
 
 videojs.registerComponent('QualityMenuButton', QualityMenuButton);
 
+function initializeVideoPlayer(videoEl) {
+  const player = videojs(videoEl, {
+    controls: true,
+    autoplay: true,
+    preload: 'auto',
+    playbackRates: [0.5, 1, 1.25, 1.5, 2],
+    controlBar: {
+      children: [
+        'playToggle',
+        'volumePanel',
+        'currentTimeDisplay',
+        'timeDivider',
+        'durationDisplay',
+        'progressControl',
+        'playbackRateMenuButton',
+        'QualityMenuButton',
+        'fullscreenToggle'
+      ]
+    }
+  });
+
+  player.on("playing", hideLoader);
+  player.on("waiting", () => showLoader("Buffering…"));
+  player.on("canplay", hideLoader);
+  player.on("ended", () => {
+    if (onEndedCallback) onEndedCallback();
+  });
+  player.on("error", () => {
+    showStatus("⚠️ Could not load this stream.<br>This is usually a " +
+      "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
+  });
+
+  const qualityLevels = player.qualityLevels();
+  qualityLevels.on('addqualitylevel', () => {
+    const qButton = player.controlBar.getChild('QualityMenuButton');
+    if (qButton) {
+      qButton.update();
+    }
+  });
+
+  return player;
+}
+
 export function playSource(url, videoEl) {
   const statusEl = document.getElementById("status");
   if (statusEl) statusEl.style.display = "none";
@@ -108,44 +151,7 @@ export function playSource(url, videoEl) {
   const isHls = /\.m3u8(\?|$)/i.test(url) || /index\.single$/i.test(url) || true;
 
   if (!window.player) {
-    window.player = videojs(videoEl, {
-      controls: true,
-      autoplay: true,
-      preload: 'auto',
-      playbackRates: [0.5, 1, 1.25, 1.5, 2],
-      controlBar: {
-        children: [
-          'playToggle',
-          'volumePanel',
-          'currentTimeDisplay',
-          'timeDivider',
-          'durationDisplay',
-          'progressControl',
-          'playbackRateMenuButton',
-          'QualityMenuButton',
-          'fullscreenToggle'
-        ]
-      }
-    });
-
-    window.player.on("playing", hideLoader);
-    window.player.on("waiting", () => showLoader("Buffering…"));
-    window.player.on("canplay", hideLoader);
-    window.player.on("ended", () => {
-      if (onEndedCallback) onEndedCallback();
-    });
-    window.player.on("error", () => {
-      showStatus("⚠️ Could not load this stream.<br>This is usually a " +
-        "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
-    });
-
-    const qualityLevels = window.player.qualityLevels();
-    qualityLevels.on('addqualitylevel', () => {
-      const qButton = window.player.controlBar.getChild('QualityMenuButton');
-      if (qButton) {
-        qButton.update();
-      }
-    });
+    window.player = initializeVideoPlayer(videoEl);
   } else {
     window.player.error(null);
   }
@@ -157,8 +163,10 @@ export function playSource(url, videoEl) {
   });
 
   window.player.ready(() => {
-    const p = window.player.play();
-    if (p && p.catch) p.catch(() => {});
+    const playPromise = window.player.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(() => {});
+    }
   });
 }
 

@@ -26,6 +26,31 @@ export function initAdBanner() {
   });
 }
 
+function createSlideElement(slide, index) {
+  const container = document.createElement("div");
+  container.className = "slide c" + (index % 4);
+
+  const bigText = document.createElement("div");
+  bigText.className = "big";
+  bigText.textContent = slide.big;
+
+  const smallText = document.createElement("div");
+  smallText.className = "small";
+  smallText.textContent = slide.small;
+
+  container.appendChild(bigText);
+  container.appendChild(smallText);
+  return container;
+}
+
+function createDotElement(index, onClick) {
+  const dot = document.createElement("button");
+  dot.type = "button";
+  dot.setAttribute("aria-label", "Slide " + (index + 1));
+  dot.addEventListener("click", onClick);
+  return dot;
+}
+
 export function initAdSlider() {
   const box = document.getElementById("adSlide");
   const track = document.getElementById("asTrack");
@@ -40,47 +65,39 @@ export function initAdSlider() {
     { big: "នំបុ័ងក្ដៅ ៗ 🥖", small: "ទើបនឹងដុតចេញ ផ្ដៅ!" },
   ];
 
-  let i = 0;
-  SLIDES.forEach((s, idx) => {
-    const slide = document.createElement("div");
-    slide.className = "slide c" + (idx % 4);
-    const big = document.createElement("div");
-    big.className = "big";
-    big.textContent = s.big;
-    const small = document.createElement("div");
-    small.className = "small";
-    small.textContent = s.small;
-    slide.appendChild(big);
-    slide.appendChild(small);
-    track.appendChild(slide);
+  let activeIndex = 0;
+  const dotEls = [];
 
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.setAttribute("aria-label", "Slide " + (idx + 1));
-    dot.addEventListener("click", () => go(idx, true));
-    dots.appendChild(dot);
+  SLIDES.forEach((slide, idx) => {
+    const slideEl = createSlideElement(slide, idx);
+    track.appendChild(slideEl);
+
+    const dotEl = createDotElement(idx, () => navigateTo(idx, true));
+    dots.appendChild(dotEl);
+    dotEls.push(dotEl);
   });
 
-  const dotEls = Array.from(dots.children);
-  function render() {
-    track.style.transform = "translateX(-" + (i * 100) + "%)";
+  function updateDisplay() {
+    track.style.transform = "translateX(-" + (activeIndex * 100) + "%)";
     dotEls.forEach((d, idx) => {
-      d.classList.toggle("on", idx === i);
+      d.classList.toggle("on", idx === activeIndex);
     });
   }
 
-  let timer = setInterval(() => go(i + 1, false), 4000);
-  function go(n, manual) {
-    i = (n + SLIDES.length) % SLIDES.length;
-    render();
+  let timer = setInterval(() => navigateTo(activeIndex + 1, false), 4000);
+
+  function navigateTo(n, manual) {
+    activeIndex = (n + SLIDES.length) % SLIDES.length;
+    updateDisplay();
     if (manual) {
       clearInterval(timer);
-      timer = setInterval(() => go(i + 1, false), 4000);
+      timer = setInterval(() => navigateTo(activeIndex + 1, false), 4000);
     }
   }
 
   box.hidden = false;
-  render();
+  updateDisplay();
+
   close.addEventListener("click", () => {
     clearInterval(timer);
     box.remove();

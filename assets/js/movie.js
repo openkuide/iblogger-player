@@ -38,77 +38,86 @@ export function startMovieMode(slug, epParam) {
     });
 }
 
-function renderMovie(movie, epParam) {
-  document.title = t(movie.title) + " · iblogger player";
-
-  const info = document.getElementById("info");
-  const poster = document.getElementById("poster");
-
-  function renderInfoFallback() {
-    const existing = info.querySelector(".info-fallback-poster");
-    if (existing) return;
-    const fb = document.createElement("div");
-    fb.className = "info-fallback-poster";
-    fb.innerHTML = `
-      <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-        <line x1="7" y1="2" x2="7" y2="22"></line>
-        <line x1="17" y1="2" x2="17" y2="22"></line>
-        <line x1="2" y1="12" x2="22" y2="12"></line>
-        <line x1="2" y1="7" x2="7" y2="7"></line>
-        <line x1="2" y1="17" x2="7" y2="17"></line>
-        <line x1="17" y1="17" x2="22" y2="17"></line>
-        <line x1="17" y1="7" x2="22" y2="7"></line>
-      </svg>
-    `;
-    info.insertBefore(fb, info.firstChild);
+function removeFallbackPoster(infoElement) {
+  const existing = infoElement.querySelector(".info-fallback-poster");
+  if (existing) {
+    existing.remove();
   }
+}
 
-  const existingFb = info.querySelector(".info-fallback-poster");
-  if (existingFb) existingFb.remove();
+function renderFallbackPoster(infoElement) {
+  const existing = infoElement.querySelector(".info-fallback-poster");
+  if (existing) return;
+  const fb = document.createElement("div");
+  fb.className = "info-fallback-poster";
+  fb.innerHTML = `
+    <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+      <line x1="7" y1="2" x2="7" y2="22"></line>
+      <line x1="17" y1="2" x2="17" y2="22"></line>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+      <line x1="2" y1="7" x2="7" y2="7"></line>
+      <line x1="2" y1="17" x2="7" y2="17"></line>
+      <line x1="17" y1="17" x2="22" y2="17"></line>
+      <line x1="17" y1="7" x2="22" y2="7"></line>
+    </svg>
+  `;
+  infoElement.insertBefore(fb, infoElement.firstChild);
+}
+
+function renderMoviePoster(movie, infoElement, posterElement) {
+  removeFallbackPoster(infoElement);
 
   if (movie.poster) {
-    poster.src = movie.poster;
-    poster.alt = t(movie.title);
-    poster.style.display = "block";
-    poster.onerror = () => {
-      poster.style.display = "none";
-      renderInfoFallback();
+    posterElement.src = movie.poster;
+    posterElement.alt = t(movie.title);
+    posterElement.style.display = "block";
+    posterElement.onerror = () => {
+      posterElement.style.display = "none";
+      renderFallbackPoster(infoElement);
     };
   } else {
-    poster.style.display = "none";
-    renderInfoFallback();
+    posterElement.style.display = "none";
+    renderFallbackPoster(infoElement);
+  }
+}
+
+function createBadgeElement(text, className, parentElement) {
+  const badge = document.createElement("span");
+  badge.className = "badge-i" + (className ? " " + className : "");
+  badge.textContent = text;
+  parentElement.appendChild(badge);
+  return badge;
+}
+
+function renderMovieBadges(movie, badgesElement) {
+  badgesElement.textContent = "";
+
+  if (movie.rating) {
+    createBadgeElement("★ " + movie.rating, "star", badgesElement);
   }
 
-  document.getElementById("infoTitle").textContent = t(movie.title);
-  const sub = LANG === "km" ? (movie.title.en || "") : (movie.title.km || "");
-  document.getElementById("infoSubtitle").textContent = sub;
-
-  const badges = document.getElementById("infoBadges");
-  badges.textContent = "";
-
-  function chip(text, cls) {
-    const s = document.createElement("span");
-    s.className = "badge-i" + (cls ? " " + cls : "");
-    s.textContent = text;
-    badges.appendChild(s);
-    return s;
-  }
-
-  if (movie.rating) chip("★ " + movie.rating, "star");
   if (movie.year) {
-    const yb = chip(String(movie.year), "clickable-year");
-    yb.title = "ស្វែងរករឿងឆ្នាំ " + movie.year + " (Find movies from " + movie.year + ")";
-    yb.addEventListener("click", () => {
+    const yearBadge = createBadgeElement(String(movie.year), "clickable-year", badgesElement);
+    yearBadge.title = "ស្វែងរករឿងឆ្នាំ " + movie.year + " (Find movies from " + movie.year + ")";
+    yearBadge.addEventListener("click", () => {
       history.pushState(null, "", "?year=" + movie.year);
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
   }
-  if (movie.episodeCount) chip(movie.episodeCount + " ភាគ");
-  (movie.genres || []).slice(0, 4).forEach(g => chip(g));
 
-  const infoDesc = document.getElementById("infoDesc");
-  infoDesc.textContent = "";
+  if (movie.episodeCount) {
+    createBadgeElement(movie.episodeCount + " ភាគ", "", badgesElement);
+  }
+
+  (movie.genres || []).slice(0, 4).forEach(genre => {
+    createBadgeElement(genre, "", badgesElement);
+  });
+}
+
+function renderMovieDescription(movie, descriptionElement) {
+  descriptionElement.textContent = "";
+  
   let descKm = "";
   let descEn = "";
   if (movie.description) {
@@ -119,62 +128,91 @@ function renderMovie(movie, epParam) {
       descKm = movie.description;
     }
   }
+
   if (descKm) {
     const pKm = document.createElement("p");
     pKm.className = "desc-km";
     pKm.textContent = descKm;
-    infoDesc.appendChild(pKm);
+    descriptionElement.appendChild(pKm);
   }
+
   if (descEn && descEn.trim() !== descKm.trim()) {
     const pEn = document.createElement("p");
     pEn.className = "desc-en";
     pEn.textContent = descEn;
-    infoDesc.appendChild(pEn);
+    descriptionElement.appendChild(pEn);
   }
+}
 
-  info.style.display = "flex";
-
-  const eps = movie.episodes || [];
-  document.getElementById("epCount").textContent = "(" + eps.length + ")";
-  const grid = document.getElementById("episodes");
-  grid.textContent = "";
+function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridElement) {
+  const episodes = movie.episodes || [];
+  document.getElementById("epCount").textContent = "(" + episodes.length + ")";
+  episodesGridElement.textContent = "";
 
   let startIdx = 0;
   if (epParam != null) {
-    const byLabel = eps.findIndex(e => String(e.ep) === String(epParam));
-    startIdx = byLabel >= 0 ? byLabel : Math.max(0, Math.min(eps.length - 1, (parseInt(epParam, 10) || 1) - 1));
+    const byLabel = episodes.findIndex(e => String(e.ep) === String(epParam));
+    startIdx = byLabel >= 0 ? byLabel : Math.max(0, Math.min(episodes.length - 1, (parseInt(epParam, 10) || 1) - 1));
   }
 
   const buttons = [];
-  function selectEp(idx, push) {
-    if (idx < 0 || idx >= eps.length) return;
-    buttons.forEach((b, i) => b.classList.toggle("active", i === idx));
+
+  function selectEpisode(idx, pushStateChange) {
+    if (idx < 0 || idx >= episodes.length) return;
+    
+    buttons.forEach((btn, i) => btn.classList.toggle("active", i === idx));
     buttons[idx].scrollIntoView({ block: "nearest", behavior: "smooth" });
     
     const videoEl = document.getElementById("video");
-    playSource(eps[idx].url, videoEl);
+    playSource(episodes[idx].url, videoEl);
     
-    document.title = t(eps[idx].title) + " · " + t(movie.title);
-    if (push) {
+    document.title = t(episodes[idx].title) + " · " + t(movie.title);
+    
+    if (pushStateChange) {
       const u = new URL(location.href);
-      u.searchParams.set("ep", eps[idx].ep);
+      u.searchParams.set("ep", episodes[idx].ep);
       history.replaceState(null, "", u);
     }
-    setOnEnded(() => selectEp(idx + 1, true));
+    
+    setOnEnded(() => selectEpisode(idx + 1, true));
   }
 
-  eps.forEach((ep, i) => {
-    const b = document.createElement("button");
-    b.className = "ep-btn" + (ep.final ? " final" : "");
-    b.textContent = ep.ep || (i + 1);
-    b.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
-    b.addEventListener("click", () => selectEp(i, true));
-    grid.appendChild(b);
-    buttons.push(b);
+  episodes.forEach((ep, i) => {
+    const btn = document.createElement("button");
+    btn.className = "ep-btn" + (ep.final ? " final" : "");
+    btn.textContent = ep.ep || (i + 1);
+    btn.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
+    btn.addEventListener("click", () => selectEpisode(i, true));
+    episodesGridElement.appendChild(btn);
+    buttons.push(btn);
   });
-  document.getElementById("episodesWrap").style.display = "block";
 
-  selectEp(startIdx, false);
+  episodesWrapElement.style.display = "block";
+  selectEpisode(startIdx, false);
+}
+
+function renderMovie(movie, epParam) {
+  document.title = t(movie.title) + " · iblogger player";
+
+  const infoElement = document.getElementById("info");
+  const posterElement = document.getElementById("poster");
+  const badgesElement = document.getElementById("infoBadges");
+  const descriptionElement = document.getElementById("infoDesc");
+  const episodesWrapElement = document.getElementById("episodesWrap");
+  const episodesGridElement = document.getElementById("episodes");
+
+  renderMoviePoster(movie, infoElement, posterElement);
+  
+  document.getElementById("infoTitle").textContent = t(movie.title);
+  const subTitle = LANG === "km" ? (movie.title.en || "") : (movie.title.km || "");
+  document.getElementById("infoSubtitle").textContent = subTitle;
+
+  renderMovieBadges(movie, badgesElement);
+  renderMovieDescription(movie, descriptionElement);
+
+  infoElement.style.display = "flex";
+
+  renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridElement);
 }
 
 function loadIndexAndRelated(movie) {

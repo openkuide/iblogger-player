@@ -1,0 +1,12 @@
+{
+  "name": "iblogger-player",
+  "private": true,
+  "type": "module",
+  "description": "Minimal player for blogger hosted video files",
+  "scripts": {
+    "test": "node tests/integration.test.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^22.10.0"
+  }
+}

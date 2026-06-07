@@ -8,4 +8,8 @@ movies-export-*.json
 # OS / editor cruft
 .DS_Store
 Thumbs.db
+
 *.swp
+
+# Node / NPM dependencies
+node_modules/

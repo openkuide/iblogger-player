@@ -325,6 +325,26 @@ async function runTests() {
     } else {
       console.log('[TEST SUCCESS] Clickable year badge and homepage redirect filtering works successfully.');
     }
+    
+    // Test Legal/Privacy & DMCA page routing
+    console.log('[TEST RUNNER] Testing Legal page (Privacy & DMCA)...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?page=legal`, { waitUntil: 'domcontentloaded' });
+    
+    // Wait for legalView to load
+    await page.waitForSelector('#legalView');
+    
+    // Assert legal terms and DMCA contact info exist
+    const hasLegalContent = await page.evaluate(() => {
+      const body = document.body.textContent;
+      return body.includes('Copyright Notice') && body.includes('legal@iblogger855.github.io');
+    });
+    
+    if (!hasLegalContent) {
+      console.error('[TEST FAILURE] Legal Privacy & DMCA disclaimer details failed to load or contact email was missing.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Legal page successfully verified.');
+    }
 
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);

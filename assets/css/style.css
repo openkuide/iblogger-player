@@ -1072,6 +1072,31 @@ a:hover { text-decoration:underline; }
 
 footer { margin-top: 34px; text-align:center; color:var(--fg-3); font-size:12px; }
 
+/* ── Legal section styling ──────────────────────────────────── */
+#legalView .meta {
+  padding: 30px;
+}
+.legal-section {
+  margin-top: 24px;
+}
+.legal-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0 0 10px;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 6px;
+}
+.legal-section p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--fg-2);
+  margin: 8px 0;
+}
+.legal-section p strong {
+  color: var(--fg);
+}
+
 @media (max-width: 560px) {
   .wrap { padding: 24px 16px 40px; }
   .logo { font-size: 18px; }

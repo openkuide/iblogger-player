@@ -8,16 +8,21 @@ import { startHomeMode } from './home.js';
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
   const src = params.get("src");
+  const pageParam = params.get("page");
 
   const playerView = document.getElementById("playerView");
   const homeView = document.getElementById("homeView");
+  const legalView = document.getElementById("legalView");
 
   // Initialize ads
   initAdBanner();
   initAdSlider();
 
   // Route based on URL parameters
-  if (id) {
+  if (pageParam === "legal") {
+    if (legalView) legalView.style.display = "block";
+    document.title = "iblogger player · Privacy & DMCA";
+  } else if (id) {
     if (playerView) playerView.style.display = "block";
     startMovieMode(id, params.get("ep"));
   } else if (src) {

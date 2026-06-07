@@ -90,7 +90,7 @@ async function runTests() {
 
   try {
     console.log('[TEST RUNNER] Navigating to http://127.0.0.1:8899/ ...');
-    await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'networkidle0' });
+    await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'domcontentloaded' });
 
     // Wait for the Vue application to mount
     console.log('[TEST RUNNER] Waiting for Vue app to mount...');
@@ -135,9 +135,15 @@ async function runTests() {
       console.log('[TEST SUCCESS] List mode toggled successfully.');
     }
 
+    // Open the filters panel
+    console.log('[TEST RUNNER] Opening filters drawer...');
+    const filterToggleBtn = await page.waitForSelector('.filter-toggle');
+    await filterToggleBtn.click();
+    await new Promise(r => setTimeout(r, 500)); // wait for panel animation
+
     // Test filtering by year (click "2020+")
     console.log('[TEST RUNNER] Filtering by year (2020+)...');
-    const filterPills = await page.$$('.filter-rows .sort-pill');
+    const filterPills = await page.$$('.filter-rows-wrapper .sort-pill');
     let yearBtn;
     for (const pill of filterPills) {
       const text = await page.evaluate(el => el.textContent.trim(), pill);

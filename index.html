@@ -508,139 +508,197 @@
     }
 
     /* ── Home / browse ──────────────────────────────────────────── */
-    .home-bar {
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      margin-bottom:16px;
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
     }
-    .search {
-      flex:1 1 240px;
-      position:relative;
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-elev) 25%, var(--bg-elev-2) 50%, var(--bg-elev) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
     }
+    .skeleton-poster { width: 100%; aspect-ratio: 2/3; border-radius: 14px; }
+    .skeleton-line   { height: 13px; border-radius: 6px; margin-top: 9px; }
+    .skeleton-line.short { width: 55%; }
+
+    /* Toolbar */
+    .home-toolbar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      margin-bottom: 12px;
+    }
+    .search { flex: 1 1 220px; position: relative; }
     .search input {
-      width:100%;
-      font-family:var(--font);
-      font-size:15px;
-      color:var(--fg);
-      background:var(--bg-elev);
-      border:1px solid var(--hairline);
-      border-radius:999px;
-      padding:11px 16px 11px 40px;
-      outline:none;
-      backdrop-filter:var(--blur);
-      -webkit-backdrop-filter:var(--blur);
-      transition:border-color .2s ease, box-shadow .2s ease;
+      width: 100%;
+      font-family: var(--font); font-size: 15px; color: var(--fg);
+      background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 999px; padding: 10px 16px 10px 40px;
+      outline: none;
+      backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      transition: border-color .2s ease, box-shadow .2s ease;
     }
-    .search input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(10,132,255,0.25); }
-    .search input::placeholder { color:var(--fg-3); }
+    .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.22); }
+    .search input::placeholder { color: var(--fg-3); }
     .search::before {
-      content:"🔍";
-      position:absolute; left:14px; top:50%; transform:translateY(-50%);
-      font-size:14px; opacity:.6; pointer-events:none;
+      content: "🔍";
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; opacity: .55; pointer-events: none;
     }
-    .sort select {
-      appearance:none; -webkit-appearance:none;
-      font-family:var(--font); font-size:14px; font-weight:500;
-      color:var(--fg);
-      background:var(--bg-elev);
-      border:1px solid var(--hairline);
-      border-radius:999px;
-      padding:11px 34px 11px 16px;
-      cursor:pointer;
-      backdrop-filter:var(--blur);
-      -webkit-backdrop-filter:var(--blur);
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'%3E%3Cpath fill='%239aa0aa' d='M0 0l4.5 6L9 0z'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 14px center;
+    .view-toggle {
+      display: flex; gap: 4px;
+      background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 10px; padding: 3px;
     }
-    .sort select:focus { outline:none; border-color:var(--accent); }
-    .genres-bar {
-      display:flex; flex-wrap:wrap; gap:8px;
-      margin-bottom:20px;
+    .view-toggle button {
+      width: 32px; height: 32px; display: grid; place-items: center;
+      background: transparent; border: none; border-radius: 7px;
+      color: var(--fg-3); font-size: 16px; cursor: pointer;
+      transition: all .15s ease; line-height: 1;
     }
+    .view-toggle button.on { background: var(--bg-elev-2); color: var(--fg); }
+
+    /* Sort pills */
+    .sort-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .sort-pill {
+      font-family: var(--font); font-size: 12.5px; font-weight: 600;
+      color: var(--fg-2); background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 999px; padding: 5px 13px;
+      cursor: pointer; transition: all .15s ease; white-space: nowrap;
+    }
+    .sort-pill:hover { color: var(--fg); border-color: rgba(255,255,255,0.24); }
+    .sort-pill.active { color: #fff; background: rgba(10,132,255,0.22); border-color: var(--accent); }
+
+    /* Filter rows (year / rating) */
+    .filter-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .filter-row  { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .filter-row-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--fg-3); white-space: nowrap; margin-right: 2px;
+    }
+
+    /* Genre chips (multi-select) */
+    .genres-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .genre-chip {
-      font-family:var(--font);
-      font-size:12.5px; font-weight:600;
-      color:var(--fg-2);
-      background:var(--bg-elev);
-      border:1px solid var(--hairline);
-      border-radius:999px;
-      padding:7px 14px;
-      cursor:pointer;
-      transition:all .18s ease;
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      color: var(--fg-2); background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 999px; padding: 5px 12px;
+      cursor: pointer; transition: all .15s ease;
     }
-    .genre-chip:hover { color:var(--fg); border-color:rgba(255,255,255,0.28); }
-    .genre-chip.active { color:#fff; background:var(--accent); border-color:var(--accent); }
-    .home-count { font-size:13px; color:var(--fg-3); margin:0 4px 14px; font-family:var(--font); }
+    .genre-chip:hover { color: var(--fg); border-color: rgba(255,255,255,0.24); }
+    .genre-chip.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .clear-chip {
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      color: #ff453a; background: rgba(255,69,58,0.12); border: 1px solid rgba(255,69,58,0.3);
+      border-radius: 999px; padding: 5px 12px;
+      cursor: pointer; transition: all .15s ease;
+    }
+    .clear-chip:hover { background: rgba(255,69,58,0.22); }
+
+    .home-count { font-size: 13px; color: var(--fg-3); margin: 0 4px 12px; font-family: var(--font); }
+
+    /* Grid view */
     .home-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
-      gap:16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
     }
     .home-card {
-      display:block; text-decoration:none; color:inherit;
-      border-radius:14px;
-      transition:transform .18s ease;
+      display: block; text-decoration: none; color: inherit;
+      border-radius: 14px; transition: transform .18s ease;
     }
-    .home-card:hover { transform:translateY(-4px); }
-    .home-card:hover .hc-poster { box-shadow:0 14px 34px rgba(0,0,0,0.5); }
-    .hc-poster-wrap { position:relative; }
+    .home-card:hover { transform: translateY(-4px); }
+    .home-card:hover .hc-poster  { box-shadow: 0 14px 34px rgba(0,0,0,0.55); }
+    .home-card:hover .hc-overlay { opacity: 1; }
+    .hc-poster-wrap { position: relative; overflow: hidden; border-radius: 14px; }
     .hc-poster {
-      width:100%; aspect-ratio:2/3; object-fit:cover;
-      border-radius:14px; background:var(--bg-elev-2);
-      border:1px solid var(--hairline);
-      transition:box-shadow .18s ease;
+      width: 100%; aspect-ratio: 2/3; object-fit: cover;
+      border-radius: 14px; background: var(--bg-elev-2);
+      border: 1px solid var(--hairline);
+      transition: box-shadow .18s ease; display: block;
     }
+    /* Play overlay */
+    .hc-overlay {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+      background: rgba(0,0,0,0.42);
+      border-radius: 14px; opacity: 0;
+      transition: opacity .2s ease; pointer-events: none;
+    }
+    .hc-overlay svg { width: 44px; height: 44px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
     .hc-eps {
-      position:absolute; bottom:8px; right:8px;
-      font-family:var(--font);
-      font-size:11px; font-weight:700; color:#fff;
-      background:rgba(0,0,0,0.7);
-      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-      padding:3px 8px; border-radius:999px;
+      position: absolute; bottom: 8px; right: 8px;
+      font-family: var(--font); font-size: 10.5px; font-weight: 700; color: #fff;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      padding: 3px 7px; border-radius: 999px;
     }
     .hc-rating {
-      position:absolute; top:8px; left:8px;
-      font-family:var(--font);
-      font-size:11px; font-weight:700; color:#ffd60a;
-      background:rgba(0,0,0,0.7);
-      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-      padding:3px 8px; border-radius:999px;
+      position: absolute; top: 8px; left: 8px;
+      font-family: var(--font); font-size: 10.5px; font-weight: 700; color: #ffd60a;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      padding: 3px 7px; border-radius: 999px;
     }
     .hc-title {
-      font-family:var(--font);
-      font-size:13.5px; line-height:1.4; margin-top:9px;
-      color:var(--fg);
-      display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+      font-family: var(--font); font-size: 13px; line-height: 1.4; margin-top: 8px;
+      color: var(--fg);
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
-    .hc-year { font-family:var(--font); font-size:12px; color:var(--fg-3); margin-top:2px; }
-    .home-empty { padding:50px 16px; text-align:center; color:var(--fg-3); font-family:var(--font); }
+    .hc-year { font-family: var(--font); font-size: 11.5px; color: var(--fg-3); margin-top: 2px; }
 
-    /* ── Pagination ─────────────────────────────────────────────── */
+    /* List view */
+    .home-grid.list-mode { grid-template-columns: 1fr; gap: 8px; }
+    .home-grid.list-mode .home-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 14px;
+      background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 14px; transform: none !important;
+      transition: background .18s ease;
+    }
+    .home-grid.list-mode .home-card:hover { background: var(--bg-elev-2); transform: none !important; }
+    .home-grid.list-mode .hc-poster-wrap { flex: 0 0 46px; border-radius: 8px; overflow: hidden; }
+    .home-grid.list-mode .hc-poster  { aspect-ratio: 2/3; border-radius: 8px; width: 46px; }
+    .home-grid.list-mode .hc-overlay { border-radius: 8px; }
+    .home-grid.list-mode .hc-body    { flex: 1 1 auto; min-width: 0; }
+    .home-grid.list-mode .hc-title   { font-size: 14px; margin-top: 0; -webkit-line-clamp: 1; line-clamp: 1; }
+    .home-grid.list-mode .hc-meta    { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+    .home-grid.list-mode .hc-year    { margin-top: 0; }
+    .home-grid.list-mode .hc-rating,
+    .home-grid.list-mode .hc-eps {
+      position: static; display: inline-block; font-size: 11px;
+      background: var(--bg-elev-2); padding: 2px 7px;
+    }
+    .home-grid.list-mode .hc-rating  { color: #ffd60a; }
+
+    .home-empty {
+      padding: 60px 16px; text-align: center; color: var(--fg-3); font-family: var(--font);
+    }
+    .home-empty .empty-icon { font-size: 46px; margin-bottom: 12px; display: block; }
+
+    /* Pagination */
     .pager {
-      display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
-      gap:6px; margin-top:28px;
-      font-family:var(--font);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 28px; font-family: var(--font);
     }
+    .pager-info { font-size: 14px; font-weight: 600; color: var(--fg-2); padding: 0 4px; }
     .pager button {
-      min-width:38px; height:38px;
-      padding:0 10px;
-      font-size:14px; font-weight:600;
-      color:var(--fg-2);
-      background:var(--bg-elev);
-      border:1px solid var(--hairline);
-      border-radius:10px;
-      cursor:pointer;
-      transition:all .16s ease;
+      min-width: 38px; height: 38px; padding: 0 12px;
+      font-size: 16px; font-weight: 600; color: var(--fg-2);
+      background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 10px; cursor: pointer; transition: all .16s ease;
+      font-family: var(--font);
     }
-    .pager button:hover:not(:disabled) { color:var(--fg); border-color:rgba(255,255,255,0.28); }
-    .pager button.active {
-      color:#fff; background:var(--accent); border-color:var(--accent);
-      box-shadow:0 4px 12px -3px rgba(10,132,255,0.5);
+    .pager button:hover:not(:disabled) { color: var(--fg); border-color: rgba(255,255,255,0.28); }
+    .pager button:disabled { opacity: .35; cursor: default; }
+    .pager input[type=number] {
+      width: 54px; height: 38px; text-align: center;
+      font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--fg);
+      background: var(--bg-elev); border: 1px solid var(--hairline);
+      border-radius: 10px; outline: none; transition: border-color .18s ease;
     }
-    .pager button:disabled { opacity:.35; cursor:default; }
-    .pager .ellipsis { color:var(--fg-3); padding:0 4px; user-select:none; }
+    .pager input[type=number]:focus { border-color: var(--accent); }
+    .pager input[type=number]::-webkit-inner-spin-button,
+    .pager input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
     /* ── Movie info (Netflix-style detail) ──────────────────────── */
     .info {
@@ -867,22 +925,128 @@
 
     <!-- Home / browse view (shown when no ?id= or ?src=) -->
     <div id="homeView" style="display:none;">
-      <div class="home-bar">
-        <div class="search"><input id="searchInput" type="search" placeholder="ស្វែងរករឿង…" autocomplete="off" /></div>
-        <div class="sort">
-          <select id="sortSelect" aria-label="Sort">
-            <option value="title">តាមឈ្មោះ</option>
-            <option value="year">ឆ្នាំថ្មីៗ</option>
-            <option value="rating">Rating ខ្ពស់</option>
-            <option value="episodes">ភាគច្រើន</option>
-          </select>
+      <div id="homeApp">
+
+        <!-- Toolbar: search + view toggle -->
+        <div class="home-toolbar">
+          <div class="search">
+            <input v-model="search" type="search" placeholder="ស្វែងរករឿង…" autocomplete="off" id="searchInput" />
+          </div>
+          <div class="view-toggle" aria-label="View mode">
+            <button :class="{on:!listView}" @click="listView=false" title="Grid">&#x229E;</button>
+            <button :class="{on:listView}"  @click="listView=true"  title="List">&#x2630;</button>
+          </div>
         </div>
-      </div>
-      <div class="genres-bar" id="genresBar"></div>
-      <div class="home-count" id="homeCount"></div>
-      <div class="home-grid" id="homeGrid"></div>
-      <div class="home-empty" id="homeEmpty" style="display:none;">រកមិនឃើញរឿងណាមួយ 😕</div>
-      <div class="pager" id="pager"></div>
+
+        <!-- Sort pills -->
+        <div class="sort-pills" role="group" aria-label="Sort by">
+          <button v-for="s in SORTS" :key="s.value"
+            class="sort-pill" :class="{active:sort===s.value}"
+            @click="sort=s.value">{{ s.label }}</button>
+        </div>
+
+        <!-- Year + Rating quick filters -->
+        <div class="filter-rows">
+          <div class="filter-row">
+            <span class="filter-row-label">ឆ្នាំ</span>
+            <button v-for="y in YEARS" :key="y.value"
+              class="sort-pill" :class="{active:yearFilter===y.value}"
+              @click="yearFilter=y.value">{{ y.label }}</button>
+          </div>
+          <div class="filter-row">
+            <span class="filter-row-label">Rating</span>
+            <button v-for="r in RATINGS" :key="r.value"
+              class="sort-pill" :class="{active:minRating===r.value}"
+              @click="minRating=r.value">{{ r.label }}</button>
+          </div>
+        </div>
+
+        <!-- Genre chips (multi-select) -->
+        <div class="genres-bar" role="group" aria-label="Genre filter">
+          <button class="genre-chip" :class="{active:activeGenres.length===0}" @click="activeGenres=[]">ទាំងអស់</button>
+          <button v-for="g in allGenres" :key="g"
+            class="genre-chip" :class="{active:activeGenres.includes(g)}"
+            @click="toggleGenre(g)">{{ g }}</button>
+          <button v-if="hasFilters" class="clear-chip" @click="clearAll">✕ Clear All</button>
+        </div>
+
+        <!-- Count line -->
+        <div class="home-count" v-if="!loading">
+          {{ filtered.length }} រឿង<template v-if="pages>1"> · ទំព័រ {{ page }}/{{ pages }}</template>
+        </div>
+
+        <!-- Skeleton while loading -->
+        <div v-if="loading" class="home-grid">
+          <div v-for="n in 12" :key="n">
+            <div class="skeleton skeleton-poster"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+          </div>
+        </div>
+
+        <!-- Movie grid / list -->
+        <div v-else-if="pageSlice.length" class="home-grid" :class="{'list-mode':listView}">
+          <a v-for="m in pageSlice" :key="m.slug"
+             class="home-card"
+             :href="'?id='+encodeURIComponent(m.slug)">
+
+            <!-- Grid mode -->
+            <template v-if="!listView">
+              <div class="hc-poster-wrap">
+                <img class="hc-poster" :src="m.poster||''" :alt="title(m)" loading="lazy" />
+                <div class="hc-overlay">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.38)"/>
+                    <path d="M10 8l6 4-6 4V8z" fill="white"/>
+                  </svg>
+                </div>
+                <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
+                <span v-if="m.episodeCount" class="hc-eps">{{ m.episodeCount }} ភាគ</span>
+              </div>
+              <div class="hc-title">{{ title(m) }}</div>
+              <div v-if="m.year" class="hc-year">{{ m.year }}</div>
+            </template>
+
+            <!-- List mode -->
+            <template v-else>
+              <div class="hc-poster-wrap">
+                <img class="hc-poster" :src="m.poster||''" :alt="title(m)" loading="lazy" />
+                <div class="hc-overlay">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.38)"/>
+                    <path d="M10 8l6 4-6 4V8z" fill="white"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="hc-body">
+                <div class="hc-title">{{ title(m) }}</div>
+                <div class="hc-meta">
+                  <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
+                  <span v-if="m.year"         class="hc-year">{{ m.year }}</span>
+                  <span v-if="m.episodeCount" class="hc-eps">{{ m.episodeCount }} ភាគ</span>
+                </div>
+              </div>
+            </template>
+          </a>
+        </div>
+
+        <!-- Empty state -->
+        <div v-else class="home-empty">
+          <span class="empty-icon">&#x1F625;</span>
+          រកមិនឃើញរឿងណាមួយ
+        </div>
+
+        <!-- Pager -->
+        <div class="pager" v-if="!loading && pages>1">
+          <button :disabled="page<=1" @click="gotoPage(page-1)">&#x2039;</button>
+          <span class="pager-info">{{ page }} / {{ pages }}</span>
+          <button :disabled="page>=pages" @click="gotoPage(page+1)">&#x203A;</button>
+          <input type="number" :min="1" :max="pages" :value="page"
+                 @change="gotoPage(+$event.target.value)"
+                 title="Go to page" aria-label="Page number" />
+        </div>
+
+      </div><!-- /#homeApp -->
     </div>
 
     <!-- Player view (shown for ?id= / ?src=) -->
@@ -962,6 +1126,7 @@
     <div class="dots" id="asDots"></div>
   </aside>
 
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js" crossorigin="anonymous"></script>
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"
     integrity="sha512-t2qFs5xQ9zghHZmMq6pKOKZfdN9XzliTKOo7SVUvpzX/20ugCr7M1OHPJ4Y9jtan+0TxM6WbqRFzMppgCP9OHQ=="
@@ -1422,196 +1587,128 @@
           .catch(function () {});
       }
 
-      // ── Mode C: home / browse (no params) ─────────────────────
+      // ── Mode C: home / browse — Vue 3 reactive app ───────────
       function startHomeMode() {
         document.title = "iblogger player · រឿងទាំងអស់";
-        const grid = document.getElementById("homeGrid");
-        const countEl = document.getElementById("homeCount");
-        const emptyEl = document.getElementById("homeEmpty");
-        const searchEl = document.getElementById("searchInput");
-        const sortEl = document.getElementById("sortSelect");
-        const genresBar = document.getElementById("genresBar");
+        const LANG_HOME = LANG;
+        const PER_PAGE  = 24;
 
-        const pagerEl = document.getElementById("pager");
-        const PER_PAGE = 24;
+        const SORTS = [
+          { value: "title",    label: "ឈ្មោះ A-Z" },
+          { value: "year",     label: "ឆ្នាំថ្មី" },
+          { value: "rating",   label: "Rating ↓" },
+          { value: "episodes", label: "ភាគច្រើន" },
+        ];
+        const YEARS = [
+          { value: "",      label: "គ្រប់ឆ្នាំ" },
+          { value: "2020+", label: "2020+" },
+          { value: "2010",  label: "2010–2019" },
+          { value: "old",   label: "មុន 2010" },
+        ];
+        const RATINGS = [
+          { value: 0, label: "ទាំងអស់" },
+          { value: 7, label: "★ 7+" },
+          { value: 8, label: "★ 8+" },
+        ];
 
-        let all = [];
-        let activeGenre = null;
-        let filtered = [];          // current filtered+sorted list
-        let page = 1;
+        const { createApp, ref, computed, watch } = Vue;
 
-        fetch("db/index.json")
-          .then(function (r) { if (!r.ok) throw new Error("no index"); return r.json(); })
-          .then(function (data) {
-            all = data;
-            buildGenres();
-            render();
-          })
-          .catch(function () {
-            grid.style.display = "none";
-            emptyEl.style.display = "block";
-            emptyEl.textContent = "⚠️ មិនអាចផ្ទុកបញ្ជីរឿង (db/index.json)។";
-          });
+        createApp({
+          setup() {
+            const all          = ref([]);
+            const loading      = ref(true);
+            const search       = ref("");
+            const activeGenres = ref([]);
+            const sort         = ref("title");
+            const yearFilter   = ref("");
+            const minRating    = ref(0);
+            const page         = ref(1);
+            const listView     = ref(false);
 
-        function buildGenres() {
-          const counts = {};
-          all.forEach(function (m) {
-            (m.genres || []).forEach(function (g) { counts[g] = (counts[g] || 0) + 1; });
-          });
-          const sorted = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
-          genresBar.textContent = "";
-          // "All" chip first.
-          const allChip = chip("ទាំងអស់", null);
-          allChip.classList.add("active");
-          sorted.forEach(function (g) { chip(g, g); });
+            fetch("db/index.json")
+              .then(function(r) { if (!r.ok) throw new Error("no index"); return r.json(); })
+              .then(function(data) { all.value = data; loading.value = false; })
+              .catch(function() { loading.value = false; });
 
-          function chip(label, value) {
-            const c = document.createElement("button");
-            c.className = "genre-chip";
-            c.textContent = label;
-            c.addEventListener("click", function () {
-              activeGenre = value;
-              genresBar.querySelectorAll(".genre-chip").forEach(function (x) { x.classList.remove("active"); });
-              c.classList.add("active");
-              render();
+            function title(m) {
+              return (m.title && (m.title[LANG_HOME] || m.title.en || m.title.km)) || "";
+            }
+
+            const allGenres = computed(function() {
+              var counts = {};
+              all.value.forEach(function(m) {
+                (m.genres || []).forEach(function(g) { counts[g] = (counts[g] || 0) + 1; });
+              });
+              return Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
             });
-            genresBar.appendChild(c);
-            return c;
-          }
-        }
 
-        // Filter + sort the whole catalog, then reset to page 1.
-        function render() {
-          const q = (searchEl.value || "").trim().toLowerCase();
-          const sort = sortEl.value;
+            const filtered = computed(function() {
+              var q = search.value.trim().toLowerCase();
+              var list = all.value.filter(function(m) {
+                if (activeGenres.value.length > 0) {
+                  var mg = m.genres || [];
+                  if (!activeGenres.value.every(function(g) { return mg.includes(g); })) return false;
+                }
+                if (q) {
+                  var hay = ((m.title && m.title.km || "") + " " + (m.title && m.title.en || "")).toLowerCase();
+                  if (hay.indexOf(q) === -1) return false;
+                }
+                if (yearFilter.value === "2020+" && (m.year || 0) < 2020) return false;
+                if (yearFilter.value === "2010"  && ((m.year || 0) < 2010 || (m.year || 0) >= 2020)) return false;
+                if (yearFilter.value === "old"   && (m.year || 0) >= 2010) return false;
+                if (minRating.value > 0 && (m.rating || 0) < minRating.value) return false;
+                return true;
+              });
+              list = list.slice().sort(function(a, b) {
+                if (sort.value === "year")     return (b.year || 0) - (a.year || 0);
+                if (sort.value === "rating")   return (b.rating || 0) - (a.rating || 0);
+                if (sort.value === "episodes") return (b.episodeCount || 0) - (a.episodeCount || 0);
+                return title(a).localeCompare(title(b));
+              });
+              return list;
+            });
 
-          filtered = all.filter(function (m) {
-            if (activeGenre && !(m.genres || []).includes(activeGenre)) return false;
-            if (q) {
-              const hay = ((m.title.km || "") + " " + (m.title.en || "")).toLowerCase();
-              if (hay.indexOf(q) === -1) return false;
-            }
-            return true;
-          });
+            watch([search, activeGenres, sort, yearFilter, minRating], function() { page.value = 1; });
 
-          filtered.sort(function (a, b) {
-            if (sort === "year") return (b.year || 0) - (a.year || 0);
-            if (sort === "rating") return (b.rating || 0) - (a.rating || 0);
-            if (sort === "episodes") return (b.episodeCount || 0) - (a.episodeCount || 0);
-            return t(a.title).localeCompare(t(b.title));   // title
-          });
+            const pages = computed(function() {
+              return Math.max(1, Math.ceil(filtered.value.length / PER_PAGE));
+            });
+            const pageSlice = computed(function() {
+              var start = (page.value - 1) * PER_PAGE;
+              return filtered.value.slice(start, start + PER_PAGE);
+            });
 
-          page = 1;
-          renderPage();
-        }
+            const hasFilters = computed(function() {
+              return activeGenres.value.length > 0 || search.value || yearFilter.value || minRating.value > 0;
+            });
 
-        // Draw just the current page's cards + the pager.
-        function renderPage() {
-          const total = filtered.length;
-          const pages = Math.max(1, Math.ceil(total / PER_PAGE));
-          if (page > pages) page = pages;
-          const start = (page - 1) * PER_PAGE;
-          const slice = filtered.slice(start, start + PER_PAGE);
-
-          countEl.textContent = total
-            ? total + " រឿង · ទំព័រ " + page + "/" + pages
-            : "0 រឿង";
-          grid.textContent = "";
-          emptyEl.style.display = total ? "none" : "block";
-
-          slice.forEach(function (m) {
-            const a = document.createElement("a");
-            a.className = "home-card";
-            a.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
-
-            const wrap = document.createElement("div");
-            wrap.className = "hc-poster-wrap";
-            const img = document.createElement("img");
-            img.className = "hc-poster";
-            img.loading = "lazy";
-            if (m.poster) img.src = m.poster;
-            img.alt = t(m.title);
-            wrap.appendChild(img);
-            if (m.rating) {
-              const r = document.createElement("span");
-              r.className = "hc-rating";
-              r.textContent = "★ " + m.rating;
-              wrap.appendChild(r);
-            }
-            if (m.episodeCount) {
-              const e = document.createElement("span");
-              e.className = "hc-eps";
-              e.textContent = m.episodeCount + " ភាគ";
-              wrap.appendChild(e);
+            function toggleGenre(g) {
+              var i = activeGenres.value.indexOf(g);
+              if (i >= 0) activeGenres.value.splice(i, 1);
+              else activeGenres.value.push(g);
             }
 
-            const cap = document.createElement("div");
-            cap.className = "hc-title";
-            cap.textContent = t(m.title);
-            const yr = document.createElement("div");
-            yr.className = "hc-year";
-            yr.textContent = m.year || "";
+            function clearAll() {
+              search.value       = "";
+              activeGenres.value = [];
+              yearFilter.value   = "";
+              minRating.value    = 0;
+              sort.value         = "title";
+            }
 
-            a.appendChild(wrap);
-            a.appendChild(cap);
-            if (m.year) a.appendChild(yr);
-            grid.appendChild(a);
-          });
+            function gotoPage(p) {
+              page.value = Math.max(1, Math.min(pages.value, p || 1));
+              document.getElementById("homeApp").scrollIntoView({ behavior: "smooth", block: "start" });
+            }
 
-          renderPager(pages);
-        }
-
-        // Build "« Prev  1 … 4 [5] 6 … 12  Next »" with a windowed page range.
-        function renderPager(pages) {
-          pagerEl.textContent = "";
-          if (pages <= 1) return;
-
-          function goto(p) {
-            page = p;
-            renderPage();
-            // Scroll back up to the grid so the new page starts at the top.
-            document.getElementById("homeGrid").scrollIntoView({ behavior: "smooth", block: "start" });
+            return {
+              all, loading, search, activeGenres, sort, yearFilter, minRating,
+              page, listView, SORTS, YEARS, RATINGS,
+              allGenres, filtered, pages, pageSlice, hasFilters,
+              title, toggleGenre, clearAll, gotoPage
+            };
           }
-          function btn(label, p, opts) {
-            opts = opts || {};
-            const b = document.createElement("button");
-            b.textContent = label;
-            if (opts.active) b.classList.add("active");
-            if (opts.disabled) b.disabled = true;
-            else b.addEventListener("click", function () { goto(p); });
-            pagerEl.appendChild(b);
-          }
-          function ellipsis() {
-            const s = document.createElement("span");
-            s.className = "ellipsis";
-            s.textContent = "…";
-            pagerEl.appendChild(s);
-          }
-
-          btn("‹", page - 1, { disabled: page === 1 });
-
-          // Windowed range: always show first, last, and ±1 around current.
-          const win = [];
-          for (let p = 1; p <= pages; p++) {
-            if (p === 1 || p === pages || Math.abs(p - page) <= 1) win.push(p);
-          }
-          let prev = 0;
-          win.forEach(function (p) {
-            if (p - prev > 1) ellipsis();
-            btn(String(p), p, { active: p === page });
-            prev = p;
-          });
-
-          btn("›", page + 1, { disabled: page === pages });
-        }
-
-        // Debounced search + instant sort (both reset to page 1 via render()).
-        let searchTimer = null;
-        searchEl.addEventListener("input", function () {
-          clearTimeout(searchTimer);
-          searchTimer = setTimeout(render, 150);
-        });
-        sortEl.addEventListener("change", render);
+        }).mount("#homeApp");
       }
     })();
   </script>

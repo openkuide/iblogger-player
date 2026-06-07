@@ -77,8 +77,9 @@ import { startHomeMode } from './home.js';
     // Check if it's a local query/route link
     const isLocal = href.startsWith("?") || href.startsWith("./") || href.startsWith("index.html");
     const isExternal = anchor.getAttribute("target") === "_blank";
+    const isLogo = anchor.classList.contains("logo");
 
-    if (isLocal && !isExternal) {
+    if (isLocal && !isExternal && !isLogo) {
       e.preventDefault();
       
       const url = new URL(anchor.href, location.href);

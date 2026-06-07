@@ -346,6 +346,35 @@ async function runTests() {
       console.log('[TEST SUCCESS] Legal page successfully verified.');
     }
 
+    // Test About page routing
+    console.log('[TEST RUNNER] Testing About Us page...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?page=about`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#aboutView');
+    const hasAboutContent = await page.evaluate(() => {
+      return document.body.textContent.includes('Our Platform');
+    });
+    if (!hasAboutContent) {
+      console.error('[TEST FAILURE] About page failed to load correctly.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] About page successfully verified.');
+    }
+
+    // Test Contact page routing
+    console.log('[TEST RUNNER] Testing Contact Us page...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?page=contact`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#contactView');
+    const hasContactContent = await page.evaluate(() => {
+      const body = document.body.textContent;
+      return body.includes('Get in Touch') && body.includes('contact@iblogger855.github.io');
+    });
+    if (!hasContactContent) {
+      console.error('[TEST FAILURE] Contact page failed to load correctly.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Contact page successfully verified.');
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;

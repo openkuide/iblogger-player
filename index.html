@@ -856,6 +856,20 @@
       background:var(--bg-elev-2);
       box-shadow:0 8px 24px rgba(0,0,0,0.35);
     }
+    .info-fallback-poster {
+      flex:0 0 auto;
+      width:108px;
+      height:154px;
+      border-radius:12px;
+      background:linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev-3));
+      border:1px solid var(--hairline);
+      box-shadow:0 8px 24px rgba(0,0,0,0.35);
+      display:flex; align-items:center; justify-content:center;
+      box-sizing:border-box;
+    }
+    .info-fallback-poster .fallback-icon {
+      width:32px; height:32px; color:var(--accent); opacity:0.6;
+    }
     .info .info-body { flex:1 1 auto; min-width:0; }
     .info h1 { font-size:22px; margin:0 0 4px; font-weight:700; letter-spacing:-0.02em; line-height:1.25; }
     .info .subtitle { font-size:14px; color:var(--fg-2); margin:0 0 10px; font-family:var(--font); }
@@ -879,7 +893,33 @@
     .info .desc {
       font-family:var(--font);
       font-size:13.5px; line-height:1.65; color:var(--fg-2);
-      margin:0; max-height:6.6em; overflow:hidden;
+      margin:0; max-height:12.5em; overflow-y:auto;
+      display:flex; flex-direction:column; gap:8px;
+      padding-right:4px;
+    }
+    .info .desc::-webkit-scrollbar {
+      width: 4px;
+    }
+    .info .desc::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .info .desc::-webkit-scrollbar-thumb {
+      background: var(--hairline);
+      border-radius: 2px;
+    }
+    .info .desc::-webkit-scrollbar-thumb:hover {
+      background: var(--fg-3);
+    }
+    .info .desc-km {
+      margin: 0;
+      color: var(--fg-2);
+      font-size: 13.5px;
+    }
+    .info .desc-en {
+      margin: 0;
+      color: var(--fg-3);
+      font-size: 12.5px;
+      font-style: italic;
     }
 
     /* ── Episodes ───────────────────────────────────────────────── */
@@ -937,12 +977,25 @@
       transition: transform .18s ease;
     }
     .rel-card:hover { transform:translateY(-3px); }
-    .rel-card:hover .rel-poster { box-shadow:0 10px 28px rgba(0,0,0,0.45); }
-    .rel-poster {
-      width:100%; aspect-ratio:2/3; object-fit:cover;
-      border-radius:12px; background:var(--bg-elev-2);
-      border:1px solid var(--hairline);
+    .rel-card:hover .rel-poster-wrap { box-shadow:0 10px 28px rgba(0,0,0,0.45); }
+    .rel-poster-wrap {
+      position: relative; overflow: hidden; border-radius: 12px; background: var(--bg-elev-2); aspect-ratio: 2/3;
       transition: box-shadow .18s ease;
+    }
+    .rel-poster {
+      width:100%; height:100%; object-fit:cover;
+      border-radius:12px; display: block;
+      border: 1px solid var(--hairline);
+    }
+    .rel-fallback-poster {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev-3));
+      border: 1px solid var(--hairline); border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .rel-fallback-poster .fallback-icon {
+      width: 24px; height: 24px; color: var(--accent); opacity: 0.6;
     }
     .rel-title {
       font-family:var(--font);
@@ -1322,7 +1375,7 @@
         <h1 id="infoTitle"></h1>
         <p class="subtitle" id="infoSubtitle"></p>
         <div class="badges" id="infoBadges"></div>
-        <p class="desc" id="infoDesc"></p>
+        <div class="desc" id="infoDesc"></div>
       </div>
     </div>
 
@@ -1724,8 +1777,41 @@
         // Movie info card.
         const info = document.getElementById("info");
         const poster = document.getElementById("poster");
-        if (movie.poster) { poster.src = movie.poster; poster.alt = t(movie.title); }
-        else { poster.style.display = "none"; }
+        function renderInfoFallback() {
+          const existing = info.querySelector(".info-fallback-poster");
+          if (existing) return;
+          const fb = document.createElement("div");
+          fb.className = "info-fallback-poster";
+          fb.innerHTML = `
+            <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+              <line x1="7" y1="2" x2="7" y2="22"></line>
+              <line x1="17" y1="2" x2="17" y2="22"></line>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <line x1="2" y1="7" x2="7" y2="7"></line>
+              <line x1="2" y1="17" x2="7" y2="17"></line>
+              <line x1="17" y1="17" x2="22" y2="17"></line>
+              <line x1="17" y1="7" x2="22" y2="7"></line>
+            </svg>
+          `;
+          info.insertBefore(fb, info.firstChild);
+        }
+
+        const existingFb = info.querySelector(".info-fallback-poster");
+        if (existingFb) existingFb.remove();
+
+        if (movie.poster) {
+          poster.src = movie.poster;
+          poster.alt = t(movie.title);
+          poster.style.display = "block";
+          poster.onerror = function() {
+            poster.style.display = "none";
+            renderInfoFallback();
+          };
+        } else {
+          poster.style.display = "none";
+          renderInfoFallback();
+        }
         document.getElementById("infoTitle").textContent = t(movie.title);
         const sub = LANG === "km" ? (movie.title.en || "") : (movie.title.km || "");
         document.getElementById("infoSubtitle").textContent = sub;
@@ -1749,7 +1835,32 @@
         }
         if (movie.episodeCount) chip(movie.episodeCount + " ភាគ");
         (movie.genres || []).slice(0, 4).forEach(function (g) { chip(g); });
-        document.getElementById("infoDesc").textContent = t(movie.description);
+        
+        const infoDesc = document.getElementById("infoDesc");
+        infoDesc.textContent = "";
+        let descKm = "";
+        let descEn = "";
+        if (movie.description) {
+          if (typeof movie.description === "object") {
+            descKm = movie.description.km || "";
+            descEn = movie.description.en || "";
+          } else {
+            descKm = movie.description;
+          }
+        }
+        if (descKm) {
+          const pKm = document.createElement("p");
+          pKm.className = "desc-km";
+          pKm.textContent = descKm;
+          infoDesc.appendChild(pKm);
+        }
+        if (descEn && descEn.trim() !== descKm.trim()) {
+          const pEn = document.createElement("p");
+          pEn.className = "desc-en";
+          pEn.textContent = descEn;
+          infoDesc.appendChild(pEn);
+        }
+
         info.style.display = "flex";
 
         // Episode grid.
@@ -1818,15 +1929,48 @@
               const a = document.createElement("a");
               a.className = "rel-card";
               a.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
+              const posterWrap = document.createElement("div");
+              posterWrap.className = "rel-poster-wrap";
+              
               const img = document.createElement("img");
               img.className = "rel-poster";
               img.loading = "lazy";
-              if (m.poster) img.src = m.poster;
               img.alt = t(m.title);
+
+              function renderRelFallback() {
+                posterWrap.classList.add("img-failed");
+                const fb = document.createElement("div");
+                fb.className = "rel-fallback-poster";
+                fb.innerHTML = `
+                  <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                `;
+                posterWrap.appendChild(fb);
+                img.remove();
+              }
+
+              if (m.poster) {
+                img.src = m.poster;
+                img.onerror = function() {
+                  renderRelFallback();
+                };
+                posterWrap.appendChild(img);
+              } else {
+                renderRelFallback();
+              }
+
               const cap = document.createElement("div");
               cap.className = "rel-title";
               cap.textContent = t(m.title);
-              a.appendChild(img);
+              a.appendChild(posterWrap);
               a.appendChild(cap);
               wrap.appendChild(a);
             });

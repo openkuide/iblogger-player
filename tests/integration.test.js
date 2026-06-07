@@ -283,6 +283,24 @@ async function runTests() {
     // Wait for info element to load
     await page.waitForSelector('.info .badge-i.clickable-year');
     
+    // Test bilingual descriptions rendering
+    console.log('[TEST RUNNER] Testing bilingual descriptions on details page...');
+    const descKmExists = await page.evaluate(() => {
+      const p = document.querySelector('#infoDesc .desc-km');
+      return p && p.textContent.includes('Han Tae Sang គឺជា');
+    });
+    const descEnExists = await page.evaluate(() => {
+      const p = document.querySelector('#infoDesc .desc-en');
+      return p && p.textContent.includes('Han Tae Sang is a successful');
+    });
+    
+    if (!descKmExists || !descEnExists) {
+      console.error('[TEST FAILURE] Bilingual descriptions were not rendered or did not have correct classes/content.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Bilingual descriptions rendered successfully.');
+    }
+    
     // Click the year badge
     console.log('[TEST RUNNER] Clicking the clickable year badge...');
     await page.evaluate(() => {

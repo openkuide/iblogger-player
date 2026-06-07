@@ -867,6 +867,15 @@
       font-family:var(--font);
     }
     .info .badge-i.star { color:#ffd60a; }       /* systemYellow */
+    .info .badge-i.clickable-year {
+      transition: all 0.2s ease;
+    }
+    .info .badge-i.clickable-year:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--bg-elev-3);
+      box-shadow: 0 2px 8px rgba(225, 29, 72, 0.15);
+    }
     .info .desc {
       font-family:var(--font);
       font-size:13.5px; line-height:1.65; color:var(--fg-2);
@@ -1107,6 +1116,8 @@
                   <button v-for="y in YEARS" :key="y.value"
                     class="sort-pill" :class="{active:yearFilter===y.value}"
                     @click="yearFilter=y.value">{{ y.label }}</button>
+                  <button v-if="yearFilter && !['2020+', '2010', 'old'].includes(yearFilter)"
+                    class="sort-pill active" @click="yearFilter=''">{{ yearFilter }}</button>
                 </div>
               </div>
               <div class="filter-row">
@@ -1726,9 +1737,16 @@
           s.className = "badge-i" + (cls ? " " + cls : "");
           s.textContent = text;
           badges.appendChild(s);
+          return s;
         }
         if (movie.rating) chip("★ " + movie.rating, "star");
-        if (movie.year) chip(String(movie.year));
+        if (movie.year) {
+          const yb = chip(String(movie.year), "clickable-year");
+          yb.title = "ស្វែងរករឿងឆ្នាំ " + movie.year + " (Find movies from " + movie.year + ")";
+          yb.addEventListener("click", function () {
+            window.location.href = "?year=" + movie.year;
+          });
+        }
         if (movie.episodeCount) chip(movie.episodeCount + " ភាគ");
         (movie.genres || []).slice(0, 4).forEach(function (g) { chip(g); });
         document.getElementById("infoDesc").textContent = t(movie.description);
@@ -1858,12 +1876,12 @@
             const search        = ref("");
             const activeGenres  = ref([]);
             const sort          = ref("title");
-            const yearFilter    = ref("");
+            const yearFilter    = ref(params.get("year") || "");
             const minRating     = ref(0);
             const countryFilter = ref("");
             const page          = ref(1);
             const listView      = ref(false);
-            const showFilters   = ref(false);
+            const showFilters   = ref(!!params.get("year"));
 
             fetch("db/index.json")
               .then(function(r) { if (!r.ok) throw new Error("no index"); return r.json(); })
@@ -1893,9 +1911,17 @@
                   var hay = ((m.title && m.title.km || "") + " " + (m.title && m.title.en || "")).toLowerCase();
                   if (hay.indexOf(q) === -1) return false;
                 }
-                if (yearFilter.value === "2020+" && (m.year || 0) < 2020) return false;
-                if (yearFilter.value === "2010"  && ((m.year || 0) < 2010 || (m.year || 0) >= 2020)) return false;
-                if (yearFilter.value === "old"   && (m.year || 0) >= 2010) return false;
+                if (yearFilter.value) {
+                  if (yearFilter.value === "2020+") {
+                    if ((m.year || 0) < 2020) return false;
+                  } else if (yearFilter.value === "2010") {
+                    if ((m.year || 0) < 2010 || (m.year || 0) >= 2020) return false;
+                  } else if (yearFilter.value === "old") {
+                    if ((m.year || 0) >= 2010) return false;
+                  } else {
+                    if (String(m.year) !== yearFilter.value) return false;
+                  }
+                }
                 if (minRating.value > 0 && (m.rating || 0) < minRating.value) return false;
                 if (countryFilter.value && m.country !== countryFilter.value) return false;
                 return true;

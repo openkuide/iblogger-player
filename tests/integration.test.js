@@ -276,6 +276,38 @@ async function runTests() {
       testFailed = true;
     }
 
+    // Test clickable year badge on details/player page
+    console.log('[TEST RUNNER] Testing clickable year badge on Player details page...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?id=when-a-man-s-in-love`, { waitUntil: 'domcontentloaded' });
+    
+    // Wait for info element to load
+    await page.waitForSelector('.info .badge-i.clickable-year');
+    
+    // Click the year badge
+    console.log('[TEST RUNNER] Clicking the clickable year badge...');
+    await page.evaluate(() => {
+      const badge = document.querySelector('.info .badge-i.clickable-year');
+      if (badge) badge.click();
+    });
+    
+    // Wait for home view to load and filter to render
+    await page.waitForFunction(() => {
+      const el = document.getElementById('homeApp');
+      return el && el.__vue_app__ && document.querySelector('.sort-pill.active');
+    }, { timeout: 5000 });
+
+    const activePillText = await page.evaluate(() => {
+      const activeEl = document.querySelector('.filter-row .sort-pill.active');
+      return activeEl ? activeEl.textContent.trim() : '';
+    });
+    console.log(`[TEST RUNNER] Active year filter after badge click: "${activePillText}"`);
+    if (activePillText !== '2013') {
+      console.error(`[TEST FAILURE] Expected year filter '2013', but found '${activePillText}'.`);
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Clickable year badge and homepage redirect filtering works successfully.');
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;

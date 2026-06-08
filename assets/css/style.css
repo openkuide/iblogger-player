@@ -1630,3 +1630,19 @@ body.dark-theme {
   box-shadow: 0 16px 36px rgba(10, 132, 255, 0.18), 0 0 0 1px rgba(10, 132, 255, 0.25);
 }
 
+/* ── Custom Interactive Cursor Styles ───────────────────────── */
+html, body {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='4' fill='%230a84ff'/><circle cx='12' cy='12' r='8' fill='none' stroke='%230a84ff' stroke-width='1.5' stroke-opacity='0.4'/></svg>") 12 12, auto;
+}
+.light-theme {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='4' fill='%23007aff'/><circle cx='12' cy='12' r='8' fill='none' stroke='%23007aff' stroke-width='1.5' stroke-opacity='0.4'/></svg>") 12 12, auto;
+}
+
+/* Hover Pointer elements */
+a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn, .slide-btn, .slide-dot, .quick-tag, .rel-card {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='%230a84ff' fill-opacity='0.15' stroke='%230a84ff' stroke-width='1.5'/><path d='M9.5 7.5v9l7-4.5-7-4.5z' fill='%230a84ff'/></svg>") 12 12, pointer;
+}
+.light-theme a, .light-theme button, .light-theme .ep-btn, .light-theme .home-card, .light-theme .sort-pill, .light-theme .theme-toggle-btn, .light-theme .lang-toggle-btn, .light-theme .slide-btn, .light-theme .slide-dot, .light-theme .quick-tag, .light-theme .rel-card {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='%23007aff' fill-opacity='0.15' stroke='%23007aff' stroke-width='1.5'/><path d='M9.5 7.5v9l7-4.5-7-4.5z' fill='%23007aff'/></svg>") 12 12, pointer;
+}
+

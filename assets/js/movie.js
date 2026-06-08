@@ -11,6 +11,9 @@ export function startDirectMode(url, ttl) {
   document.getElementById("srcline").textContent = url;
   document.getElementById("source").style.display = "block";
   
+  const backdropElement = document.getElementById("detailBackdrop");
+  if (backdropElement) backdropElement.style.backgroundImage = "none";
+
   const videoEl = document.getElementById("video");
   playSource(url, videoEl);
 }
@@ -68,6 +71,15 @@ function renderFallbackPoster(infoElement) {
 function renderMoviePoster(movie, infoElement, posterElement) {
   removeFallbackPoster(infoElement);
 
+  const backdropElement = document.getElementById("detailBackdrop");
+  if (backdropElement) {
+    if (movie.poster) {
+      backdropElement.style.backgroundImage = `url('${movie.poster}')`;
+    } else {
+      backdropElement.style.backgroundImage = "none";
+    }
+  }
+
   if (movie.poster) {
     posterElement.src = movie.poster;
     posterElement.alt = t(movie.title);
@@ -75,6 +87,7 @@ function renderMoviePoster(movie, infoElement, posterElement) {
     posterElement.onerror = () => {
       posterElement.style.display = "none";
       renderFallbackPoster(infoElement);
+      if (backdropElement) backdropElement.style.backgroundImage = "none";
     };
   } else {
     posterElement.style.display = "none";
@@ -82,10 +95,22 @@ function renderMoviePoster(movie, infoElement, posterElement) {
   }
 }
 
-function createBadgeElement(text, className, parentElement) {
+function createBadgeElement(text, className, parentElement, iconSvg) {
   const badge = document.createElement("span");
   badge.className = "badge-i" + (className ? " " + className : "");
-  badge.textContent = text;
+
+  if (iconSvg) {
+    const iconContainer = document.createElement("span");
+    iconContainer.className = "badge-icon";
+    iconContainer.innerHTML = iconSvg.trim();
+    badge.appendChild(iconContainer);
+  }
+
+  const textNode = document.createElement("span");
+  textNode.className = "badge-text";
+  textNode.textContent = text;
+  badge.appendChild(textNode);
+
   parentElement.appendChild(badge);
   return badge;
 }
@@ -94,11 +119,13 @@ function renderMovieBadges(movie, badgesElement) {
   badgesElement.textContent = "";
 
   if (movie.rating) {
-    createBadgeElement("★ " + movie.rating, "star", badgesElement);
+    const starSvg = `<svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+    createBadgeElement(String(movie.rating), "star", badgesElement, starSvg);
   }
 
   if (movie.year) {
-    const yearBadge = createBadgeElement(String(movie.year), "clickable-year", badgesElement);
+    const calendarSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+    const yearBadge = createBadgeElement(String(movie.year), "clickable-year", badgesElement, calendarSvg);
     yearBadge.title = "ស្វែងរករឿងឆ្នាំ " + movie.year + " (Find movies from " + movie.year + ")";
     yearBadge.addEventListener("click", () => {
       history.pushState(null, "", "?year=" + movie.year);
@@ -107,11 +134,41 @@ function renderMovieBadges(movie, badgesElement) {
   }
 
   if (movie.episodeCount) {
-    createBadgeElement(movie.episodeCount + " ភាគ", "", badgesElement);
+    const playSvg = `<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M8 5v14l11-7z"/></svg>`;
+    createBadgeElement(movie.episodeCount + " ភាគ", "episode-count", badgesElement, playSvg);
+  }
+
+  if (movie.country) {
+    let countryKm = "";
+    if (movie.country === "Hong Kong") countryKm = "ហុងកុង";
+    else if (movie.country === "China") countryKm = "ចិន";
+    else if (movie.country === "Korea") countryKm = "កូរ៉េ";
+    else countryKm = movie.country;
+
+    const countryText = LANG === "km" ? countryKm : movie.country;
+    const globeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+    createBadgeElement(countryText, "country", badgesElement, globeSvg);
   }
 
   (movie.genres || []).slice(0, 4).forEach(genre => {
-    createBadgeElement(genre, "", badgesElement);
+    let genreText = genre;
+    if (LANG === "km") {
+      const genreMap = {
+        "ACTION": "វាយប្រហារ",
+        "COMEDY": "កំប្លែង",
+        "DRAMA": "មនោសញ្ចេតនា",
+        "HORROR": "ភ័យរន្ធត់",
+        "ROMANCE": "ស្នេហា",
+        "THRILLER": "រន្ធត់",
+        "FANTASY": "មហិទ្ធិរិទ្ធ",
+        "DOCUMENTARY": "ឯកសារ",
+        "SCI_FI": "វិទ្យាសាស្ត្រ",
+        "ANIMATION": "គំនូរជីវចល"
+      };
+      genreText = genreMap[genre] || genre;
+    }
+    const tagSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+    createBadgeElement(genreText, "genre", badgesElement, tagSvg);
   });
 }
 

@@ -18,6 +18,44 @@ import { startHomeMode } from './home.js';
   initAdBanner();
   initAdSlider();
 
+  // Initialize manual theme toggling
+  function initTheme() {
+    const btn = document.getElementById("themeToggle");
+    if (!btn) return;
+
+    const sunIcon = btn.querySelector(".sun-icon");
+    const moonIcon = btn.querySelector(".moon-icon");
+
+    let theme = localStorage.getItem("iblogger_theme");
+    if (!theme) {
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+
+    applyTheme(theme);
+
+    btn.addEventListener("click", () => {
+      const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+      const nextTheme = currentTheme === "light" ? "dark" : "light";
+      applyTheme(nextTheme);
+    });
+
+    function applyTheme(t) {
+      if (t === "light") {
+        document.body.classList.remove("dark-theme");
+        document.body.classList.add("light-theme");
+        if (sunIcon) sunIcon.style.display = "none";
+        if (moonIcon) moonIcon.style.display = "block";
+      } else {
+        document.body.classList.remove("light-theme");
+        document.body.classList.add("dark-theme");
+        if (sunIcon) sunIcon.style.display = "block";
+        if (moonIcon) moonIcon.style.display = "none";
+      }
+      localStorage.setItem("iblogger_theme", t);
+    }
+  }
+  initTheme();
+
   function route() {
     const params = new URLSearchParams(location.search);
     const id = params.get("id");

@@ -43,7 +43,7 @@ export function startHomeMode() {
   ];
 
   const params = new URLSearchParams(location.search);
-  const { createApp, ref, computed, watch } = Vue;
+  const { createApp, ref, computed, watch, onMounted, onUnmounted } = Vue;
 
   const app = createApp({
     setup() {
@@ -58,6 +58,57 @@ export function startHomeMode() {
       const page          = ref(1);
       const listView      = ref(false);
       const showFilters   = ref(!!params.get("year"));
+
+      // Carousel, history, and quick tags state
+      const currentSlide     = ref(0);
+      const watchHistory     = ref([]);
+      const currentQuickTag  = ref("");
+
+      const featuredMovies = computed(() => {
+        return all.value
+          .filter(m => m.rating >= 7.8 && m.poster)
+          .slice()
+          .sort((a, b) => (b.year || 0) - (a.year || 0) || (b.rating || 0) - (a.rating || 0))
+          .slice(0, 5);
+      });
+
+      let slideTimer = null;
+      function startSlideTimer() {
+        stopSlideTimer();
+        slideTimer = setInterval(() => {
+          if (featuredMovies.value.length > 0) {
+            currentSlide.value = (currentSlide.value + 1) % featuredMovies.value.length;
+          }
+        }, 6000);
+      }
+      function stopSlideTimer() {
+        if (slideTimer) {
+          clearInterval(slideTimer);
+          slideTimer = null;
+        }
+      }
+      function setSlide(idx) {
+        currentSlide.value = idx;
+        startSlideTimer();
+      }
+
+      function loadWatchHistory() {
+        try {
+          const stored = localStorage.getItem("iblogger_watch_history");
+          if (stored) {
+            watchHistory.value = JSON.parse(stored);
+          }
+        } catch (e) {}
+      }
+
+      onMounted(() => {
+        startSlideTimer();
+        loadWatchHistory();
+      });
+
+      onUnmounted(() => {
+        stopSlideTimer();
+      });
 
       fetch("db/index.json")
         .then(r => {
@@ -185,6 +236,30 @@ export function startHomeMode() {
         minRating.value     = 0;
         countryFilter.value = "";
         sort.value          = "title";
+        currentQuickTag.value = "";
+      }
+
+      function toggleQuickTag(tag) {
+        if (currentQuickTag.value === tag) {
+          currentQuickTag.value = "";
+          clearAll();
+        } else {
+          clearAll();
+          currentQuickTag.value = tag;
+          if (tag === "trending") {
+            sort.value = "rating";
+            minRating.value = 7.5;
+          } else if (tag === "latest") {
+            yearFilter.value = "2020+";
+            sort.value = "year";
+          } else if (tag === "classic") {
+            yearFilter.value = "old";
+            sort.value = "title";
+          } else if (tag === "top") {
+            minRating.value = 8;
+            sort.value = "rating";
+          }
+        }
       }
 
       function gotoPage(p) {
@@ -197,7 +272,9 @@ export function startHomeMode() {
         page, listView, SORTS, YEARS, RATINGS, COUNTRIES,
         allGenres, filtered, pages, pageSlice, pagerItems, hasFilters,
         title, toggleGenre, clearAll, gotoPage,
-        showFilters, activeFilterCount
+        showFilters, activeFilterCount,
+        currentSlide, watchHistory, currentQuickTag, featuredMovies,
+        setSlide, toggleQuickTag
       };
     }
   });

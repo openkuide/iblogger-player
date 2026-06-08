@@ -122,12 +122,31 @@ async function runTests() {
     // Test grid vs list view toggle
     console.log('[TEST RUNNER] Toggling to List View...');
     const listBtn = await page.waitForSelector('.view-toggle button[title="List"]');
-    await listBtn.click();
+    await page.evaluate(() => {
+      const btn = document.querySelector('.view-toggle button[title="List"]');
+      if (btn) btn.click();
+    });
+    
+    // Wait a brief moment for Vue tick
+    await new Promise(r => setTimeout(r, 150));
     
     // Assert .home-grid has class list-mode
-    const isListMode = await page.evaluate(() => {
-      return document.querySelector('.home-grid').classList.contains('list-mode');
+    const gridClasses = await page.evaluate(() => {
+      const grids = document.querySelectorAll('.home-grid');
+      const btn = document.querySelector('.view-toggle button[title="List"]');
+      return {
+        grids: Array.from(grids).map(g => ({
+          html: g.outerHTML.substring(0, 100),
+          classes: Array.from(g.classList)
+        })),
+        button: {
+          classes: Array.from(btn ? btn.classList : [])
+        }
+      };
     });
+    
+    console.log('[DEBUG] grid/button classes:', gridClasses);
+    const isListMode = gridClasses.grids.some(g => g.classes.includes('list-mode'));
     if (!isListMode) {
       console.error('[TEST FAILURE] Grid did not switch to list-mode.');
       testFailed = true;

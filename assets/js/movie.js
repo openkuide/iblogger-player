@@ -157,6 +157,38 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
 
   const buttons = [];
 
+  function saveWatchHistory(movieData, episode) {
+    try {
+      const historyKey = "iblogger_watch_history";
+      let historyList = [];
+      try {
+        const stored = localStorage.getItem(historyKey);
+        if (stored) {
+          historyList = JSON.parse(stored);
+        }
+      } catch (e) {}
+      if (!Array.isArray(historyList)) historyList = [];
+
+      historyList = historyList.filter(item => item.slug !== movieData.slug);
+
+      historyList.unshift({
+        slug: movieData.slug,
+        title: movieData.title,
+        poster: movieData.poster,
+        lastEpisode: episode.ep,
+        timestamp: Date.now()
+      });
+
+      if (historyList.length > 10) {
+        historyList = historyList.slice(0, 10);
+      }
+
+      localStorage.setItem(historyKey, JSON.stringify(historyList));
+    } catch (e) {
+      console.warn("Failed to save watch history:", e);
+    }
+  }
+
   function selectEpisode(idx, pushStateChange) {
     if (idx < 0 || idx >= episodes.length) return;
     
@@ -173,6 +205,8 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
       u.searchParams.set("ep", episodes[idx].ep);
       history.replaceState(null, "", u);
     }
+    
+    saveWatchHistory(movie, episodes[idx]);
     
     setOnEnded(() => selectEpisode(idx + 1, true));
   }

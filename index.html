@@ -37,12 +37,109 @@
         </span>
         <span>iblogger <span class="sub">player</span></span>
       </a>
-      <span class="pill">HLS</span>
+      <div class="header-actions" style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+        <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle light/dark theme" title="Toggle theme">
+          <!-- Sun icon -->
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon icon -->
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <span class="pill">HLS</span>
+      </div>
     </header>
 
     <!-- Home / browse view (shown when no ?id= or ?src=) -->
     <div id="homeView" style="display:none;">
       <div id="homeApp">
+
+        <!-- Featured Movies Hero Carousel -->
+        <div v-if="!loading && featuredMovies.length > 0" class="hero-carousel">
+          <div class="hc-slides">
+            <div v-for="(m, idx) in featuredMovies" :key="m.slug" 
+                 class="hc-slide" :class="{ active: currentSlide === idx }">
+              
+              <!-- Backdrop blurred image of the poster for a premium cinema effect -->
+              <div class="slide-backdrop" :style="{ backgroundImage: 'url(' + m.poster + ')' }"></div>
+              
+              <!-- Slide contents -->
+              <div class="slide-content">
+                <div class="slide-badges">
+                  <span class="slide-badge rating">★ {{ m.rating || 'N/A' }}</span>
+                  <span v-if="m.year" class="slide-badge year">{{ m.year }}</span>
+                  <span v-if="m.episodeCount" class="slide-badge eps">{{ m.episodeCount }} ភាគ</span>
+                  <span class="slide-badge country">{{ m.country === 'Korea' ? 'កូរ៉េ' : (m.country === 'Hong Kong' ? 'ហុងកុង' : (m.country === 'China' ? 'ចិន' : 'ផ្សេងៗ')) }}</span>
+                </div>
+                <h2 class="slide-title-km">{{ m.title.km || m.title.en }}</h2>
+                <h3 v-if="m.title.km && m.title.en" class="slide-title-en">{{ m.title.en }}</h3>
+                <p class="slide-desc" v-if="m.genres && m.genres.length">
+                  ប្រភេទ៖ {{ m.genres.slice(0, 3).join(', ') }}
+                </p>
+                <a :href="'?id=' + encodeURIComponent(m.slug)" class="slide-btn">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  <span>ទស្សនាឥឡូវនេះ (Watch Now)</span>
+                </a>
+              </div>
+              
+              <!-- Left poster display -->
+              <div class="slide-poster-wrap">
+                <img :src="m.poster" class="slide-poster" :alt="title(m)" />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Carousel Navigation Dots -->
+          <div class="hc-dots">
+            <button v-for="(m, idx) in featuredMovies" :key="idx" 
+                    :class="{ active: currentSlide === idx }" 
+                    @click="setSlide(idx)" 
+                    :aria-label="'Go to slide ' + (idx + 1)"></button>
+          </div>
+        </div>
+
+        <!-- Continue Watching (Recently Watched) -->
+        <div v-if="!loading && watchHistory.length > 0" class="history-section">
+          <h3 class="section-title-home">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            បន្តទស្សនា (Continue Watching)
+          </h3>
+          <div class="history-scroll-row">
+            <a v-for="item in watchHistory" :key="item.slug" 
+               class="history-card" 
+               :href="'?id=' + encodeURIComponent(item.slug) + '&ep=' + encodeURIComponent(item.lastEpisode)">
+              <div class="history-poster-wrap">
+                <img :src="item.poster" class="history-poster" :alt="title(item)" />
+                <div class="history-overlay">
+                  <div class="play-btn-circle-sm">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="history-info">
+                <div class="history-title">{{ title(item) }}</div>
+                <div class="history-episode">ភាគ {{ item.lastEpisode }}</div>
+              </div>
+            </a>
+          </div>
+        </div>
 
         <!-- Toolbar: search + toggle filters + view toggle -->
         <div class="home-toolbar">
@@ -66,6 +163,14 @@
               <button :class="{on:listView}"  @click="listView=true"  title="List">&#x2630;</button>
             </div>
           </div>
+        </div>
+
+        <!-- Quick tags -->
+        <div v-if="!loading" class="quick-tags">
+          <button class="quick-tag" :class="{ active: currentQuickTag === 'trending' }" @click="toggleQuickTag('trending')">🔥 ពេញនិយម (Trending)</button>
+          <button class="quick-tag" :class="{ active: currentQuickTag === 'latest' }" @click="toggleQuickTag('latest')">🌟 រឿងថ្មីៗ 2024-2025</button>
+          <button class="quick-tag" :class="{ active: currentQuickTag === 'classic' }" @click="toggleQuickTag('classic')">🎬 រឿងបុរាណ / ក្បាច់គុន</button>
+          <button class="quick-tag" :class="{ active: currentQuickTag === 'top' }" @click="toggleQuickTag('top')">🏆 Rating ខ្ពស់ (★ 8+)</button>
         </div>
 
         <!-- Collapsible Filter Panel -->

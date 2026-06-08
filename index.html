@@ -127,7 +127,16 @@
                class="history-card" 
                :href="'?id=' + encodeURIComponent(item.slug) + '&ep=' + encodeURIComponent(item.lastEpisode)">
               <div class="history-poster-wrap">
-                <img :src="item.poster" class="history-poster" :alt="title(item)" />
+                <!-- Fallback poster if broken or missing -->
+                <div v-if="!item.poster || item.imgFailed" class="history-fallback-poster">
+                  <svg class="fallback-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                  </svg>
+                </div>
+                <img v-else class="history-poster" :src="item.poster" :alt="title(item)" @error="item.imgFailed = true" />
                 <div class="history-overlay">
                   <div class="play-btn-circle-sm">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

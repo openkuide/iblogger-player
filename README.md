@@ -143,7 +143,7 @@ The browser can only play a stream if the **`.m3u8` host sends `Access-Control-A
 
 ## 🙏 Built with
 
-[Video.js](https://videojs.com) · [Inter](https://rsms.me/inter/) + [Battambang](https://fonts.google.com/specimen/Battambang) fonts · GitHub Pages
+[Video.js](https://videojs.com) · [Inter](https://rsms.me/inter/) + [Siemreap](https://fonts.google.com/specimen/Siemreap) fonts · GitHub Pages
 
 <div align="center">
 

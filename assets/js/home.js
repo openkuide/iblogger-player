@@ -65,8 +65,9 @@ export function startHomeMode() {
       const currentQuickTag  = ref("");
 
       const featuredMovies = computed(() => {
+        if (!all.value || !Array.isArray(all.value)) return [];
         return all.value
-          .filter(m => m.rating >= 7.8 && m.poster)
+          .filter(m => m && m.rating >= 7.8 && m.poster)
           .slice()
           .sort((a, b) => (b.year || 0) - (a.year || 0) || (b.rating || 0) - (a.rating || 0))
           .slice(0, 5);
@@ -96,9 +97,16 @@ export function startHomeMode() {
         try {
           const stored = localStorage.getItem("iblogger_watch_history");
           if (stored) {
-            watchHistory.value = JSON.parse(stored);
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              watchHistory.value = parsed;
+              return;
+            }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("Failed to load watch history:", e);
+        }
+        watchHistory.value = [];
       }
 
       onMounted(() => {
@@ -128,24 +136,29 @@ export function startHomeMode() {
       }
 
       const allGenres = computed(() => {
+        if (!all.value || !Array.isArray(all.value)) return [];
         const counts = {};
         all.value.forEach(m => {
-          (m.genres || []).forEach(g => {
-            counts[g] = (counts[g] || 0) + 1;
-          });
+          if (m && m.genres) {
+            (m.genres || []).forEach(g => {
+              counts[g] = (counts[g] || 0) + 1;
+            });
+          }
         });
         return Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
       });
 
       const filtered = computed(() => {
+        if (!all.value || !Array.isArray(all.value)) return [];
         const q = search.value.trim().toLowerCase();
         let list = all.value.filter(m => {
+          if (!m) return false;
           if (activeGenres.value.length > 0) {
             const mg = m.genres || [];
             if (!activeGenres.value.every(g => mg.includes(g))) return false;
           }
           if (q) {
-            const hay = ((m.title && m.title.km || "") + " " + (m.title && m.title.en || "")).toLowerCase();
+            const hay = (((m.title && m.title.km) || "") + " " + ((m.title && m.title.en) || "")).toLowerCase();
             if (hay.indexOf(q) === -1) return false;
           }
           if (yearFilter.value) {

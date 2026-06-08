@@ -202,12 +202,18 @@
             <div class="filter-rows-wrapper">
               <div class="filter-row">
                 <span class="filter-row-label">ឆ្នាំ</span>
-                <div class="scroll-row">
+                <div class="scroll-row" style="display:flex; align-items:center; gap:8px;">
                   <button v-for="y in YEARS" :key="y.value"
                     class="sort-pill" :class="{active:yearFilter===y.value}"
                     @click="yearFilter=y.value">{{ y.label }}</button>
-                  <button v-if="yearFilter && !['2020+', '2010', 'old'].includes(yearFilter)"
-                    class="sort-pill active" @click="yearFilter=''">{{ yearFilter }}</button>
+                  
+                  <!-- Dropdown select for specific years -->
+                  <div class="select-wrapper" :class="{ active: yearFilter && !['', '2020+', '2010', 'old'].includes(yearFilter) }">
+                    <select v-model="yearFilter" class="year-select" :class="{ active: yearFilter && !['', '2020+', '2010', 'old'].includes(yearFilter) }">
+                      <option value="">-- ឆ្នាំជាក់លាក់ (Select Year) --</option>
+                      <option v-for="yr in allYears" :key="yr" :value="String(yr)">{{ yr }}</option>
+                    </select>
+                  </div>
                 </div>
               </div>
               <div class="filter-row">

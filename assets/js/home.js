@@ -148,6 +148,15 @@ export function startHomeMode() {
         return Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
       });
 
+      const allYears = computed(() => {
+        if (!all.value || !Array.isArray(all.value)) return [];
+        const years = new Set();
+        all.value.forEach(m => {
+          if (m && m.year) years.add(m.year);
+        });
+        return Array.from(years).sort((a, b) => b - a);
+      });
+
       const filtered = computed(() => {
         if (!all.value || !Array.isArray(all.value)) return [];
         const q = search.value.trim().toLowerCase();
@@ -283,7 +292,7 @@ export function startHomeMode() {
       return {
         all, loading, search, activeGenres, sort, yearFilter, minRating, countryFilter,
         page, listView, SORTS, YEARS, RATINGS, COUNTRIES,
-        allGenres, filtered, pages, pageSlice, pagerItems, hasFilters,
+        allGenres, allYears, filtered, pages, pageSlice, pagerItems, hasFilters,
         title, toggleGenre, clearAll, gotoPage,
         showFilters, activeFilterCount,
         currentSlide, watchHistory, currentQuickTag, featuredMovies,

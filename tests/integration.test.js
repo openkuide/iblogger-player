@@ -330,12 +330,14 @@ async function runTests() {
     // Wait for home view to load and filter to render
     await page.waitForFunction(() => {
       const el = document.getElementById('homeApp');
-      return el && el.__vue_app__ && document.querySelector('.sort-pill.active');
+      return el && el.__vue_app__ && (document.querySelector('.sort-pill.active') || document.querySelector('.year-select.active'));
     }, { timeout: 5000 });
 
     const activePillText = await page.evaluate(() => {
-      const activeEl = document.querySelector('.filter-row .sort-pill.active');
-      return activeEl ? activeEl.textContent.trim() : '';
+      const activeEl = document.querySelector('.filter-rows-wrapper .filter-row:nth-child(1) .sort-pill.active');
+      if (activeEl) return activeEl.textContent.trim();
+      const activeSelect = document.querySelector('.filter-rows-wrapper .filter-row:nth-child(1) .year-select.active');
+      return activeSelect ? activeSelect.value : '';
     });
     console.log(`[TEST RUNNER] Active year filter after badge click: "${activePillText}"`);
     if (activePillText !== '2013') {

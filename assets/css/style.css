@@ -1693,17 +1693,17 @@ body.dark-theme {
 
 /* ── Custom Interactive Cursor Styles ───────────────────────── */
 html, body {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='4' fill='%230a84ff'/><circle cx='12' cy='12' r='8' fill='none' stroke='%230a84ff' stroke-width='1.5' stroke-opacity='0.4'/></svg>") 12 12, auto;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><linearGradient id='cursorGrad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%237aa8ff'/><stop offset='100%25' stop-color='%23a98bff'/></linearGradient></defs><path d='M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z' fill='url(%23cursorGrad)' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/></svg>") 5 1, auto;
 }
 .light-theme {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='4' fill='%23007aff'/><circle cx='12' cy='12' r='8' fill='none' stroke='%23007aff' stroke-width='1.5' stroke-opacity='0.4'/></svg>") 12 12, auto;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><linearGradient id='cursorGradLight' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23007aff'/><stop offset='100%25' stop-color='%235856d6'/></linearGradient></defs><path d='M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z' fill='url(%23cursorGradLight)' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/></svg>") 5 1, auto;
 }
 
 /* Hover Pointer elements */
 a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn, .slide-btn, .slide-dot, .quick-tag, .rel-card, .year-select, .select-wrapper {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='%230a84ff' fill-opacity='0.15' stroke='%230a84ff' stroke-width='1.5'/><path d='M9.5 7.5v9l7-4.5-7-4.5z' fill='%230a84ff'/></svg>") 12 12, pointer;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><linearGradient id='handGrad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%237aa8ff'/><stop offset='100%25' stop-color='%23a98bff'/></linearGradient></defs><path d='M12 2c-.55 0-1 .45-1 1v8.19l-.72-.72a1.003 1.003 0 0 0-1.42 0c-.39.39-.39 1.02 0 1.41l3.02 3.02c.93.94 2.19 1.46 3.49 1.46H18c2.21 0 4-1.79 4-4V7.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V5.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V3c0-.55-.45-1-1-1z' fill='url(%23handGrad)' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/></svg>") 12 2, pointer;
 }
 .light-theme a, .light-theme button, .light-theme .ep-btn, .light-theme .home-card, .light-theme .sort-pill, .light-theme .theme-toggle-btn, .light-theme .lang-toggle-btn, .light-theme .slide-btn, .light-theme .slide-dot, .light-theme .quick-tag, .light-theme .rel-card, .light-theme .year-select, .light-theme .select-wrapper {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24'><circle cx='12' cy='12' r='11' fill='%23007aff' fill-opacity='0.15' stroke='%23007aff' stroke-width='1.5'/><path d='M9.5 7.5v9l7-4.5-7-4.5z' fill='%23007aff'/></svg>") 12 12, pointer;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><linearGradient id='handGradLight' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23007aff'/><stop offset='100%25' stop-color='%235856d6'/></linearGradient></defs><path d='M12 2c-.55 0-1 .45-1 1v8.19l-.72-.72a1.003 1.003 0 0 0-1.42 0c-.39.39-.39 1.02 0 1.41l3.02 3.02c.93.94 2.19 1.46 3.49 1.46H18c2.21 0 4-1.79 4-4V7.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V5.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V3c0-.55-.45-1-1-1z' fill='url(%23handGradLight)' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/></svg>") 12 2, pointer;
 }
 

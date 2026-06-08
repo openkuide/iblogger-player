@@ -56,6 +56,32 @@ import { startHomeMode } from './home.js';
   }
   initTheme();
 
+  // Initialize bilingual language toggling
+  function initLanguageToggle() {
+    const btn = document.getElementById("langToggle");
+    if (!btn) return;
+
+    const label = btn.querySelector(".lang-label");
+    const params = new URLSearchParams(location.search);
+    const currentLang = (params.get("lang") || "km").toLowerCase() === "en" ? "en" : "km";
+
+    if (label) {
+      label.textContent = currentLang === "km" ? "EN" : "ខ្មែរ";
+    }
+
+    btn.addEventListener("click", () => {
+      const nextLang = currentLang === "km" ? "en" : "km";
+      const u = new URL(location.href);
+      if (nextLang === "en") {
+        u.searchParams.set("lang", "en");
+      } else {
+        u.searchParams.delete("lang");
+      }
+      location.href = u.href;
+    });
+  }
+  initLanguageToggle();
+
   function route() {
     const params = new URLSearchParams(location.search);
     const id = params.get("id");

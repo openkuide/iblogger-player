@@ -81,6 +81,10 @@ import { showToast, LANG } from './utils.js';
       location.href = u.href;
     });
 
+    // Set language classes on body for CSS language block visibility
+    document.body.classList.toggle("lang-en", currentLang === "en");
+    document.body.classList.toggle("lang-km", currentLang === "km");
+
     // Update logo link to preserve lang
     const logoLink = document.querySelector(".logo");
     if (logoLink) {

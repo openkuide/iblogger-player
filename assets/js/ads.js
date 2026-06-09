@@ -18,7 +18,7 @@ export function initAdBanner() {
     adText.offsetHeight; // force reflow
     adText.style.animation = "";
     adText.textContent = ADS[i];
-  }, 4000);
+  }, 12000);
 
   adClose.addEventListener("click", () => {
     clearInterval(timer);

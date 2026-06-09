@@ -265,6 +265,27 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
     
     saveWatchHistory(movie, episodes[idx]);
     
+    // Update Up Next episode panel
+    const nextEpPanel = document.getElementById("nextEpPanel");
+    if (nextEpPanel) {
+      if (idx < episodes.length - 1) {
+        nextEpPanel.style.display = "flex";
+        const nextEp = episodes[idx + 1];
+        const nextTitleEl = document.getElementById("nextEpTitle");
+        if (nextTitleEl) {
+          nextTitleEl.textContent = t(nextEp.title) || `Episode ${nextEp.ep}`;
+        }
+        const nextEpBtn = document.getElementById("nextEpBtn");
+        if (nextEpBtn) {
+          const newBtn = nextEpBtn.cloneNode(true);
+          nextEpBtn.parentNode.replaceChild(newBtn, nextEpBtn);
+          newBtn.addEventListener("click", () => selectEpisode(idx + 1, true));
+        }
+      } else {
+        nextEpPanel.style.display = "none";
+      }
+    }
+    
     setOnEnded(() => selectEpisode(idx + 1, true));
   }
 

@@ -400,11 +400,24 @@
       <div class="tv-strip">
         <span class="tv-led"></span>
         <span class="tv-power">Power</span>
+        <button id="theaterToggle" class="tv-theater-btn" title="Theater Mode (Dim Page)">Theater</button>
         <span class="tv-grille"><span></span><span></span><span></span><span></span></span>
         <span class="tv-brand">IBLOGGER&nbsp;TV</span>
       </div>
     </div>
     <div class="tv-feet"><span></span><span></span></div>
+
+    <!-- Up Next Episode Panel -->
+    <div id="nextEpPanel" class="next-ep-panel" style="display:none;">
+      <div class="next-ep-label">បន្ទាប់ (Up Next)</div>
+      <div class="next-ep-content">
+        <span class="next-ep-title" id="nextEpTitle"></span>
+        <button class="next-ep-btn" id="nextEpBtn">
+          <span>មើលភាគបន្ត (Play Next)</span>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M5 4l12 8-12 8V4zM19 4h2v16h-2V4z"/></svg>
+        </button>
+      </div>
+    </div>
 
     <div class="ad" id="ad">
       <span class="ad-tag">Ad</span>
@@ -420,6 +433,12 @@
         <p class="subtitle" id="infoSubtitle"></p>
         <div class="badges" id="infoBadges"></div>
         <div class="desc" id="infoDesc"></div>
+        <div class="info-actions">
+          <button id="copyLinkBtn" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copyLinkText">ចម្លងតំណភ្ជាប់ (Copy Link)</span>
+          </button>
+        </div>
       </div>
     </div>
 

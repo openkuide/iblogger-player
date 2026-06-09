@@ -3,6 +3,7 @@
 import { initAdBanner, initAdSlider } from './ads.js';
 import { startDirectMode, startMovieMode } from './movie.js';
 import { startHomeMode } from './home.js';
+import { showToast, LANG } from './utils.js';
 
 (function () {
   const playerView = document.getElementById("playerView");
@@ -82,6 +83,33 @@ import { startHomeMode } from './home.js';
   }
   initLanguageToggle();
 
+  // Initialize Theater Mode toggling
+  function initTheaterMode() {
+    const btn = document.getElementById("theaterToggle");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      document.body.classList.toggle("theater-mode");
+      btn.classList.toggle("active");
+    });
+  }
+  initTheaterMode();
+
+  // Initialize Copy Link action
+  function initCopyLink() {
+    const btn = document.getElementById("copyLinkBtn");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      navigator.clipboard.writeText(location.href)
+        .then(() => {
+          showToast(LANG === "km" ? "ចម្លងតំណភ្ជាប់ជោគជ័យ! (Link copied!)" : "Link copied to clipboard!");
+        })
+        .catch(() => {
+          showToast("Failed to copy link");
+        });
+    });
+  }
+  initCopyLink();
+
   function route() {
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
@@ -92,6 +120,11 @@ import { startHomeMode } from './home.js';
     views.forEach(v => {
       if (v) v.style.display = "none";
     });
+
+    // Clear theater mode on route switch
+    document.body.classList.remove("theater-mode");
+    const theaterBtn = document.getElementById("theaterToggle");
+    if (theaterBtn) theaterBtn.classList.remove("active");
 
     // Pause player if we are leaving the player view
     if (window.player && typeof window.player.pause === 'function') {

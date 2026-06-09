@@ -42,3 +42,22 @@ export function showStatusText(prefix, codeText, suffix, isErr) {
     if (suffix) statusEl.appendChild(document.createTextNode(suffix));
   }
 }
+
+export function showToast(message) {
+  let toast = document.getElementById("toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.className = "toast-notification";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.remove("show");
+  void toast.offsetWidth;
+  toast.classList.add("show");
+  
+  if (toast.timeoutId) clearTimeout(toast.timeoutId);
+  toast.timeoutId = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
+}

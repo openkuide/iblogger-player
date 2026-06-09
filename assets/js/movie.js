@@ -1,6 +1,6 @@
 // Direct/Movie routing details and rendering
 
-import { LANG, t, showLoader, showStatusText } from './utils.js';
+import { LANG, t, showLoader, showStatusText, toKhmerNumerals } from './utils.js';
 import { playSource, setOnEnded } from './player.js';
 
 export function startDirectMode(url, ttl) {
@@ -135,7 +135,7 @@ function renderMovieBadges(movie, badgesElement) {
 
   if (movie.episodeCount) {
     const playSvg = `<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M8 5v14l11-7z"/></svg>`;
-    createBadgeElement(movie.episodeCount + " ភាគ", "episode-count", badgesElement, playSvg);
+    createBadgeElement((LANG === "km" ? toKhmerNumerals(movie.episodeCount) : movie.episodeCount) + " ភាគ", "episode-count", badgesElement, playSvg);
   }
 
   if (movie.country) {
@@ -203,7 +203,7 @@ function renderMovieDescription(movie, descriptionElement) {
 
 function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridElement) {
   const episodes = movie.episodes || [];
-  document.getElementById("epCount").textContent = "(" + episodes.length + ")";
+  document.getElementById("epCount").textContent = "(" + (LANG === "km" ? toKhmerNumerals(episodes.length) : episodes.length) + ")";
   episodesGridElement.textContent = "";
 
   let startIdx = 0;
@@ -273,7 +273,7 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
         const nextEp = episodes[idx + 1];
         const nextTitleEl = document.getElementById("nextEpTitle");
         if (nextTitleEl) {
-          nextTitleEl.textContent = t(nextEp.title) || `Episode ${nextEp.ep}`;
+          nextTitleEl.textContent = t(nextEp.title) || (LANG === "km" ? `ភាគ ${toKhmerNumerals(nextEp.ep)}` : `Episode ${nextEp.ep}`);
         }
         const nextEpBtn = document.getElementById("nextEpBtn");
         if (nextEpBtn) {
@@ -292,7 +292,7 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
   episodes.forEach((ep, i) => {
     const btn = document.createElement("button");
     btn.className = "ep-btn" + (ep.final ? " final" : "");
-    btn.textContent = ep.ep || (i + 1);
+    btn.textContent = LANG === "km" ? toKhmerNumerals(ep.ep || (i + 1)) : (ep.ep || (i + 1));
     btn.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
     btn.addEventListener("click", () => selectEpisode(i, true));
     episodesGridElement.appendChild(btn);

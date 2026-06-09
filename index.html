@@ -85,7 +85,7 @@
                 <div class="slide-badges">
                   <span class="slide-badge rating">★ {{ m.rating || 'N/A' }}</span>
                   <span v-if="m.year" class="slide-badge year">{{ m.year }}</span>
-                  <span v-if="m.episodeCount" class="slide-badge eps">{{ m.episodeCount }} ភាគ</span>
+                  <span v-if="m.episodeCount" class="slide-badge eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
                   <span class="slide-badge country">{{ m.country === 'Korea' ? 'កូរ៉េ' : (m.country === 'Hong Kong' ? 'ហុងកុង' : (m.country === 'China' ? 'ចិន' : 'ផ្សេងៗ')) }}</span>
                 </div>
                 <h2 class="slide-title-km">{{ m.title.km || m.title.en }}</h2>
@@ -151,7 +151,7 @@
               </div>
               <div class="history-info">
                 <div class="history-title">{{ title(item) }}</div>
-                <div class="history-episode">ភាគ {{ item.lastEpisode }}</div>
+                <div class="history-episode">{{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(item.lastEpisode) : 'Episode ' + item.lastEpisode }}</div>
               </div>
             </a>
           </div>
@@ -257,7 +257,7 @@
 
         <!-- Count line -->
         <div class="home-count" v-if="!loading">
-          {{ filtered.length }} រឿង<template v-if="pages>1"> · ទំព័រ {{ page }}/{{ pages }}</template>
+          {{ lang === 'km' ? toKhmerNumerals(filtered.length) : filtered.length }} រឿង<template v-if="pages>1"> · {{ lang === 'km' ? 'ទំព័រ ' + toKhmerNumerals(page) + '/' + toKhmerNumerals(pages) : 'Page ' + page + '/' + pages }}</template>
         </div>
 
         <!-- Skeleton while loading -->
@@ -303,7 +303,7 @@
                   </div>
                 </div>
                 <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
-                <span v-if="m.episodeCount" class="hc-eps">{{ m.episodeCount }} ភាគ</span>
+                <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
               </div>
               <div class="hc-title">{{ title(m) }}</div>
               <div v-if="m.year" class="hc-year">{{ m.year }}</div>
@@ -341,7 +341,7 @@
                 <div class="hc-meta">
                   <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
                   <span v-if="m.year"         class="hc-year">{{ m.year }}</span>
-                  <span v-if="m.episodeCount" class="hc-eps">{{ m.episodeCount }} ភាគ</span>
+                  <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
                 </div>
               </div>
             </template>

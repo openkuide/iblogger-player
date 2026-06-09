@@ -166,14 +166,14 @@ async function runTests() {
     const pageButtons = await page.$$('.pager button');
     for (const btn of pageButtons) {
       const text = await page.evaluate(el => el.textContent.trim(), btn);
-      if (text === '2') {
+      if (text === '2' || text === '២') {
         page2Btn = btn;
         break;
       }
     }
 
     if (page2Btn) {
-      await page2Btn.click();
+      await page.evaluate(el => el.click(), page2Btn);
       await new Promise(r => setTimeout(r, 500)); // wait for page load
 
       const firstTitlePage2 = await page.evaluate(() => {
@@ -192,13 +192,13 @@ async function runTests() {
       let page1Btn;
       for (const btn of pageButtons) {
         const text = await page.evaluate(el => el.textContent.trim(), btn);
-        if (text === '1') {
+        if (text === '1' || text === '១') {
           page1Btn = btn;
           break;
         }
       }
       if (page1Btn) {
-        await page1Btn.click();
+        await page.evaluate(el => el.click(), page1Btn);
         await new Promise(r => setTimeout(r, 500));
       }
     } else {
@@ -209,7 +209,7 @@ async function runTests() {
     // Open the filters panel
     console.log('[TEST RUNNER] Opening filters drawer...');
     const filterToggleBtn = await page.waitForSelector('.filter-toggle');
-    await filterToggleBtn.click();
+    await page.evaluate(el => el.click(), filterToggleBtn);
     await new Promise(r => setTimeout(r, 500)); // wait for panel animation
 
     // Test filtering by year (click "2020+")
@@ -225,7 +225,7 @@ async function runTests() {
     }
 
     if (yearBtn) {
-      await yearBtn.click();
+      await page.evaluate(el => el.click(), yearBtn);
       // Wait for Vue reactivity to process
       await new Promise(r => setTimeout(r, 500));
 
@@ -257,7 +257,7 @@ async function runTests() {
     }
 
     if (countryBtn) {
-      await countryBtn.click();
+      await page.evaluate(el => el.click(), countryBtn);
       await new Promise(r => setTimeout(r, 500)); // wait for reactivity
 
       const hkCount = await page.evaluate(() => {

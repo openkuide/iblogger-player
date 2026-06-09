@@ -1,6 +1,6 @@
 // Catalog / Home Vue 3 application
 
-import { LANG } from './utils.js';
+import { LANG, toKhmerNumerals } from './utils.js';
 
 let homeApp = null;
 
@@ -218,15 +218,15 @@ export function startHomeMode() {
         }
 
         if (start > 1) {
-          range.push({ value: 1, label: "1" });
+          range.push({ value: 1, label: LANG_HOME === "km" ? toKhmerNumerals(1) : "1" });
           if (start > 2) range.push({ value: null, label: "..." });
         }
         for (let i = start; i <= end; i++) {
-          range.push({ value: i, label: String(i) });
+          range.push({ value: i, label: LANG_HOME === "km" ? toKhmerNumerals(i) : String(i) });
         }
         if (end < pages.value) {
           if (end < pages.value - 1) range.push({ value: null, label: "..." });
-          range.push({ value: pages.value, label: String(pages.value) });
+          range.push({ value: pages.value, label: LANG_HOME === "km" ? toKhmerNumerals(pages.value) : String(pages.value) });
         }
         return range;
       });
@@ -296,7 +296,8 @@ export function startHomeMode() {
         title, toggleGenre, clearAll, gotoPage,
         showFilters, activeFilterCount,
         currentSlide, watchHistory, currentQuickTag, featuredMovies,
-        setSlide, toggleQuickTag
+        setSlide, toggleQuickTag,
+        toKhmerNumerals, lang: LANG_HOME
       };
     }
   });

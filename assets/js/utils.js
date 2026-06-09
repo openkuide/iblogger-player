@@ -61,3 +61,9 @@ export function showToast(message) {
     toast.classList.remove("show");
   }, 2500);
 }
+
+export function toKhmerNumerals(num) {
+  if (num == null) return "";
+  const khmerDigits = ["០", "១", "២", "៣", "៤", "៥", "៦", "៧", "៨", "៩"];
+  return String(num).replace(/[0-9]/g, (w) => khmerDigits[+w]);
+}

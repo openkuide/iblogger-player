@@ -80,6 +80,34 @@ import { showToast, LANG } from './utils.js';
       }
       location.href = u.href;
     });
+
+    // Update logo link to preserve lang
+    const logoLink = document.querySelector(".logo");
+    if (logoLink) {
+      logoLink.href = currentLang === "en" ? "./?lang=en" : "./";
+    }
+
+    // Translate footer content dynamically
+    const footer = document.querySelector("footer");
+    if (footer) {
+      if (currentLang === "km") {
+        footer.innerHTML = `
+          បង្កើតឡើងដោយ <a href="https://videojs.com" target="_blank" rel="noopener">Video.js</a> ·
+          <a href="?page=about" id="aboutLink">អំពីយើង</a> ·
+          <a href="?page=contact" id="contactLink">ទាក់ទងមកយើង</a> ·
+          <a href="?page=terms" id="termsLink">លក្ខខណ្ឌប្រើប្រាស់</a> ·
+          <a href="?page=legal" id="legalLink">ឯកជនភាព និង DMCA</a>
+        `;
+      } else {
+        footer.innerHTML = `
+          Built with <a href="https://videojs.com" target="_blank" rel="noopener">Video.js</a> ·
+          <a href="?page=about" id="aboutLink">About Us</a> ·
+          <a href="?page=contact" id="contactLink">Contact Us</a> ·
+          <a href="?page=terms" id="termsLink">Terms of Service</a> ·
+          <a href="?page=legal" id="legalLink">Privacy & DMCA</a>
+        `;
+      }
+    }
   }
   initLanguageToggle();
 
@@ -137,17 +165,33 @@ import { showToast, LANG } from './utils.js';
 
     // Route based on URL parameters
     if (pageParam === "legal") {
-      if (legalView) legalView.style.display = "block";
-      document.title = "iblogger player · Privacy & DMCA";
+      if (legalView) {
+        legalView.style.display = "block";
+        const title = legalView.querySelector("h1");
+        if (title) title.textContent = LANG === "km" ? "គោលការណ៍ឯកជនភាព និង ការបដិសេធ DMCA" : "Privacy Policy & DMCA Disclaimer";
+      }
+      document.title = LANG === "km" ? "iblogger player · ឯកជនភាព និង DMCA" : "iblogger player · Privacy & DMCA";
     } else if (pageParam === "about") {
-      if (aboutView) aboutView.style.display = "block";
-      document.title = "iblogger player · About Us";
+      if (aboutView) {
+        aboutView.style.display = "block";
+        const title = aboutView.querySelector("h1");
+        if (title) title.textContent = LANG === "km" ? "អំពីយើង" : "About Us";
+      }
+      document.title = LANG === "km" ? "iblogger player · អំពីយើង" : "iblogger player · About Us";
     } else if (pageParam === "contact") {
-      if (contactView) contactView.style.display = "block";
-      document.title = "iblogger player · Contact Us";
+      if (contactView) {
+        contactView.style.display = "block";
+        const title = contactView.querySelector("h1");
+        if (title) title.textContent = LANG === "km" ? "ទាក់ទងមកយើង" : "Contact Us";
+      }
+      document.title = LANG === "km" ? "iblogger player · ទាក់ទងមកយើង" : "iblogger player · Contact Us";
     } else if (pageParam === "terms") {
-      if (termsView) termsView.style.display = "block";
-      document.title = "iblogger player · Terms of Service";
+      if (termsView) {
+        termsView.style.display = "block";
+        const title = termsView.querySelector("h1");
+        if (title) title.textContent = LANG === "km" ? "លក្ខខណ្ឌប្រើប្រាស់" : "Terms of Service";
+      }
+      document.title = LANG === "km" ? "iblogger player · លក្ខខណ្ឌប្រើប្រាស់" : "iblogger player · Terms of Service";
     } else if (id) {
       if (playerView) playerView.style.display = "block";
       startMovieMode(id, params.get("ep"));
@@ -180,6 +224,16 @@ import { showToast, LANG } from './utils.js';
       e.preventDefault();
       
       const url = new URL(anchor.href, location.href);
+      
+      // Preserve language state in search parameters
+      const params = new URLSearchParams(location.search);
+      const lang = params.get("lang");
+      if (lang) {
+        url.searchParams.set("lang", lang);
+      } else {
+        url.searchParams.delete("lang");
+      }
+
       if (url.search !== location.search || url.pathname !== location.pathname) {
         history.pushState(null, "", url.href);
         route();

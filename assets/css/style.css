@@ -837,6 +837,7 @@ video { width:100%; height:100%; display:block; background:#000; }
   position: static; display: inline-block; font-size: 11px;
   background: var(--bg-elev-2); border: 1px solid var(--hairline);
   padding: 2px 7px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  color: var(--fg-2);
 }
 .home-grid.list-mode .hc-rating  { color: #ffd60a; }
 

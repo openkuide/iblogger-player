@@ -1897,3 +1897,69 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><defs><linearGradient id='handGradLight' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23ff007f'/><stop offset='50%25' stop-color='%237b2cbf'/><stop offset='100%25' stop-color='%2300f2fe'/></linearGradient></defs><path d='M12 2c-.55 0-1 .45-1 1v8.19l-.72-.72a1.003 1.003 0 0 0-1.42 0c-.39.39-.39 1.02 0 1.41l3.02 3.02c.93.94 2.19 1.46 3.49 1.46H18c2.21 0 4-1.79 4-4V7.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V5.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V11h-1V3c0-.55-.45-1-1-1z' fill='url(%23handGradLight)' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/></svg>") 12 2, pointer;
 }
 
+/* ── Seek Overlay Visual Indicator ─────────────────────────── */
+.vjs-seek-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transition: opacity 0.25s cubic-bezier(0.19, 1, 0.22, 1), transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.vjs-seek-overlay.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.vjs-seek-overlay svg {
+  width: 28px;
+  height: 28px;
+  fill: #fff;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.vjs-seek-overlay.seek-left.show svg {
+  animation: seek-left-bounce 0.4s ease-out;
+}
+.vjs-seek-overlay.seek-right.show svg {
+  animation: seek-right-bounce 0.4s ease-out;
+}
+
+@keyframes seek-left-bounce {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-8px) scaleX(1.1); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes seek-right-bounce {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(8px) scaleX(1.1); }
+  100% { transform: translateX(0); }
+}
+
+.vjs-seek-overlay span {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+  font-family: var(--font);
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+

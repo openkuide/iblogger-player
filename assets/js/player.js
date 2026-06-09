@@ -173,3 +173,81 @@ export function playSource(url, videoEl) {
 export function setOnEnded(cb) {
   onEndedCallback = cb;
 }
+
+function showSeekOverlay(isLeft, seconds) {
+  if (!window.player) return;
+  const playerEl = window.player.el();
+  if (!playerEl) return;
+
+  let overlay = playerEl.querySelector(".vjs-seek-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.className = "vjs-seek-overlay";
+    playerEl.appendChild(overlay);
+  }
+
+  // Reset classes and set correct seeking class
+  overlay.className = "vjs-seek-overlay";
+  overlay.classList.add(isLeft ? "seek-left" : "seek-right");
+
+  // SVG for left/right chevrons
+  const leftSvg = `<svg viewBox="0 0 24 24"><path d="M11.5 12l8.5-8v16L11.5 12zm-9 0L11 4v16L2.5 12z"/></svg>`;
+  const rightSvg = `<svg viewBox="0 0 24 24"><path d="M12.5 12L4 4v16l8.5-8zm9 0L13 4v16l8.5-8z"/></svg>`;
+
+  overlay.innerHTML = `
+    ${isLeft ? leftSvg : rightSvg}
+    <span>${isLeft ? "-" : "+"}${seconds}s</span>
+  `;
+
+  // Trigger animation reflow
+  overlay.classList.remove("show");
+  void overlay.offsetWidth;
+  overlay.classList.add("show");
+
+  // Clear existing timeout
+  if (overlay.timeoutId) {
+    clearTimeout(overlay.timeoutId);
+  }
+
+  overlay.timeoutId = setTimeout(() => {
+    overlay.classList.remove("show");
+  }, 600);
+}
+
+// Global hotkey handler for seeking
+document.addEventListener("keydown", (e) => {
+  if (!window.player) return;
+
+  const playerView = document.getElementById("playerView");
+  if (!playerView || playerView.style.display === "none") return;
+
+  // Ignore seeking when typing in form controls
+  const active = document.activeElement;
+  if (active && (
+    active.tagName === "INPUT" ||
+    active.tagName === "TEXTAREA" ||
+    active.tagName === "SELECT" ||
+    active.isContentEditable
+  )) {
+    return;
+  }
+
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    e.preventDefault();
+    const isLeft = e.key === "ArrowLeft";
+    const seekStep = 10;
+    const currentTime = window.player.currentTime();
+    
+    let newTime;
+    if (isLeft) {
+      newTime = Math.max(0, currentTime - seekStep);
+    } else {
+      const duration = window.player.duration();
+      newTime = Math.min(duration || Infinity, currentTime + seekStep);
+    }
+    
+    window.player.currentTime(newTime);
+    showSeekOverlay(isLeft, seekStep);
+  }
+});
+

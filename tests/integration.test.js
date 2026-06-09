@@ -320,6 +320,21 @@ async function runTests() {
       console.log('[TEST SUCCESS] Bilingual descriptions rendered successfully.');
     }
     
+    // Test keyboard seeking (Left/Right arrow keys)
+    console.log('[TEST RUNNER] Testing player keyboard seeking...');
+    await page.keyboard.press('ArrowRight');
+    await new Promise(r => setTimeout(r, 200));
+    const seekOverlayExists = await page.evaluate(() => {
+      const overlay = document.querySelector('.vjs-seek-overlay');
+      return overlay !== null && overlay.classList.contains('show') && overlay.classList.contains('seek-right');
+    });
+    if (!seekOverlayExists) {
+      console.error('[TEST FAILURE] Seek overlay was not shown/created on ArrowRight keypress.');
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Keyboard seeking (ArrowRight) triggers seek overlay successfully.');
+    }
+    
     // Click the year badge
     console.log('[TEST RUNNER] Clicking the clickable year badge...');
     await page.evaluate(() => {

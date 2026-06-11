@@ -42,6 +42,9 @@
         <span>iblogger <span class="sub">player</span></span>
       </a>
       <div class="header-actions" style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+        <a href="?mode=shorts" class="pill" id="shortsToggle" style="text-decoration:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;margin-top:-2px;"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 8l6 4-6 4V8z" fill="currentColor"/></svg>Shorts
+        </a>
         <button id="langToggle" class="lang-toggle-btn" aria-label="Switch language" title="Switch language">
           <span class="lang-label">EN</span>
         </button>
@@ -625,6 +628,12 @@
       <a href="?page=terms" id="termsLink">Terms of Service</a> ·
       <a href="?page=legal" id="legalLink">Privacy & DMCA</a>
     </footer>
+  </div>
+
+  <!-- Shorts view (Full screen overlay) -->
+  <div id="shortsView" class="shorts-overlay" style="display:none;">
+    <a href="./" id="closeShortsBtn" class="shorts-close" aria-label="Close Shorts">✕</a>
+    <div id="shortsContainer" class="shorts-container"></div>
   </div>
 
   <!-- Floating rotating ad slider (built by JS, textContent only) -->

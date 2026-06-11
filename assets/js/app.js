@@ -3,17 +3,19 @@
 import { initAdBanner, initAdSlider } from './ads.js';
 import { startDirectMode, startMovieMode } from './movie.js';
 import { startHomeMode } from './home.js';
+import { startShortsMode } from './shorts.js';
 import { showToast, LANG } from './utils.js';
 
 (function () {
   const playerView = document.getElementById("playerView");
   const homeView = document.getElementById("homeView");
+  const shortsView = document.getElementById("shortsView");
   const legalView = document.getElementById("legalView");
   const aboutView = document.getElementById("aboutView");
   const contactView = document.getElementById("contactView");
   const termsView = document.getElementById("termsView");
 
-  const views = [playerView, homeView, legalView, aboutView, contactView, termsView];
+  const views = [playerView, homeView, shortsView, legalView, aboutView, contactView, termsView];
 
   // Initialize ads
   initAdBanner();
@@ -147,6 +149,7 @@ import { showToast, LANG } from './utils.js';
     const id = params.get("id");
     const src = params.get("src");
     const pageParam = params.get("page");
+    const modeParam = params.get("mode");
 
     // Hide all views first
     views.forEach(v => {
@@ -202,6 +205,9 @@ import { showToast, LANG } from './utils.js';
     } else if (src) {
       if (playerView) playerView.style.display = "block";
       startDirectMode(src, params.get("title"));
+    } else if (modeParam === "shorts") {
+      if (shortsView) shortsView.style.display = "block";
+      startShortsMode();
     } else {
       if (homeView) homeView.style.display = "block";
       startHomeMode();

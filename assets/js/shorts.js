@@ -106,6 +106,17 @@ function generateShortHtml(movie, title) {
     ${generateActionsContainerHtml(movie)}
     <div class="video-container" style="position:absolute; inset:0; z-index:-1;"></div>
     ${generatePlayOverlayHtml()}
+    ${generateProgressBarHtml()}
+  `;
+}
+
+function generateProgressBarHtml() {
+  return `
+    <div class="short-progress-container">
+      <div class="short-progress-bar">
+        <div class="short-progress-filled"></div>
+      </div>
+    </div>
   `;
 }
 
@@ -386,6 +397,8 @@ function createVideoJsInstance(videoElement, url) {
 
 function setupPlayerEventHandlers(player, wrapper) {
   const posterImg = wrapper.querySelector('img');
+  const progressContainer = wrapper.querySelector('.short-progress-container');
+  const progressFilled = wrapper.querySelector('.short-progress-filled');
 
   player.on('playing', () => {
     if (posterImg) posterImg.style.opacity = '0';
@@ -395,6 +408,24 @@ function setupPlayerEventHandlers(player, wrapper) {
   player.on('pause', () => {
     togglePlayOverlayVisibility(wrapper, true);
   });
+
+  player.on('timeupdate', () => {
+    const duration = player.duration();
+    if (!duration) return;
+    const percent = (player.currentTime() / duration) * 100;
+    if (progressFilled) progressFilled.style.width = `${percent}%`;
+  });
+
+  if (progressContainer) {
+    progressContainer.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent triggering the play/pause overlay
+      const duration = player.duration();
+      if (!duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      player.currentTime(pos * duration);
+    });
+  }
 }
 
 function togglePlayOverlayVisibility(wrapper, isVisible) {

@@ -2075,43 +2075,98 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
   height: 100%;
   object-fit: cover; /* crop to fill vertical screen */
 }
-.short-overlay {
+.short-gradient-bottom {
   position: absolute;
-  bottom: 40px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
+  z-index: 1002;
+}
+
+/* ── Info Stack (Bottom Left) ── */
+.short-info-container {
+  position: absolute;
+  bottom: 20px;
   left: 16px;
-  right: 64px;
-  color: #fff;
+  right: 80px; /* leave room for actions */
   z-index: 1005;
+  color: #fff;
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.short-author {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 .short-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 400;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.4;
 }
 .short-tags {
   font-size: 13px;
-  opacity: 0.8;
+  font-weight: 600;
+  color: var(--accent, #0a84ff);
 }
-.short-actions {
+.short-audio-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 4px;
+}
+.short-audio-icon {
+  animation: pulse-music 2s infinite;
+}
+.short-audio-marquee {
+  white-space: nowrap;
+  font-size: 13px;
+  animation: audio-scroll 6s linear infinite;
+}
+
+@keyframes pulse-music {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+@keyframes audio-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Actions Stack (Bottom Right) ── */
+.short-actions-container {
   position: absolute;
-  bottom: 40px;
-  right: 16px;
+  bottom: 20px;
+  right: 12px;
   z-index: 1005;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 18px;
+}
+.short-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 .short-action-btn {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: none;
@@ -2120,6 +2175,7 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
   place-items: center;
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
+  padding: 0;
 }
 .short-action-btn:hover {
   background: rgba(255, 255, 255, 0.2);
@@ -2129,4 +2185,35 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
 }
 .short-action-btn.active svg {
   fill: #ff453a;
+}
+.short-action-label {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* ── Audio Disc Spinning ── */
+.short-audio-disc {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #222;
+  border: 8px solid #111;
+  display: grid;
+  place-items: center;
+  animation: spin-disc 4s linear infinite;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  margin-top: 10px;
+}
+.short-audio-disc img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+@keyframes spin-disc {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

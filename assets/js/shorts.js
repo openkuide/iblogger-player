@@ -117,8 +117,12 @@ async function playVideoInWrapper(wrapper, slug) {
       const res = await fetch(`db/${slug}.json`);
       if (!res.ok) return;
       const data = await res.json();
-      const firstEp = data.episodes[0];
-      if (!firstEp || !firstEp.url) return;
+      
+      // Pick a random episode from the movie's episodes list
+      const episodes = data.episodes || [];
+      if (episodes.length === 0) return;
+      const randomEp = episodes[Math.floor(Math.random() * episodes.length)];
+      if (!randomEp || !randomEp.url) return;
       
       const videoEl = document.createElement('video');
       videoEl.className = 'video-js vjs-default-skin';
@@ -134,7 +138,7 @@ async function playVideoInWrapper(wrapper, slug) {
         preload: 'auto',
         fluid: false,
         fill: true,
-        sources: [{ src: firstEp.url, type: 'application/x-mpegURL' }]
+        sources: [{ src: randomEp.url, type: 'application/x-mpegURL' }]
       });
       
       players.set(slug, player);

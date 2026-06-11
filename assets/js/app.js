@@ -229,8 +229,9 @@ import { showToast, LANG } from './utils.js';
     const isLocal = href.startsWith("?") || href.startsWith("./") || href.startsWith("index.html");
     const isExternal = anchor.getAttribute("target") === "_blank";
     const isLogo = anchor.classList.contains("logo");
+    const isShortsClose = anchor.id === "closeShortsBtn";
 
-    if (isLocal && !isExternal && !isLogo) {
+    if (isLocal && !isExternal && !isLogo && !isShortsClose) {
       e.preventDefault();
       
       const url = new URL(anchor.href, location.href);

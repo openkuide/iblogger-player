@@ -3,6 +3,7 @@
 import { hideLoader, showLoader, showStatus } from './utils.js';
 
 let onEndedCallback = null;
+let onProgressCallback = null;
 
 // Register custom Quality menu component in Video.js
 const MenuButton = videojs.getComponent('MenuButton');
@@ -127,6 +128,9 @@ function initializeVideoPlayer(videoEl) {
   player.on("ended", () => {
     if (onEndedCallback) onEndedCallback();
   });
+  player.on("timeupdate", () => {
+    if (onProgressCallback) onProgressCallback(player.currentTime(), player.duration());
+  });
   player.on("error", () => {
     showStatus("⚠️ Could not load this stream.<br>This is usually a " +
       "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
@@ -172,6 +176,17 @@ export function playSource(url, videoEl) {
 
 export function setOnEnded(cb) {
   onEndedCallback = cb;
+}
+
+export function setOnProgress(cb) {
+  onProgressCallback = cb;
+}
+
+export function seekWhenReady(seconds) {
+  if (!window.player) return;
+  window.player.one("loadedmetadata", () => {
+    window.player.currentTime(seconds);
+  });
 }
 
 function showSeekOverlay(isLeft, seconds) {

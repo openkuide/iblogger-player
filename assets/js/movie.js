@@ -1,7 +1,18 @@
 // Direct/Movie routing details and rendering
 
-import { LANG, t, showLoader, showStatusText, toKhmerNumerals } from './utils.js';
-import { playSource, setOnEnded } from './player.js';
+import { LANG, t, showLoader, showStatusText, showToast, toKhmerNumerals, formatPlaybackTime } from './utils.js';
+import { playSource, setOnEnded, setOnProgress, seekWhenReady } from './player.js';
+import {
+  recordEpisodeSelection,
+  saveEpisodeProgress,
+  markEpisodeWatched,
+  getResumePosition,
+  getWatchedEpisodes,
+  getLastWatchedEpisode
+} from './watch-progress.js';
+
+const EPISODES_PER_RANGE = 25;
+const PROGRESS_SAVE_INTERVAL_SECONDS = 5;
 
 export function startDirectMode(url, ttl) {
   const hintEl = document.getElementById("hint");
@@ -201,106 +212,203 @@ function renderMovieDescription(movie, descriptionElement) {
   }
 }
 
-function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridElement) {
-  const episodes = movie.episodes || [];
-  document.getElementById("epCount").textContent = "(" + (LANG === "km" ? toKhmerNumerals(episodes.length) : episodes.length) + ")";
-  episodesGridElement.textContent = "";
-
-  let startIdx = 0;
-  if (epParam != null) {
-    const byLabel = episodes.findIndex(e => String(e.ep) === String(epParam));
-    startIdx = byLabel >= 0 ? byLabel : Math.max(0, Math.min(episodes.length - 1, (parseInt(epParam, 10) || 1) - 1));
-  }
-
-  const buttons = [];
-
-  function saveWatchHistory(movieData, episode) {
+function saveWatchHistory(movieData, episode) {
+  try {
+    const historyKey = "iblogger_watch_history";
+    let historyList = [];
     try {
-      const historyKey = "iblogger_watch_history";
-      let historyList = [];
-      try {
-        const stored = localStorage.getItem(historyKey);
-        if (stored) {
-          historyList = JSON.parse(stored);
-        }
-      } catch (e) {}
-      if (!Array.isArray(historyList)) historyList = [];
-
-      historyList = historyList.filter(item => item.slug !== movieData.slug);
-
-      historyList.unshift({
-        slug: movieData.slug,
-        title: movieData.title,
-        poster: movieData.poster,
-        lastEpisode: episode.ep,
-        timestamp: Date.now()
-      });
-
-      if (historyList.length > 10) {
-        historyList = historyList.slice(0, 10);
+      const stored = localStorage.getItem(historyKey);
+      if (stored) {
+        historyList = JSON.parse(stored);
       }
+    } catch (e) {}
+    if (!Array.isArray(historyList)) historyList = [];
 
-      localStorage.setItem(historyKey, JSON.stringify(historyList));
-    } catch (e) {
-      console.warn("Failed to save watch history:", e);
+    historyList = historyList.filter(item => item.slug !== movieData.slug);
+
+    historyList.unshift({
+      slug: movieData.slug,
+      title: movieData.title,
+      poster: movieData.poster,
+      lastEpisode: episode.ep,
+      timestamp: Date.now()
+    });
+
+    if (historyList.length > 10) {
+      historyList = historyList.slice(0, 10);
     }
+
+    localStorage.setItem(historyKey, JSON.stringify(historyList));
+  } catch (e) {
+    console.warn("Failed to save watch history:", e);
   }
+}
 
-  function selectEpisode(idx, pushStateChange) {
-    if (idx < 0 || idx >= episodes.length) return;
-    
-    buttons.forEach((btn, i) => btn.classList.toggle("active", i === idx));
-    buttons[idx].scrollIntoView({ block: "nearest", behavior: "smooth" });
-    
-    const videoEl = document.getElementById("video");
-    playSource(episodes[idx].url, videoEl);
-    
-    document.title = t(episodes[idx].title) + " · " + t(movie.title);
-    
-    if (pushStateChange) {
-      const u = new URL(location.href);
-      u.searchParams.set("ep", episodes[idx].ep);
-      history.replaceState(null, "", u);
-    }
-    
-    saveWatchHistory(movie, episodes[idx]);
-    
-    // Update Up Next episode panel
-    const nextEpPanel = document.getElementById("nextEpPanel");
-    if (nextEpPanel) {
-      if (idx < episodes.length - 1) {
-        nextEpPanel.style.display = "flex";
-        const nextEp = episodes[idx + 1];
-        const nextTitleEl = document.getElementById("nextEpTitle");
-        if (nextTitleEl) {
-          nextTitleEl.textContent = t(nextEp.title) || (LANG === "km" ? `ភាគ ${toKhmerNumerals(nextEp.ep)}` : `Episode ${nextEp.ep}`);
-        }
-        const nextEpBtn = document.getElementById("nextEpBtn");
-        if (nextEpBtn) {
-          const newBtn = nextEpBtn.cloneNode(true);
-          nextEpBtn.parentNode.replaceChild(newBtn, nextEpBtn);
-          newBtn.addEventListener("click", () => selectEpisode(idx + 1, true));
-        }
-      } else {
-        nextEpPanel.style.display = "none";
-      }
-    }
-    
-    setOnEnded(() => selectEpisode(idx + 1, true));
-  }
+function renderEpisodeCount(count) {
+  const countText = LANG === "km" ? toKhmerNumerals(count) : count;
+  document.getElementById("epCount").textContent = "(" + countText + ")";
+}
 
-  episodes.forEach((ep, i) => {
+function resolveStartIndex(movie, episodes, epParam) {
+  const requested = epParam != null ? epParam : getLastWatchedEpisode(movie.slug);
+  if (requested == null) return 0;
+  const byLabel = episodes.findIndex(e => String(e.ep) === String(requested));
+  if (byLabel >= 0) return byLabel;
+  return Math.max(0, Math.min(episodes.length - 1, (parseInt(requested, 10) || 1) - 1));
+}
+
+function createEpisodeButtons(episodes, episodesGridElement, onSelect) {
+  return episodes.map((ep, i) => {
     const btn = document.createElement("button");
     btn.className = "ep-btn" + (ep.final ? " final" : "");
     btn.textContent = LANG === "km" ? toKhmerNumerals(ep.ep || (i + 1)) : (ep.ep || (i + 1));
     btn.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
-    btn.addEventListener("click", () => selectEpisode(i, true));
+    btn.addEventListener("click", () => onSelect(i));
     episodesGridElement.appendChild(btn);
-    buttons.push(btn);
+    return btn;
   });
+}
+
+function markButtonWatched(button) {
+  button.classList.add("watched");
+}
+
+function applyWatchedMarkers(slug, episodes, buttons) {
+  const watched = getWatchedEpisodes(slug);
+  episodes.forEach((ep, i) => {
+    if (watched.has(String(ep.ep))) markButtonWatched(buttons[i]);
+  });
+}
+
+function createRangeTabButton(range, totalEpisodes, onClick) {
+  const start = range * EPISODES_PER_RANGE + 1;
+  const end = Math.min((range + 1) * EPISODES_PER_RANGE, totalEpisodes);
+  const label = LANG === "km"
+    ? toKhmerNumerals(start) + "–" + toKhmerNumerals(end)
+    : start + "–" + end;
+
+  const tab = document.createElement("button");
+  tab.className = "ep-range-tab";
+  tab.textContent = label;
+  tab.addEventListener("click", onClick);
+  return tab;
+}
+
+function setupRangeTabs(episodes, buttons, episodesWrapElement, episodesGridElement) {
+  const existing = document.getElementById("episodeRangeTabs");
+  if (existing) existing.remove();
+  if (episodes.length <= EPISODES_PER_RANGE) return null;
+
+  const tabsEl = document.createElement("div");
+  tabsEl.id = "episodeRangeTabs";
+  tabsEl.className = "ep-range-tabs";
+
+  const rangeCount = Math.ceil(episodes.length / EPISODES_PER_RANGE);
+  const tabButtons = [];
+  for (let range = 0; range < rangeCount; range++) {
+    const tab = createRangeTabButton(range, episodes.length, () => showRange(range));
+    tabButtons.push(tab);
+    tabsEl.appendChild(tab);
+  }
+  episodesWrapElement.insertBefore(tabsEl, episodesGridElement);
+
+  function showRange(range) {
+    tabButtons.forEach((tab, r) => tab.classList.toggle("active", r === range));
+    buttons.forEach((btn, i) => {
+      btn.style.display = Math.floor(i / EPISODES_PER_RANGE) === range ? "" : "none";
+    });
+  }
+
+  return { reveal: idx => showRange(Math.floor(idx / EPISODES_PER_RANGE)) };
+}
+
+function updateEpisodeUrlParam(ep) {
+  const u = new URL(location.href);
+  u.searchParams.set("ep", ep);
+  history.replaceState(null, "", u);
+}
+
+function resumeIfSaved(slug, ep) {
+  const resumeAt = getResumePosition(slug, ep);
+  if (!resumeAt) return;
+  seekWhenReady(resumeAt);
+  const prefix = LANG === "km" ? "បន្តចាក់ពី " : "Resuming from ";
+  showToast(prefix + formatPlaybackTime(resumeAt));
+}
+
+function playEpisode(movie, episode) {
+  const videoEl = document.getElementById("video");
+  playSource(episode.url, videoEl);
+  resumeIfSaved(movie.slug, episode.ep);
+}
+
+let lastSavedSecond = -Infinity;
+
+function trackEpisodeProgress(movie, episode, onBecameWatched) {
+  lastSavedSecond = -Infinity;
+  setOnProgress((seconds, duration) => {
+    if (Math.abs(seconds - lastSavedSecond) < PROGRESS_SAVE_INTERVAL_SECONDS) return;
+    lastSavedSecond = seconds;
+    if (saveEpisodeProgress(movie.slug, episode.ep, seconds, duration)) {
+      onBecameWatched();
+    }
+  });
+}
+
+function updateUpNextPanel(episodes, idx, selectEpisode) {
+  const nextEpPanel = document.getElementById("nextEpPanel");
+  if (!nextEpPanel) return;
+  if (idx >= episodes.length - 1) {
+    nextEpPanel.style.display = "none";
+    return;
+  }
+
+  nextEpPanel.style.display = "flex";
+  const nextEp = episodes[idx + 1];
+  const nextTitleEl = document.getElementById("nextEpTitle");
+  if (nextTitleEl) {
+    nextTitleEl.textContent = t(nextEp.title) || (LANG === "km" ? `ភាគ ${toKhmerNumerals(nextEp.ep)}` : `Episode ${nextEp.ep}`);
+  }
+  const nextEpBtn = document.getElementById("nextEpBtn");
+  if (nextEpBtn) {
+    const newBtn = nextEpBtn.cloneNode(true);
+    nextEpBtn.parentNode.replaceChild(newBtn, nextEpBtn);
+    newBtn.addEventListener("click", () => selectEpisode(idx + 1, true));
+  }
+}
+
+function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridElement) {
+  const episodes = movie.episodes || [];
+  renderEpisodeCount(episodes.length);
+  episodesGridElement.textContent = "";
+
+  const buttons = createEpisodeButtons(episodes, episodesGridElement, idx => selectEpisode(idx, true));
+  const rangeTabs = setupRangeTabs(episodes, buttons, episodesWrapElement, episodesGridElement);
+  applyWatchedMarkers(movie.slug, episodes, buttons);
+
+  function selectEpisode(idx, pushStateChange) {
+    if (idx < 0 || idx >= episodes.length) return;
+    buttons.forEach((btn, i) => btn.classList.toggle("active", i === idx));
+    buttons[idx].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    if (rangeTabs) rangeTabs.reveal(idx);
+
+    playEpisode(movie, episodes[idx]);
+    document.title = t(episodes[idx].title) + " · " + t(movie.title);
+    if (pushStateChange) updateEpisodeUrlParam(episodes[idx].ep);
+
+    saveWatchHistory(movie, episodes[idx]);
+    recordEpisodeSelection(movie.slug, episodes[idx].ep);
+    trackEpisodeProgress(movie, episodes[idx], () => markButtonWatched(buttons[idx]));
+    updateUpNextPanel(episodes, idx, selectEpisode);
+    setOnEnded(() => {
+      markEpisodeWatched(movie.slug, episodes[idx].ep);
+      markButtonWatched(buttons[idx]);
+      selectEpisode(idx + 1, true);
+    });
+  }
 
   episodesWrapElement.style.display = "block";
-  selectEpisode(startIdx, false);
+  selectEpisode(resolveStartIndex(movie, episodes, epParam), false);
 }
 
 function renderMovie(movie, epParam) {

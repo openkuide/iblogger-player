@@ -482,6 +482,66 @@ async function runTests() {
       console.log('[TEST SUCCESS] Sound toggle unmutes video, syncs all labels, and persists preference.');
     }
 
+    // Test movie page: episode range tabs, watched markers, continue-watching
+    console.log('[TEST RUNNER] Testing movie page watch progress (demi-gods-and-semi-devils, 50 eps)...');
+    await page.evaluate(() => {
+      localStorage.setItem('iblogger_watch_progress', JSON.stringify({
+        'demi-gods-and-semi-devils': {
+          positions: { '3': 600 },
+          watched: ['1', '2'],
+          lastEp: '3',
+          updatedAt: 1
+        }
+      }));
+    });
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?id=demi-gods-and-semi-devils`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#episodes .ep-btn', { timeout: 10000 });
+
+    const progressUi = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('#episodes .ep-btn'));
+      const tabs = Array.from(document.querySelectorAll('.ep-range-tab'));
+      const toast = document.getElementById('toast');
+      return {
+        buttonCount: buttons.length,
+        tabCount: tabs.length,
+        visibleCount: buttons.filter(b => b.style.display !== 'none').length,
+        watchedCount: buttons.filter(b => b.classList.contains('watched')).length,
+        activeIndex: buttons.findIndex(b => b.classList.contains('active')),
+        activeTabIndex: tabs.findIndex(tb => tb.classList.contains('active')),
+        toastText: toast ? toast.textContent : ''
+      };
+    });
+
+    const progressOk =
+      progressUi.buttonCount === 50 &&
+      progressUi.tabCount === 2 &&
+      progressUi.visibleCount === 25 &&
+      progressUi.watchedCount === 2 &&
+      progressUi.activeIndex === 2 &&   // lastEp '3' resumes without ?ep= param
+      progressUi.activeTabIndex === 0 &&
+      progressUi.toastText.includes('បន្តចាក់ពី 10:00'); // 600s resume toast
+
+    if (!progressOk) {
+      console.error('[TEST FAILURE] Watch progress UI incorrect:', progressUi);
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Range tabs, watched markers, continue-watching, and resume toast verified.');
+    }
+
+    // Switching range tab shows the second chunk of episodes
+    await page.evaluate(() => document.querySelectorAll('.ep-range-tab')[1].click());
+    const secondRange = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('#episodes .ep-btn'));
+      const visible = buttons.filter(b => b.style.display !== 'none');
+      return { visibleCount: visible.length, firstVisibleIndex: buttons.indexOf(visible[0]) };
+    });
+    if (secondRange.visibleCount !== 25 || secondRange.firstVisibleIndex !== 25) {
+      console.error('[TEST FAILURE] Range tab switch incorrect:', secondRange);
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Range tab switching filters the episode grid correctly.');
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;

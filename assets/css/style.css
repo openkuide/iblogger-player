@@ -2114,10 +2114,36 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
   overflow: hidden;
   line-height: 1.4;
 }
+a.short-title {
+  color: #fff;
+  text-decoration: none;
+  pointer-events: auto; /* parent .short-info-container disables pointer events */
+}
 .short-tags {
   font-size: 13px;
   font-weight: 600;
   color: var(--accent, #0a84ff);
+}
+.short-watch-btn {
+  pointer-events: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--accent, #0a84ff);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(10, 132, 255, 0.4);
+  transition: transform 0.2s, filter 0.2s;
+}
+.short-watch-btn:hover {
+  transform: scale(1.04);
+  filter: brightness(1.1);
 }
 .short-audio-track {
   display: flex;

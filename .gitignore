@@ -1,6 +1,7 @@
 # Claude Code / local tooling — never publish to GitHub Pages
 .claude/
 .remember/
+CLAUDE.md
 
 # Source data export (input to build-db.py); db/ is the published output
 movies-export-*.json

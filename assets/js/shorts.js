@@ -1,9 +1,17 @@
 import { LANG, showToast } from './utils.js';
 
+const SOUND_ON_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+const SOUND_OFF_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+
+const AUTOPLAY_VISIBILITY_THRESHOLD = 0.6;
+const RANDOM_DISCOVERY_WEIGHT = 2;
+
 const players = new Map();
 let shortsDb = [];
 let observer = null;
 let prefs = JSON.parse(localStorage.getItem('shorts_prefs') || '{}');
+let soundOn = localStorage.getItem('shorts_sound') === 'on';
+let soundHintShown = false;
 
 function savePrefs() {
   localStorage.setItem('shorts_prefs', JSON.stringify(prefs));
@@ -20,7 +28,7 @@ function boostGenres(genres) {
 function scoreMovie(movie) {
   if (!movie.genres) return 0;
   const baseScore = movie.genres.reduce((sum, g) => sum + (prefs[g] || 0), 0);
-  const randomFactor = Math.random() * 2;
+  const randomFactor = Math.random() * RANDOM_DISCOVERY_WEIGHT;
   return baseScore + randomFactor;
 }
 
@@ -75,7 +83,7 @@ function renderFeed(container) {
 function createIntersectionObserver(container) {
   return new IntersectionObserver(handleIntersect, {
     root: container,
-    threshold: 0.6
+    threshold: AUTOPLAY_VISIBILITY_THRESHOLD
   });
 }
 
@@ -101,13 +109,25 @@ function generateShortHtml(movie, title) {
   `;
 }
 
+function getWatchLabel() {
+  return LANG === 'km' ? 'មើលរឿងពេញ' : 'Watch Full Movie';
+}
+
+function getMoviePageLink(movie) {
+  return `?id=${movie.slug}`;
+}
+
 function generateInfoContainerHtml(movie, title) {
   const genres = (movie.genres || []).join(' · ');
   return `
     <div class="short-info-container">
       <div class="short-author">@iblogger</div>
-      <div class="short-title">${title}</div>
+      <a class="short-title watch-link" href="${getMoviePageLink(movie)}">${title}</a>
       <div class="short-tags">${genres}</div>
+      <a class="short-watch-btn watch-link" href="${getMoviePageLink(movie)}">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        ${getWatchLabel()}
+      </a>
       <div class="short-audio-track">
         <svg class="short-audio-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
         <div style="overflow:hidden; flex:1;">
@@ -144,9 +164,28 @@ function generateActionsContainerHtml(movie) {
         </button>
         <span class="short-action-label">Share</span>
       </div>
+      ${generateSoundActionHtml()}
       <div class="short-audio-disc">
         <img src="${movie.poster}" alt="audio" />
       </div>
+    </div>
+  `;
+}
+
+function getSoundUi() {
+  return soundOn
+    ? { icon: SOUND_ON_ICON, label: 'Sound', toggleAction: 'Mute' }
+    : { icon: SOUND_OFF_ICON, label: 'Muted', toggleAction: 'Unmute' };
+}
+
+function generateSoundActionHtml() {
+  const ui = getSoundUi();
+  return `
+    <div class="short-action-item">
+      <button class="short-action-btn sound-btn" aria-label="${ui.toggleAction}">
+        ${ui.icon}
+      </button>
+      <span class="short-action-label sound-label">${ui.label}</span>
     </div>
   `;
 }
@@ -164,7 +203,38 @@ function generatePlayOverlayHtml() {
 function setupActionListeners(wrapper, movie) {
   setupLikeButton(wrapper, movie);
   setupShareButton(wrapper, movie);
+  setupSoundButton(wrapper);
+  setupWatchLinks(wrapper, movie);
   setupPlayOverlay(wrapper, movie);
+}
+
+function setupSoundButton(wrapper) {
+  const soundBtn = wrapper.querySelector('.sound-btn');
+  soundBtn.addEventListener('click', () => setSoundEnabled(!soundOn));
+}
+
+function setSoundEnabled(isOn) {
+  soundOn = isOn;
+  localStorage.setItem('shorts_sound', isOn ? 'on' : 'off');
+  players.forEach(player => player.muted(!isOn));
+  refreshSoundButtons();
+}
+
+function refreshSoundButtons() {
+  const ui = getSoundUi();
+  document.querySelectorAll('.sound-btn').forEach(btn => {
+    btn.innerHTML = ui.icon;
+    btn.setAttribute('aria-label', ui.toggleAction);
+  });
+  document.querySelectorAll('.sound-label').forEach(label => {
+    label.textContent = ui.label;
+  });
+}
+
+function setupWatchLinks(wrapper, movie) {
+  wrapper.querySelectorAll('.watch-link').forEach(link => {
+    link.addEventListener('click', () => boostGenres(movie.genres));
+  });
 }
 
 function setupLikeButton(wrapper, movie) {
@@ -180,7 +250,7 @@ function setupLikeButton(wrapper, movie) {
 function setupShareButton(wrapper, movie) {
   const shareBtn = wrapper.querySelector('.share-btn');
   shareBtn.addEventListener('click', () => {
-    const link = `${location.origin}${location.pathname}?id=${movie.slug}`;
+    const link = `${location.origin}${location.pathname}${getMoviePageLink(movie)}`;
     navigator.clipboard.writeText(link)
       .then(() => showToast(LANG === 'km' ? 'ចម្លងតំណភ្ជាប់ជោគជ័យ!' : 'Link copied!'))
       .catch(() => showToast('Failed to copy link'));
@@ -201,11 +271,11 @@ function setupPlayOverlay(wrapper, movie) {
   });
 }
 
-async function handleIntersect(entries) {
+function handleIntersect(entries) {
   for (const entry of entries) {
     const wrapper = entry.target;
     const slug = wrapper.dataset.slug;
-    
+
     if (entry.isIntersecting) {
       handleVideoInView(wrapper, slug);
     } else {
@@ -222,39 +292,60 @@ function handleVideoInView(wrapper, slug) {
 
 async function playVideoInWrapper(wrapper, slug) {
   let player = players.get(slug);
-  const vContainer = wrapper.querySelector('.video-container');
-  const img = wrapper.querySelector('img');
-  
   if (!player) {
-    player = await initializePlayer(slug, vContainer, img, wrapper);
-  } 
-  
-  if (player) {
-    vContainer.style.zIndex = '1';
-    try {
-      player.play();
-    } catch (e) {
-      console.warn('Playback interrupted:', e);
-    }
+    player = await initializePlayer(slug, wrapper);
+  }
+  if (!player) return;
+
+  bringVideoToFront(wrapper);
+  playWithSoundPreference(player);
+}
+
+function bringVideoToFront(wrapper) {
+  wrapper.querySelector('.video-container').style.zIndex = '1';
+}
+
+function playWithSoundPreference(player) {
+  player.muted(!soundOn);
+  if (!soundOn) showSoundHintOnce();
+  const playback = player.play();
+  if (playback && playback.catch) {
+    playback.catch(() => fallBackToMutedPlayback(player));
   }
 }
 
-async function initializePlayer(slug, container, img, wrapper) {
+// Browsers reject unmuted autoplay before the first user gesture; recover by
+// playing muted. Only the in-memory flag flips — the stored preference stays,
+// so the next visit tries sound again.
+function fallBackToMutedPlayback(player) {
+  soundOn = false;
+  player.muted(true);
+  refreshSoundButtons();
+  showSoundHintOnce();
+  const retry = player.play();
+  if (retry && retry.catch) {
+    retry.catch(e => console.warn('Playback blocked:', e));
+  }
+}
+
+function showSoundHintOnce() {
+  if (soundHintShown) return;
+  soundHintShown = true;
+  showToast(LANG === 'km' ? 'ចុច 🔊 ដើម្បីបើកសំឡេង' : 'Tap 🔊 for sound');
+}
+
+async function initializePlayer(slug, wrapper) {
   try {
     const movieData = await fetchMovieDetails(slug);
     const randomEp = getRandomEpisode(movieData.episodes);
-    
     if (!randomEp || !randomEp.url) return null;
-    
+
     const videoEl = createVideoElement();
-    container.appendChild(videoEl);
-    container.style.zIndex = '1';
-    
+    wrapper.querySelector('.video-container').appendChild(videoEl);
+
     const player = createVideoJsInstance(videoEl, randomEp.url);
     players.set(slug, player);
-    
-    setupPlayerEventHandlers(player, img, wrapper);
-    
+    setupPlayerEventHandlers(player, wrapper);
     return player;
   } catch (e) {
     console.error('Failed to initialize short video:', e);
@@ -293,12 +384,14 @@ function createVideoJsInstance(videoElement, url) {
   });
 }
 
-function setupPlayerEventHandlers(player, img, wrapper) {
+function setupPlayerEventHandlers(player, wrapper) {
+  const posterImg = wrapper.querySelector('img');
+
   player.on('playing', () => {
-    if (img) img.style.opacity = '0';
+    if (posterImg) posterImg.style.opacity = '0';
     togglePlayOverlayVisibility(wrapper, false);
   });
-  
+
   player.on('pause', () => {
     togglePlayOverlayVisibility(wrapper, true);
   });

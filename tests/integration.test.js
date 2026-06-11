@@ -428,6 +428,60 @@ async function runTests() {
       console.log('[TEST SUCCESS] Terms of Service page successfully verified.');
     }
 
+    // Test Shorts mode: watch link + sound toggle
+    console.log('[TEST RUNNER] Testing Shorts mode (watch link & sound toggle)...');
+    await page.goto(`http://127.0.0.1:${PORT}/index.html?mode=shorts`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.short-video-wrapper', { timeout: 10000 });
+
+    const shortsUi = await page.evaluate(() => {
+      const wrapper = document.querySelector('.short-video-wrapper');
+      const watchBtn = wrapper.querySelector('a.short-watch-btn');
+      const titleLink = wrapper.querySelector('a.short-title');
+      const soundBtn = wrapper.querySelector('.sound-btn');
+      return {
+        slug: wrapper.dataset.slug,
+        watchHref: watchBtn ? watchBtn.getAttribute('href') : null,
+        titleHref: titleLink ? titleLink.getAttribute('href') : null,
+        hasSoundBtn: !!soundBtn
+      };
+    });
+
+    const expectedHref = `?id=${shortsUi.slug}`;
+    if (!shortsUi.hasSoundBtn || shortsUi.watchHref !== expectedHref || shortsUi.titleHref !== expectedHref) {
+      console.error('[TEST FAILURE] Shorts UI incomplete:', shortsUi);
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Shorts watch links and sound button rendered successfully.');
+    }
+
+    console.log('[TEST RUNNER] Waiting for first short video to initialize...');
+    await page.waitForSelector('.short-video-wrapper video', { timeout: 15000 });
+
+    const mutedBefore = await page.evaluate(() => {
+      return document.querySelector('.short-video-wrapper video').muted;
+    });
+
+    console.log('[TEST RUNNER] Clicking sound toggle...');
+    await page.evaluate(() => document.querySelector('.sound-btn').click());
+    await new Promise(r => setTimeout(r, 200));
+
+    const soundState = await page.evaluate(() => {
+      const labels = Array.from(document.querySelectorAll('.sound-label')).slice(0, 3);
+      return {
+        muted: document.querySelector('.short-video-wrapper video').muted,
+        labels: labels.map(l => l.textContent.trim()),
+        stored: localStorage.getItem('shorts_sound')
+      };
+    });
+
+    const labelsSynced = soundState.labels.every(l => l === 'Sound');
+    if (mutedBefore !== true || soundState.muted !== false || !labelsSynced || soundState.stored !== 'on') {
+      console.error('[TEST FAILURE] Sound toggle did not unmute globally:', { mutedBefore, ...soundState });
+      testFailed = true;
+    } else {
+      console.log('[TEST SUCCESS] Sound toggle unmutes video, syncs all labels, and persists preference.');
+    }
+
   } catch (error) {
     console.error('[TEST ERROR] Test execution threw an error:', error);
     testFailed = true;

@@ -13,6 +13,29 @@ let prefs = JSON.parse(localStorage.getItem('shorts_prefs') || '{}');
 let soundOn = localStorage.getItem('shorts_sound') === 'on';
 let soundHintShown = false;
 
+function getStringHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function getMockStats(slug) {
+  const hash = getStringHash(slug);
+  return {
+    likes: (hash % 50000) + 1000,
+    comments: (hash % 1000) + 20,
+    shares: (hash % 500) + 10
+  };
+}
+
+function formatStat(num) {
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
 function savePrefs() {
   localStorage.setItem('shorts_prefs', JSON.stringify(prefs));
 }
@@ -40,6 +63,16 @@ export async function startShortsMode() {
   const container = document.getElementById('shortsContainer');
   showLoadingState(container);
   
+  document.addEventListener('keydown', handleShortsKeydown);
+  
+  const closeCommentBtn = document.getElementById('closeShortsCommentBtn');
+  if (closeCommentBtn && !closeCommentBtn.dataset.bound) {
+    closeCommentBtn.dataset.bound = 'true';
+    closeCommentBtn.addEventListener('click', () => {
+      document.getElementById('shortsCommentPanel').classList.remove('active');
+    });
+  }
+  
   try {
     const data = await fetchDatabase();
     shortsDb = sortMoviesByPreference(data);
@@ -51,7 +84,24 @@ export async function startShortsMode() {
 }
 
 function showLoadingState(container) {
-  container.innerHTML = '<div style="color:#fff; text-align:center; margin-top: 50vh;">Loading Shorts...</div>';
+  container.innerHTML = `
+    <div class="short-video-wrapper" style="background:#111;">
+      <div class="short-skeleton-loader" style="width:100%; height:100%; position:relative;">
+        <div class="skeleton-shimmer"></div>
+        <div style="position:absolute; bottom:20px; left:16px; width:70%;">
+          <div style="height:14px; width:40%; background:rgba(255,255,255,0.1); border-radius:4px; margin-bottom:8px;"></div>
+          <div style="height:14px; width:80%; background:rgba(255,255,255,0.1); border-radius:4px; margin-bottom:8px;"></div>
+          <div style="height:14px; width:60%; background:rgba(255,255,255,0.1); border-radius:4px;"></div>
+        </div>
+        <div style="position:absolute; bottom:20px; right:12px; display:flex; flex-direction:column; gap:18px;">
+          <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.1);"></div>
+          <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.1);"></div>
+          <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.1);"></div>
+          <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.1);"></div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function showErrorState(container) {
@@ -150,6 +200,7 @@ function generateInfoContainerHtml(movie, title) {
 }
 
 function generateActionsContainerHtml(movie) {
+  const stats = getMockStats(movie.slug);
   return `
     <div class="short-actions-container">
       <div class="short-action-item">
@@ -161,22 +212,22 @@ function generateActionsContainerHtml(movie) {
         <button class="short-action-btn like-btn" aria-label="Like" title="Like">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
-        <span class="short-action-label">Like</span>
+        <span class="short-action-label like-count">${formatStat(stats.likes)}</span>
       </div>
       <div class="short-action-item">
         <button class="short-action-btn comment-btn" aria-label="Comment">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
         </button>
-        <span class="short-action-label">12</span>
+        <span class="short-action-label">${formatStat(stats.comments)}</span>
       </div>
       <div class="short-action-item">
         <button class="short-action-btn share-btn" aria-label="Share">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
         </button>
-        <span class="short-action-label">Share</span>
+        <span class="short-action-label">${formatStat(stats.shares)}</span>
       </div>
       ${generateSoundActionHtml()}
-      <div class="short-audio-disc">
+      <div class="short-audio-disc paused">
         <img src="${movie.poster}" alt="audio" />
       </div>
     </div>
@@ -203,10 +254,14 @@ function generateSoundActionHtml() {
 
 function generatePlayOverlayHtml() {
   return `
-    <div class="short-play-overlay" style="position:absolute; inset:0; z-index:1001; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.2s;">
-      <div style="width:80px; height:80px; background:rgba(0,0,0,0.4); border-radius:50%; display:grid; place-items:center;">
+    <div class="short-play-overlay" style="position:absolute; inset:0; z-index:1001; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+      <div class="short-pause-icon" style="width:80px; height:80px; background:rgba(0,0,0,0.4); border-radius:50%; display:grid; place-items:center; opacity:0; transition:opacity 0.2s; transform:scale(0.8);">
         <svg viewBox="0 0 24 24" width="40" height="40" fill="#fff" style="margin-left:4px;"><path d="M8 5v14l11-7z"/></svg>
       </div>
+      <div class="short-like-heart" style="position:absolute; opacity:0; transform:scale(0); pointer-events:none;">
+        <svg viewBox="0 0 24 24" width="100" height="100" fill="#ff453a"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      </div>
+      <div class="short-ripple" style="position:absolute; width:80px; height:80px; background:rgba(255,255,255,0.4); border-radius:50%; opacity:0; pointer-events:none;"></div>
     </div>
   `;
 }
@@ -214,9 +269,17 @@ function generatePlayOverlayHtml() {
 function setupActionListeners(wrapper, movie) {
   setupLikeButton(wrapper, movie);
   setupShareButton(wrapper, movie);
+  setupCommentButton(wrapper);
   setupSoundButton(wrapper);
   setupWatchLinks(wrapper, movie);
   setupPlayOverlay(wrapper, movie);
+}
+
+function setupCommentButton(wrapper) {
+  const commentBtn = wrapper.querySelector('.comment-btn');
+  commentBtn.addEventListener('click', () => {
+    document.getElementById('shortsCommentPanel').classList.add('active');
+  });
 }
 
 function setupSoundButton(wrapper) {
@@ -270,16 +333,107 @@ function setupShareButton(wrapper, movie) {
 
 function setupPlayOverlay(wrapper, movie) {
   const playOverlay = wrapper.querySelector('.short-play-overlay');
-  playOverlay.addEventListener('click', () => {
-    const player = players.get(movie.slug);
-    if (!player) return;
+  const likeBtn = wrapper.querySelector('.like-btn');
+  const heartAnim = wrapper.querySelector('.short-like-heart');
+  const ripple = wrapper.querySelector('.short-ripple');
+  
+  let lastTap = 0;
+  
+  playOverlay.addEventListener('click', (e) => {
+    const now = Date.now();
+    const doubleTap = (now - lastTap) < 300;
     
-    if (player.paused()) {
-      player.play();
+    if (doubleTap) {
+      // Trigger like on double tap
+      lastTap = 0;
+      if (!likeBtn.classList.contains('active')) {
+        likeBtn.click();
+      }
+      
+      // Heart animation
+      heartAnim.style.transition = 'none';
+      heartAnim.style.opacity = '1';
+      heartAnim.style.transform = 'scale(0.5)';
+      
+      // Force reflow
+      void heartAnim.offsetWidth;
+      
+      heartAnim.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-out';
+      heartAnim.style.transform = 'scale(1.2)';
+      
+      setTimeout(() => {
+        heartAnim.style.transition = 'opacity 0.3s ease-out';
+        heartAnim.style.opacity = '0';
+      }, 600);
+      
     } else {
-      player.pause();
+      lastTap = now;
+      setTimeout(() => {
+        if (lastTap === now) {
+          // Play/pause on single tap
+          const player = players.get(movie.slug);
+          if (!player) return;
+          
+          if (player.paused()) {
+            player.play();
+          } else {
+            player.pause();
+          }
+          
+          // Ripple animation
+          ripple.style.transition = 'none';
+          ripple.style.opacity = '1';
+          ripple.style.transform = 'scale(0.5)';
+          
+          void ripple.offsetWidth;
+          
+          ripple.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+          ripple.style.transform = 'scale(2)';
+          ripple.style.opacity = '0';
+        }
+      }, 300);
     }
   });
+}
+
+function handleShortsKeydown(e) {
+  const shortsView = document.getElementById('shortsView');
+  if (!shortsView || shortsView.style.display === 'none') return;
+  
+  const container = document.getElementById('shortsContainer');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    container.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    container.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+  }
+}
+
+function disposeOldPlayers(currentSlug) {
+  const MAX_PLAYERS = 4;
+  if (players.size > MAX_PLAYERS) {
+    let toDelete = [];
+    for (let [key, player] of players.entries()) {
+      if (key !== currentSlug && player.paused()) {
+        toDelete.push(key);
+      }
+    }
+    while (toDelete.length > 0 && players.size > MAX_PLAYERS) {
+      const key = toDelete.shift();
+      const p = players.get(key);
+      if (p) {
+        p.dispose();
+        players.delete(key);
+        // Re-inject a fresh video container div for when we scroll back
+        const wrapper = document.querySelector(\`.short-video-wrapper[data-slug="\${key}"]\`);
+        if (wrapper) {
+            const vc = wrapper.querySelector('.video-container');
+            if (vc) vc.innerHTML = '';
+        }
+      }
+    }
+  }
 }
 
 function handleIntersect(entries) {
@@ -299,6 +453,7 @@ function handleVideoInView(wrapper, slug) {
   const genres = JSON.parse(wrapper.dataset.genres || '[]');
   boostGenres(genres);
   playVideoInWrapper(wrapper, slug);
+  disposeOldPlayers(slug);
 }
 
 async function playVideoInWrapper(wrapper, slug) {
@@ -399,14 +554,17 @@ function setupPlayerEventHandlers(player, wrapper) {
   const posterImg = wrapper.querySelector('img');
   const progressContainer = wrapper.querySelector('.short-progress-container');
   const progressFilled = wrapper.querySelector('.short-progress-filled');
+  const audioDisc = wrapper.querySelector('.short-audio-disc');
 
   player.on('playing', () => {
     if (posterImg) posterImg.style.opacity = '0';
     togglePlayOverlayVisibility(wrapper, false);
+    if (audioDisc) audioDisc.classList.remove('paused');
   });
 
   player.on('pause', () => {
     togglePlayOverlayVisibility(wrapper, true);
+    if (audioDisc) audioDisc.classList.add('paused');
   });
 
   player.on('timeupdate', () => {
@@ -430,8 +588,15 @@ function setupPlayerEventHandlers(player, wrapper) {
 
 function togglePlayOverlayVisibility(wrapper, isVisible) {
   const playOverlay = wrapper.querySelector('.short-play-overlay');
-  if (playOverlay) {
-    playOverlay.style.opacity = isVisible ? '1' : '0';
+  const pauseIcon = wrapper.querySelector('.short-pause-icon');
+  if (playOverlay && pauseIcon) {
+    if (isVisible) {
+      pauseIcon.style.opacity = '1';
+      pauseIcon.style.transform = 'scale(1)';
+    } else {
+      pauseIcon.style.opacity = '0';
+      pauseIcon.style.transform = 'scale(0.8)';
+    }
   }
 }
 

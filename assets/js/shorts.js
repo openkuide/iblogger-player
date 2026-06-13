@@ -426,7 +426,7 @@ function disposeOldPlayers(currentSlug) {
         p.dispose();
         players.delete(key);
         // Re-inject a fresh video container div for when we scroll back
-        const wrapper = document.querySelector(\`.short-video-wrapper[data-slug="\${key}"]\`);
+        const wrapper = document.querySelector(`.short-video-wrapper[data-slug="${key}"]`);
         if (wrapper) {
             const vc = wrapper.querySelector('.video-container');
             if (vc) vc.innerHTML = '';

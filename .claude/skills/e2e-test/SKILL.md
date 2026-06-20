@@ -125,6 +125,8 @@ if (!found) console.error('Legal heading missing.');
 | Mistake | Fix |
 |---|---|
 | `waitForSelector` times out | Check the selector in DevTools; the element may be inside a hidden parent |
+| `waitForSelector('#legalView')` resolves immediately | Add `{ visible: true }` — the element is always in DOM (display:none), so default resolves before routing shows it |
+| `a.clear-chip` not found on legal/about/contact/terms | `initQuest()` in `quests.js` **replaces** `a.clear-chip` with `div.quest-choice-box > a.quest-choice-option` — check for `.quest-choice-option \|\| a.clear-chip` |
 | Vue app not ready | Use `waitForFunction(() => el.__vue_app__)` before touching catalog DOM |
 | Test passes locally, fails in CI | Replace `delay()` with a DOM condition — timing is environment-dependent |
 | Console errors not caught | They are caught globally; don't suppress them with try/catch inside tests |

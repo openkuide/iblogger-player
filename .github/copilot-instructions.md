@@ -137,6 +137,7 @@ Project skills live in `.claude/skills/` and `.agents/skills/`. Suggest using th
 | `/e2e-test` | Writing or extending tests | Puppeteer e2e suite authoring — structure, assertions, screenshots, wiring into `integration.test.js` |
 | `/add-movie <url> <title> <hints>` | Adding a movie to catalog | Writes `db/<slug>.json` and prepends entry to `db/index.json` — handles Douyin shorts and multi-episode dramas |
 | `/enrich-movie <slug\|--all>` | Improving existing movie metadata | Refreshes year/rating/genres/poster from web for dramas; rewrites description for Douyin shorts; generates SVG poster if missing |
+| `/suggest` | Micro-improvement suggestions | Audits UI/UX/a11y/code across 7 lenses, presents numbered options, implements chosen items, then commits and pushes |
 
 ## 🤖 Subagents Reference
 Project subagents live in `.claude/agents/` and `.agents/agents/`. Invoke proactively when the task matches:

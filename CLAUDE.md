@@ -111,6 +111,7 @@ Before making any changes or pushing to remote, follow this strict loop to refin
 - `/refactor <file>` — guided clean-code refactoring; `/clean-check [file]` — audit only; `/build-db` — rebuild catalog; `/e2e-test` — write or extend Puppeteer e2e tests.
 - `/add-movie <url> <title> <hints>` — add a Douyin short or multi-episode drama to `db/` and register in `db/index.json`.
 - `/enrich-movie <slug>` or `/enrich-movie --all` — refresh metadata from web research (dramas) or rewrite description (Douyin shorts); generate SVG poster if missing.
+- `/suggest` — audit UI/UX/code/a11y across 7 lenses, present numbered options, implement what you pick, then commit and push.
 - `.claude/settings.local.json`, `.remember/`, and this file are gitignored on purpose (everything in the repo root is published to GitHub Pages).
 
 ## Diagnosing `index.html` issues

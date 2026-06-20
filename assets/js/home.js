@@ -240,16 +240,37 @@ export function startHomeMode() {
           if (stored) {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed)) {
-              // Zeigarnik Effect: attach progress % so the UI can render a progress bar
+              // Zeigarnik Effect: calculate progress percentage based on all watched episodes + total count
               watchHistory.value = parsed.map(item => {
+                const catalogItem = all.value.find(m => m.slug === item.slug);
                 const entry = progressAll[item.slug];
                 let progress = 0;
-                if (entry && entry.positions && item.lastEpisode) {
-                  const pos = entry.positions[String(item.lastEpisode)];
-                  // We don't have duration here so show 30% if any resume position recorded
-                  if (pos && pos > 30) progress = 35; // placeholder: indicates "in progress"
+                let watchedCount = 0;
+                let totalEpisodes = catalogItem ? catalogItem.episodeCount : 1;
+                
+                if (entry) {
+                  if (Array.isArray(entry.watched)) {
+                    watchedCount = entry.watched.length;
+                  }
+                  
+                  if (totalEpisodes > 0) {
+                    let currentEpProgress = 0;
+                    if (entry.positions && item.lastEpisode) {
+                      const pos = entry.positions[String(item.lastEpisode)];
+                      if (pos && pos > 30) {
+                        currentEpProgress = 0.5;
+                      }
+                    }
+                    progress = Math.round(((watchedCount + currentEpProgress) / totalEpisodes) * 100);
+                  }
                 }
-                return { ...item, progress };
+                
+                return {
+                  ...item,
+                  progress: Math.min(progress || (entry && entry.positions && entry.positions[String(item.lastEpisode)] ? 35 : 0), 100),
+                  watchedCount,
+                  totalEpisodes
+                };
               });
               return;
             }
@@ -641,6 +662,19 @@ export function startHomeMode() {
         return watchHistory.value.find(item => item.slug === slug) || null;
       }
 
+      function getMovieProgressText(m) {
+        const prog = getMovieProgress(m.slug);
+        if (!prog) return "";
+        const watched = prog.watchedCount || 0;
+        const total = prog.totalEpisodes || m.episodeCount || 1;
+        if (total === 1) {
+          return LANG_HOME === "km" ? "បានមើល" : "Watched";
+        }
+        const watchedText = LANG_HOME === "km" ? toKhmerNumerals(watched) : watched;
+        const totalText = LANG_HOME === "km" ? toKhmerNumerals(total) : total;
+        return `${watchedText}/${totalText} ${LANG_HOME === "km" ? "ភាគ" : "eps"}`;
+      }
+
       function gotoPage(p) {
         page.value = Math.max(1, Math.min(pages.value, p || 1));
         document.getElementById("homeApp").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -670,6 +704,7 @@ export function startHomeMode() {
         deleteHistoryItem,
         translateGenre,
         getMovieProgress,
+        getMovieProgressText,
         toKhmerNumerals, lang: LANG_HOME,
         searchFocused, recentSearches, trendingSuggestions, MOODS,
         searchPlaceholder, saveSearchQuery, deleteRecentSearch,

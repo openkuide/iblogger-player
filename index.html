@@ -122,14 +122,14 @@
             <button v-for="(m, idx) in featuredMovies" :key="idx" 
                     :class="{ active: currentSlide === idx }" 
                     @click="setSlide(idx)" 
-                    :aria-label="'Go to slide ' + (idx + 1)"></button>
+                    :aria-label="lang === 'km' ? 'ទៅកាន់ស្លាយទី ' + toKhmerNumerals(idx + 1) : 'Go to slide ' + (idx + 1)"></button>
           </div>
 
           <!-- Jakob's Law: Carousel prev/next arrows (users expect these) -->
-          <button class="hc-arrow prev" @click="setSlide(currentSlide > 0 ? currentSlide - 1 : featuredMovies.length - 1)" aria-label="Previous slide">
+          <button class="hc-arrow prev" @click="setSlide(currentSlide > 0 ? currentSlide - 1 : featuredMovies.length - 1)" :aria-label="lang === 'km' ? 'ស្លាយមុន' : 'Previous slide'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
-          <button class="hc-arrow next" @click="setSlide(currentSlide < featuredMovies.length - 1 ? currentSlide + 1 : 0)" aria-label="Next slide">
+          <button class="hc-arrow next" @click="setSlide(currentSlide < featuredMovies.length - 1 ? currentSlide + 1 : 0)" :aria-label="lang === 'km' ? 'ស្លាយបន្ទាប់' : 'Next slide'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
@@ -355,11 +355,13 @@
 
         <!-- Movie grid / list -->
         <div v-else-if="pageSlice.length" class="home-grid" :class="{'list-mode':listView}">
-          <a v-for="m in pageSlice" :key="m.slug"
+          <a v-for="(m, idx) in pageSlice" :key="m.slug"
              class="home-card"
              :data-slug="m.slug"
              :class="{ 'nudge-active': nudgedCardSlug === m.slug }"
              :href="'?id='+encodeURIComponent(m.slug)"
+             :style="{ '--card-idx': idx }"
+             :aria-label="title(m) + (m.year ? ' (' + m.year + ')' : '') + (lang === 'km' ? ' - ទស្សនាព័ត៌មានលម្អិត' : ' - View Details')"
              @mouseenter="onCardMouseEnter(m.slug)"
              @mouseleave="onCardMouseLeave(m.slug)">
 
@@ -393,8 +395,11 @@
                 <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
                 <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
                 <span v-if="getMovieProgress(m.slug)" class="hc-progress-badge">
-                  ✓ {{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(getMovieProgress(m.slug).lastEpisode) : 'Ep ' + getMovieProgress(m.slug).lastEpisode }}
+                  ✓ {{ getMovieProgressText(m) }}
                 </span>
+                <div class="hc-progress-bar" v-if="getMovieProgress(m.slug) && getMovieProgress(m.slug).progress">
+                  <div class="hc-progress-fill" :style="{ width: Math.min(getMovieProgress(m.slug).progress, 100) + '%' }"></div>
+                </div>
               </div>
               <div class="hc-title">{{ title(m) }}</div>
               <div v-if="m.year" class="hc-year">{{ m.year }}</div>
@@ -426,6 +431,9 @@
                     </svg>
                   </div>
                 </div>
+                <div class="hc-progress-bar" v-if="getMovieProgress(m.slug) && getMovieProgress(m.slug).progress">
+                  <div class="hc-progress-fill" :style="{ width: Math.min(getMovieProgress(m.slug).progress, 100) + '%' }"></div>
+                </div>
               </div>
               <div class="hc-body">
                 <div class="hc-title">{{ title(m) }}</div>
@@ -434,7 +442,7 @@
                   <span v-if="m.year"         class="hc-year">{{ m.year }}</span>
                   <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
                   <span v-if="getMovieProgress(m.slug)" class="hc-progress-badge-list">
-                    ✓ {{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(getMovieProgress(m.slug).lastEpisode) : 'Ep ' + getMovieProgress(m.slug).lastEpisode }}
+                    ✓ {{ getMovieProgressText(m) }}
                   </span>
                 </div>
               </div>
@@ -457,7 +465,7 @@
           <div class="empty-actions" style="display:flex; justify-content:center; gap:12px; margin-top:16px; flex-wrap:wrap;">
             <button class="empty-clear-btn" @click="clearAll" v-if="hasFilters" style="margin-top:0;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              <span>{{ lang === 'km' ? 'សំអាតតម្រងទាំងអស់' : 'Clear All Filters' }}</span>
+              <span>{{ search.trim() ? (lang === 'km' ? 'លុបការស្វែងរក (Clear Search)' : 'Clear Search') : (lang === 'km' ? 'សំអាតតម្រងទាំងអស់ (Clear All Filters)' : 'Clear All Filters') }}</span>
             </button>
             <button class="surprise-btn" @click="surpriseMe" style="padding:10px 18px; border-radius:10px; font-weight:700;">
               <span class="surprise-dice">🎲</span>

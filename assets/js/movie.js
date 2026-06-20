@@ -1,6 +1,6 @@
 // Direct/Movie routing details and rendering
 
-import { LANG, t, showLoader, showStatusText, showToast, toKhmerNumerals, formatPlaybackTime, playSparkleSound, playRetroClickSound, translateGenre, triggerOsd, triggerCrtStatic } from './utils.js';
+import { LANG, t, showLoader, showStatusText, showToast, toKhmerNumerals, formatPlaybackTime, playSparkleSound, playRetroClickSound, translateGenre, triggerOsd, triggerCrtStatic, playPopSound } from './utils.js';
 import { playSource, setOnEnded, setOnProgress, seekWhenReady } from './player.js';
 import {
   recordEpisodeSelection,
@@ -583,11 +583,16 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
     let countdownSeconds = 5;
     const numberEl = overlay.querySelector(".vjs-countdown-number");
     
+    // Play sound on countdown start (Anticipation)
+    playPopSound();
+    
     const countdownInterval = setInterval(() => {
       countdownSeconds--;
       if (numberEl) numberEl.textContent = countdownSeconds;
       
-      if (countdownSeconds <= 0) {
+      if (countdownSeconds > 0) {
+        playPopSound();
+      } else {
         clearInterval(countdownInterval);
         removeNextEpisodeCountdown();
         selectEpisode(nextIdx, true);

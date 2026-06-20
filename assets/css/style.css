@@ -5233,5 +5233,88 @@ button[class*="ndm-"],
   max-height: 0 !important;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   UX Micro-improvements Appended (Zeigarnik, Stagger, A11y, Active states)
+   ───────────────────────────────────────────────────────────── */
+
+/* 1. Catalog progress bars (Zeigarnik Effect) */
+.hc-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 3;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+}
+.hc-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9f0a, #ff453a);
+  min-width: 4px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.6);
+}
+
+/* 2. Interaction Physics (Tactile active feedbacks & manipulation) */
+.pill, .action-btn, .surprise-btn, .filter-toggle, .view-toggle button, 
+.sort-pill, .genre-chip, .pager button, .home-card, .history-card, 
+.back-btn, .next-ep-btn, .vjs-countdown-btn, .hc-arrow, .ep-btn {
+  touch-action: manipulation;
+}
+.pill:active, .action-btn:active, .surprise-btn:active, .filter-toggle:active, 
+.view-toggle button:active, .sort-pill:active, .genre-chip:active, 
+.pager button:active, .home-card:active, .history-card:active, 
+.back-btn:active, .next-ep-btn:active, .vjs-countdown-btn:active, 
+.hc-arrow:active, .ep-btn:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* Ensure hover scale/translate overrides animation state and plays nice with active state */
+.home-card:hover {
+  transform: translateY(-5px) !important;
+}
+
+/* 3. Stagger Entrance Animation */
+@keyframes fadeInUpStagger {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.home-card {
+  opacity: 0;
+  animation: fadeInUpStagger 0.45s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation-delay: calc(var(--card-idx, 0) * 20ms);
+}
+
+/* 4. Focus outline indicator (A11y accessibility) */
+:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 4px rgba(159, 90, 253, 0.25) !important;
+}
+
+/* 5. Up Next Slide-in Transition */
+@keyframes slideInUpNext {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.next-ep-panel {
+  animation: slideInUpNext 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
 
 

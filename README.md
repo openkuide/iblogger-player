@@ -1,5 +1,9 @@
 <div align="center">
 
+<img src=".github/logo.svg" alt="iblogger player logo" width="96" height="96" />
+
+<h1>iblogger <sub>player</sub></h1>
+
 <img src=".github/banner.svg" alt="iblogger-player" width="100%" />
 
 <br/>

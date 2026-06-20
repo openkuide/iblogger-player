@@ -1,6 +1,6 @@
 // Direct/Movie routing details and rendering
 
-import { LANG, t, showLoader, showStatusText, showToast, toKhmerNumerals, formatPlaybackTime, playSparkleSound, playRetroClickSound, translateGenre, triggerOsd, triggerCrtStatic, playPopSound } from './utils.js';
+import { LANG, t, showLoader, showStatusText, showToast, toKhmerNumerals, formatPlaybackTime, playSparkleSound, playRetroClickSound, translateGenre, triggerOsd, triggerCrtStatic, playPopSound, triggerDialRipple } from './utils.js';
 import { playSource, setOnEnded, setOnProgress, seekWhenReady } from './player.js';
 import {
   recordEpisodeSelection,
@@ -541,6 +541,12 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
       const chLabel = String(epNum).padStart(2, '0');
       chHud.textContent = `CH ${LANG === "km" ? toKhmerNumerals(chLabel) : chLabel}`;
     }
+    const dial = document.getElementById("channelDial");
+    if (dial && episodes.length > 0) {
+      const rot = idx * 30;
+      dial.style.setProperty("--channel-rotate", `${rot}deg`);
+      localStorage.setItem(`channel_dial_rot_${movie.slug}`, rot);
+    }
     removeNextEpisodeCountdown();
     buttons.forEach((btn, i) => {
       const isActive = i === idx;
@@ -731,9 +737,20 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
       }
     };
 
+    const toggleCountdown = () => {
+      if (isPaused) {
+        const resumeBtn = overlay.querySelector(".resume-countdown-btn");
+        if (resumeBtn) {
+          resumeBtn.click();
+        }
+      } else {
+        pauseCountdown();
+      }
+    };
+
     overlay.addEventListener("click", (e) => {
       if (e.target.closest(".vjs-countdown-btn")) return;
-      pauseCountdown();
+      toggleCountdown();
     });
     
     overlay.querySelector(".play-now-btn").addEventListener("click", (e) => {
@@ -1117,6 +1134,8 @@ function showRatingDialog(badge, slug) {
 
   const handleGlobalEsc = (e) => {
     if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
       destroyDialog();
     }
   };
@@ -1247,16 +1266,6 @@ function triggerStarExplosion(el) {
   }
 }
 
-function triggerDialRipple(dial) {
-  if (!dial) return;
-  dial.classList.remove("ripple-effect");
-  void dial.offsetWidth;
-  dial.classList.add("ripple-effect");
-  if (dial._rippleTimeout) clearTimeout(dial._rippleTimeout);
-  dial._rippleTimeout = setTimeout(() => {
-    dial.classList.remove("ripple-effect");
-  }, 400);
-}
 
 function setupChannelKnob(movie) {
   const dial = document.getElementById("channelDial");

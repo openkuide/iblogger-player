@@ -204,4 +204,16 @@ export function triggerCrtStatic() {
   }, 400);
 }
 
+export function triggerDialRipple(dial) {
+  if (!dial) return;
+  dial.classList.remove("ripple-effect");
+  void dial.offsetWidth;
+  dial.classList.add("ripple-effect");
+  if (dial._rippleTimeout) clearTimeout(dial._rippleTimeout);
+  dial._rippleTimeout = setTimeout(() => {
+    dial.classList.remove("ripple-effect");
+  }, 400);
+}
+
+
 

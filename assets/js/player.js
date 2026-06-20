@@ -1,6 +1,6 @@
 // Video.js playback & quality controls
 
-import { hideLoader, showLoader, showStatus, showToast, playPopSound, playRetroClickSound, LANG, triggerOsd } from './utils.js';
+import { hideLoader, showLoader, showStatus, showToast, playPopSound, playRetroClickSound, LANG, triggerOsd, triggerDialRipple } from './utils.js';
 
 let onEndedCallback = null;
 let onProgressCallback = null;
@@ -101,28 +101,7 @@ class QualityMenuButton extends MenuButton {
 
 videojs.registerComponent('QualityMenuButton', QualityMenuButton);
 
-function initializeVideoPlayer(videoEl) {
-  const player = videojs(videoEl, {
-    controls: true,
-    autoplay: true,
-    preload: 'auto',
-    playbackRates: [0.5, 1, 1.25, 1.5, 2],
-    controlBar: {
-      children: [
-        'playToggle',
-        'volumePanel',
-        'currentTimeDisplay',
-        'timeDivider',
-        'durationDisplay',
-        'progressControl',
-        'playbackRateMenuButton',
-        'QualityMenuButton',
-        'pictureInPictureToggle',
-        'fullscreenToggle'
-      ]
-    }
-  });
-
+function setupPlayerEvents(player, videoEl) {
   player.on("playing", () => {
     hideLoader();
     const tv = document.querySelector('.tv');
@@ -166,52 +145,54 @@ function initializeVideoPlayer(videoEl) {
       qButton.update();
     }
   });
+}
 
-  // ── Scroll Wheel Volume & Double Click Seek ──
+function setupPlayerBoxInteractions(player) {
   const playerBox = document.querySelector('.player-box');
-  if (playerBox) {
-    // Scroll Wheel Volume
-    if (!playerBox.dataset.wheelBound) {
-      playerBox.dataset.wheelBound = 'true';
-      playerBox.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const currentVolume = player.volume();
-        const isUp = e.deltaY < 0;
-        const newVolume = isUp ? Math.min(1, currentVolume + 0.05) : Math.max(0, currentVolume - 0.05);
-        player.volume(newVolume);
-        const percent = Math.round(newVolume * 100);
-        showToast(`${LANG === "km" ? "កម្រិតសំឡេង" : "Volume"}: ${percent}%`);
-      }, { passive: false });
-    }
+  if (!playerBox) return;
 
-    // Double-Click Seek (Left/Right half)
-    if (!playerBox.dataset.dblclickBound) {
-      playerBox.dataset.dblclickBound = 'true';
-      playerBox.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const rect = playerBox.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const isLeft = clickX < rect.width / 2;
-        const seekStep = 10;
-        
-        const currentTime = player.currentTime();
-        let newTime;
-        if (isLeft) {
-          newTime = Math.max(0, currentTime - seekStep);
-        } else {
-          const duration = player.duration();
-          newTime = Math.min(duration || Infinity, currentTime + seekStep);
-        }
-        
-        player.currentTime(newTime);
-        showSeekOverlay(isLeft, seekStep);
-      }, true); // Capturing phase
-    }
+  // Scroll Wheel Volume
+  if (!playerBox.dataset.wheelBound) {
+    playerBox.dataset.wheelBound = 'true';
+    playerBox.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const currentVolume = player.volume();
+      const isUp = e.deltaY < 0;
+      const newVolume = isUp ? Math.min(1, currentVolume + 0.05) : Math.max(0, currentVolume - 0.05);
+      player.volume(newVolume);
+      const percent = Math.round(newVolume * 100);
+      showToast(`${LANG === "km" ? "កម្រិតសំឡេង" : "Volume"}: ${percent}%`);
+    }, { passive: false });
   }
 
-  // ── Skip Intro Button (+90s) ──
+  // Double-Click Seek (Left/Right half)
+  if (!playerBox.dataset.dblclickBound) {
+    playerBox.dataset.dblclickBound = 'true';
+    playerBox.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const rect = playerBox.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const isLeft = clickX < rect.width / 2;
+      const seekStep = 10;
+      
+      const currentTime = player.currentTime();
+      let newTime;
+      if (isLeft) {
+        newTime = Math.max(0, currentTime - seekStep);
+      } else {
+        const duration = player.duration();
+        newTime = Math.min(duration || Infinity, currentTime + seekStep);
+      }
+      
+      player.currentTime(newTime);
+      showSeekOverlay(isLeft, seekStep);
+    }, true); // Capturing phase
+  }
+}
+
+function setupSkipIntro(player) {
   player.ready(() => {
     const playerEl = player.el();
     if (playerEl) {
@@ -247,8 +228,9 @@ function initializeVideoPlayer(videoEl) {
       }
     }
   });
+}
 
-  // ── TV Bezel Skeuomorphic Click Controls ──
+function setupTvBezelControls(player) {
   const ledEl = document.querySelector('.tv-led');
   const powerEl = document.querySelector('.tv-power');
   
@@ -280,109 +262,135 @@ function initializeVideoPlayer(videoEl) {
       }
     });
   }
+}
 
-  // ── Cinematic Ambient Glow Frame Sampler ──
+function setupAmbientGlowSampler(player, videoEl) {
   const ambientCanvas = document.getElementById("ambientGlowCanvas");
-  if (ambientCanvas) {
-    const ambientCtx = ambientCanvas.getContext("2d", { alpha: false });
-    ambientCanvas.width = 32;
-    ambientCanvas.height = 18;
-    
-    let ambientInterval = null;
-    
-    const drawFrame = () => {
-      if (player.paused() || player.ended()) return;
-      try {
-        ambientCtx.drawImage(videoEl, 0, 0, ambientCanvas.width, ambientCanvas.height);
-      } catch (err) {
-        // Silently swallow errors (e.g. video frame not ready yet)
-      }
-    };
-    
-    player.on("playing", () => {
-      if (!ambientInterval) {
-        // Sample every 150ms for low overhead & dynamic color transitions
-        ambientInterval = setInterval(drawFrame, 150);
-      }
-    });
-    
-    player.on("pause", () => {
-      if (ambientInterval) {
-        clearInterval(ambientInterval);
-        ambientInterval = null;
-      }
-    });
-    
-    player.on("ended", () => {
-      if (ambientInterval) {
-        clearInterval(ambientInterval);
-        ambientInterval = null;
-      }
-      ambientCtx.fillStyle = "#000000";
-      ambientCtx.fillRect(0, 0, ambientCanvas.width, ambientCanvas.height);
-    });
-  }
-  // ── Glow Toggle Button Logic ──
+  if (!ambientCanvas) return;
+
+  const ambientCtx = ambientCanvas.getContext("2d", { alpha: false });
+  ambientCanvas.width = 32;
+  ambientCanvas.height = 18;
+  
+  let ambientInterval = null;
+  
+  const drawFrame = () => {
+    if (player.paused() || player.ended()) return;
+    try {
+      ambientCtx.drawImage(videoEl, 0, 0, ambientCanvas.width, ambientCanvas.height);
+    } catch (err) {
+      // ignore
+    }
+  };
+  
+  player.on("playing", () => {
+    if (!ambientInterval) {
+      ambientInterval = setInterval(drawFrame, 150);
+    }
+  });
+  
+  player.on("pause", () => {
+    if (ambientInterval) {
+      clearInterval(ambientInterval);
+      ambientInterval = null;
+    }
+  });
+  
+  player.on("ended", () => {
+    if (ambientInterval) {
+      clearInterval(ambientInterval);
+      ambientInterval = null;
+    }
+    ambientCtx.fillStyle = "#000000";
+    ambientCtx.fillRect(0, 0, ambientCanvas.width, ambientCanvas.height);
+  });
+}
+
+function setupAmbientGlowToggle(player) {
   const glowBtn = document.getElementById("glowToggle");
-  if (glowBtn && !glowBtn.dataset.bound) {
-    glowBtn.dataset.bound = 'true';
-    let glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
+  if (!glowBtn || glowBtn.dataset.bound) return;
+  glowBtn.dataset.bound = 'true';
 
-    const applyGlowLevel = (level) => {
-      let opacity = 0.55;
-      if (level === "off") opacity = 0;
-      else if (level === "low") opacity = 0.25;
-      else if (level === "medium") opacity = 0.55;
-      else if (level === "high") opacity = 0.85;
+  let glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
 
-      const ambientCanvas = document.getElementById("ambientGlowCanvas");
-      if (ambientCanvas) {
-        ambientCanvas.style.setProperty("--glow-opacity", opacity);
-        if (!player.paused()) {
-          const tv = document.querySelector('.tv');
-          if (tv && tv.classList.contains("playing")) {
-            ambientCanvas.style.opacity = opacity;
-          }
-        }
-      }
+  const applyGlowLevel = (level) => {
+    let opacity = 0.55;
+    if (level === "off") opacity = 0;
+    else if (level === "low") opacity = 0.25;
+    else if (level === "medium") opacity = 0.55;
+    else if (level === "high") opacity = 0.85;
 
-      if (level === "off") {
-        glowBtn.classList.remove("active");
-        glowBtn.style.color = "";
-        glowBtn.style.borderColor = "";
+    const ambientCanvas = document.getElementById("ambientGlowCanvas");
+    if (ambientCanvas) {
+      ambientCanvas.style.setProperty("--glow-opacity", opacity);
+    }
+
+    if (level === "off") {
+      glowBtn.classList.remove("active");
+      glowBtn.style.color = "";
+      glowBtn.style.borderColor = "";
+    } else {
+      glowBtn.classList.add("active");
+      if (level === "low") {
+        glowBtn.style.color = "rgba(159, 90, 253, 0.6)";
+        glowBtn.style.borderColor = "rgba(159, 90, 253, 0.6)";
+      } else if (level === "medium") {
+        glowBtn.style.color = "#9f5afd";
+        glowBtn.style.borderColor = "#9f5afd";
       } else {
-        glowBtn.classList.add("active");
-        if (level === "low") {
-          glowBtn.style.color = "rgba(159, 90, 253, 0.6)";
-          glowBtn.style.borderColor = "rgba(159, 90, 253, 0.6)";
-        } else if (level === "medium") {
-          glowBtn.style.color = "#9f5afd";
-          glowBtn.style.borderColor = "#9f5afd";
-        } else {
-          glowBtn.style.color = "#00f2fe";
-          glowBtn.style.borderColor = "#00f2fe";
-        }
+        glowBtn.style.color = "#00f2fe";
+        glowBtn.style.borderColor = "#00f2fe";
       }
-      localStorage.setItem("ambient_glow_level", level);
-    };
+    }
+    localStorage.setItem("ambient_glow_level", level);
+  };
 
-    applyGlowLevel(glowLevel);
+  applyGlowLevel(glowLevel);
 
-    glowBtn.addEventListener("click", () => {
-      glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
-      let nextLevel = "medium";
-      if (glowLevel === "off") nextLevel = "low";
-      else if (glowLevel === "low") nextLevel = "medium";
-      else if (glowLevel === "medium") nextLevel = "high";
-      else if (glowLevel === "high") nextLevel = "off";
+  glowBtn.addEventListener("click", () => {
+    glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
+    let nextLevel = "medium";
+    if (glowLevel === "off") nextLevel = "low";
+    else if (glowLevel === "low") nextLevel = "medium";
+    else if (glowLevel === "medium") nextLevel = "high";
+    else if (glowLevel === "high") nextLevel = "off";
 
-      applyGlowLevel(nextLevel);
-      playPopSound();
-      showToast(`${LANG === "km" ? "កម្រិតពន្លឺជុំវិញ" : "Ambient Glow"}: ${nextLevel.toUpperCase()}`);
-    });
-  }
+    applyGlowLevel(nextLevel);
+    playPopSound();
+    showToast(`${LANG === "km" ? "កម្រិតពន្លឺជុំវិញ" : "Ambient Glow"}: ${nextLevel.toUpperCase()}`);
+  });
+}
 
+function initializeVideoPlayer(videoEl) {
+  const player = videojs(videoEl, {
+    controls: true,
+    autoplay: true,
+    preload: 'auto',
+    playbackRates: [0.5, 1, 1.25, 1.5, 2],
+    controlBar: {
+      children: [
+        'playToggle',
+        'volumePanel',
+        'currentTimeDisplay',
+        'timeDivider',
+        'durationDisplay',
+        'progressControl',
+        'playbackRateMenuButton',
+        'QualityMenuButton',
+        'pictureInPictureToggle',
+        'fullscreenToggle'
+      ]
+    }
+  });
+
+  setupPlayerEvents(player, videoEl);
+  setupPlayerBoxInteractions(player);
+  setupSkipIntro(player);
+  setupTvBezelControls(player);
+  setupAmbientGlowSampler(player, videoEl);
+  setupAmbientGlowToggle(player);
   setupVolumeDial(player);
+
   return player;
 }
 
@@ -674,16 +682,7 @@ function showSpeedOverlay(rate) {
   }, 600);
 }
 
-function triggerDialRipple(dial) {
-  if (!dial) return;
-  dial.classList.remove("ripple-effect");
-  void dial.offsetWidth;
-  dial.classList.add("ripple-effect");
-  if (dial._rippleTimeout) clearTimeout(dial._rippleTimeout);
-  dial._rippleTimeout = setTimeout(() => {
-    dial.classList.remove("ripple-effect");
-  }, 400);
-}
+
 
 function updateVolumeDial(volume) {
   const dial = document.getElementById("volumeDial");

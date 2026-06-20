@@ -3719,7 +3719,7 @@ a.short-title {
   will-change: opacity;
 }
 .tv.playing .ambient-glow-canvas {
-  opacity: 0.55;
+  opacity: var(--glow-opacity, 0.55);
 }
 
 /* ── History Card Delete Button ── */

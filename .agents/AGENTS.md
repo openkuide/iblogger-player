@@ -183,4 +183,5 @@ Skills live in `.agents/skills/`. Invoke the relevant skill when the task matche
 | `/reflect` | End of session | Captures session learnings and updates AI config files |
 | `/e2e-test` | Writing or extending tests | Puppeteer e2e suite authoring — structure, assertions, screenshots, wiring into `integration.test.js` |
 | `/add-movie <url> <title> <hints>` | Adding a movie to catalog | Writes `db/<slug>.json` and registers in `db/index.json` |
+| `/enrich-movie <slug\|--all>` | Improving existing metadata | Web-research refresh for dramas; description rewrite + SVG poster for Douyin shorts |
 

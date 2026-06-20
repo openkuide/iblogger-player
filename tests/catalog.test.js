@@ -11,6 +11,7 @@ export async function runCatalogTests(ctx) {
   await testYearFilter(ctx.page);
   await testCountryFilter(ctx.page, initialCount);
   await testClearFilters(ctx.page, initialCount);
+  await testSearch(ctx.page, initialCount);
   console.log('[TEST CATALOG] All catalog tests passed successfully.');
 }
 
@@ -158,4 +159,40 @@ async function testClearFilters(page, initialCount) {
   if (resetCount !== initialCount) {
     throw new Error('[TEST CATALOG] Reset count does not match initial count after clear.');
   }
+}
+
+async function testSearch(page, initialCount) {
+  console.log('[TEST CATALOG] Testing keyword search...');
+  await page.waitForSelector('#searchInput');
+
+  await page.evaluate(() => {
+    const input = document.getElementById('searchInput');
+    input.focus();
+  });
+  await page.type('#searchInput', 'kung fu', { delay: 40 });
+  await delay(400);
+
+  const searchCount = await page.evaluate(() => {
+    return document.querySelectorAll('.home-card').length;
+  });
+  console.log(`[TEST CATALOG] Cards matching "kung fu": ${searchCount}`);
+  if (searchCount === 0) throw new Error('[TEST CATALOG] Search returned no results for "kung fu".');
+  if (searchCount >= initialCount) throw new Error('[TEST CATALOG] Search did not filter results — count unchanged.');
+
+  // Search matches across title, description, and genres — just verify count was narrowed.
+  if (searchCount >= initialCount) throw new Error('[TEST CATALOG] Search did not filter — result count unchanged.');
+
+  await page.evaluate(() => {
+    const btn = document.querySelector('.search-clear-btn');
+    if (btn) btn.click();
+  });
+  await delay(400);
+
+  const clearedCount = await page.evaluate(() => {
+    return document.querySelectorAll('.home-card').length;
+  });
+  if (clearedCount !== initialCount) {
+    throw new Error(`[TEST CATALOG] Search clear did not restore full catalog (expected ${initialCount}, got ${clearedCount}).`);
+  }
+  console.log('[TEST CATALOG] Search clear restored full catalog.');
 }

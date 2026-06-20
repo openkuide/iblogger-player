@@ -91,6 +91,45 @@ function renderFallbackPoster(infoElement) {
   infoElement.insertBefore(fb, infoElement.firstChild);
 }
 
+function applyAmbientTintFromPoster(imgEl, titleEl) {
+  if (!imgEl || !titleEl || !imgEl.src) return;
+  const canvas = document.createElement("canvas");
+  canvas.width = 10;
+  canvas.height = 10;
+  const ctx = canvas.getContext("2d");
+  
+  const processImage = () => {
+    try {
+      ctx.drawImage(imgEl, 0, 0, 10, 10);
+      const data = ctx.getImageData(0, 0, 10, 10).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] + data[i+1] + data[i+2] > 60) {
+          r += data[i];
+          g += data[i+1];
+          b += data[i+2];
+          count++;
+        }
+      }
+      if (count > 0) {
+        r = Math.round(r / count);
+        g = Math.round(g / count);
+        b = Math.round(b / count);
+        titleEl.style.textShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.35)`;
+        titleEl.style.transition = "text-shadow 0.6s ease";
+      }
+    } catch (e) {
+      // CORS block, ignore silently
+    }
+  };
+  
+  if (imgEl.complete) {
+    processImage();
+  } else {
+    imgEl.addEventListener("load", processImage, { once: true });
+  }
+}
+
 function renderMoviePoster(movie, infoElement, posterElement) {
   removeFallbackPoster(infoElement);
 
@@ -107,14 +146,21 @@ function renderMoviePoster(movie, infoElement, posterElement) {
     posterElement.src = movie.poster;
     posterElement.alt = t(movie.title);
     posterElement.style.display = "block";
+    
+    const titleEl = document.getElementById("infoTitle");
+    applyAmbientTintFromPoster(posterElement, titleEl);
+    
     posterElement.onerror = () => {
       posterElement.style.display = "none";
       renderFallbackPoster(infoElement);
       if (backdropElement) backdropElement.style.backgroundImage = "none";
+      if (titleEl) titleEl.style.textShadow = "none";
     };
   } else {
     posterElement.style.display = "none";
     renderFallbackPoster(infoElement);
+    const titleEl = document.getElementById("infoTitle");
+    if (titleEl) titleEl.style.textShadow = "none";
   }
 }
 
@@ -286,6 +332,7 @@ function createEpisodeButtons(episodes, episodesGridElement, onSelect, slug) {
     btn.className = "ep-btn" + (ep.final ? " final" : "");
     btn.textContent = LANG === "km" ? toKhmerNumerals(ep.ep || (i + 1)) : (ep.ep || (i + 1));
     btn.title = t(ep.title) + (ep.final ? " (ភាគចុងក្រោយ)" : "");
+    btn.style.setProperty("--btn-idx", i % 25);
     
     // Anchoring: First episode START visual cue
     if (i === 0) {
@@ -488,6 +535,12 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
       const chLabel = String(epNum).padStart(2, '0');
       triggerOsd(`CH ${LANG === "km" ? toKhmerNumerals(chLabel) : chLabel}`);
     }
+    const chHud = document.getElementById("channelDialHud");
+    if (chHud && episodes[idx]) {
+      const epNum = episodes[idx].ep;
+      const chLabel = String(epNum).padStart(2, '0');
+      chHud.textContent = `CH ${LANG === "km" ? toKhmerNumerals(chLabel) : chLabel}`;
+    }
     removeNextEpisodeCountdown();
     buttons.forEach((btn, i) => {
       const isActive = i === idx;
@@ -601,14 +654,98 @@ function renderMovieEpisodes(movie, epParam, episodesWrapElement, episodesGridEl
     
     overlay._interval = countdownInterval;
     
-    overlay.querySelector(".play-now-btn").addEventListener("click", () => {
-      clearInterval(countdownInterval);
+    let isPaused = false;
+    const pauseCountdown = () => {
+      if (isPaused) return;
+      isPaused = true;
+      if (overlay._interval) {
+        clearInterval(overlay._interval);
+        overlay._interval = null;
+      }
+      
+      const titleEl = overlay.querySelector(".vjs-countdown-title");
+      const cancelBtn = overlay.querySelector(".cancel-btn");
+      
+      if (titleEl) {
+        titleEl.innerHTML = `
+          <span class="lang-km-block">បានផ្អាកការរាប់ថយក្រោយ</span>
+          <span class="lang-en-block">Countdown Paused</span>
+        `;
+      }
+      if (numberEl) {
+        numberEl.textContent = "⏸";
+      }
+      if (cancelBtn) {
+        cancelBtn.innerHTML = `
+          <span class="lang-km-block">បិទ</span>
+          <span class="lang-en-block">Dismiss</span>
+        `;
+      }
+      
+      let resumeBtn = overlay.querySelector(".resume-countdown-btn");
+      if (!resumeBtn) {
+        resumeBtn = document.createElement("button");
+        resumeBtn.className = "vjs-countdown-btn resume-countdown-btn";
+        resumeBtn.innerHTML = `
+          <span class="lang-km-block">បន្ត</span>
+          <span class="lang-en-block">Resume</span>
+        `;
+        const actions = overlay.querySelector(".vjs-countdown-actions");
+        if (actions && cancelBtn) {
+          actions.insertBefore(resumeBtn, cancelBtn);
+        }
+        
+        resumeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          resumeBtn.remove();
+          isPaused = false;
+          
+          if (titleEl) {
+            titleEl.innerHTML = `
+              <span class="lang-km-block">ភាគបន្ទាប់នឹងចាក់ក្នុងរយៈពេល</span>
+              <span class="lang-en-block">Next Episode In</span>
+            `;
+          }
+          if (numberEl) numberEl.textContent = countdownSeconds;
+          if (cancelBtn) {
+            cancelBtn.innerHTML = `
+              <span class="lang-km-block">បោះបង់</span>
+              <span class="lang-en-block">Cancel</span>
+            `;
+          }
+          
+          const nextInterval = setInterval(() => {
+            countdownSeconds--;
+            if (numberEl) numberEl.textContent = countdownSeconds;
+            
+            if (countdownSeconds > 0) {
+              playPopSound();
+            } else {
+              clearInterval(nextInterval);
+              removeNextEpisodeCountdown();
+              selectEpisode(nextIdx, true);
+            }
+          }, 1000);
+          overlay._interval = nextInterval;
+        });
+      }
+    };
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target.closest(".vjs-countdown-btn")) return;
+      pauseCountdown();
+    });
+    
+    overlay.querySelector(".play-now-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (overlay._interval) clearInterval(overlay._interval);
       removeNextEpisodeCountdown();
       selectEpisode(nextIdx, true);
     });
     
-    overlay.querySelector(".cancel-btn").addEventListener("click", () => {
-      clearInterval(countdownInterval);
+    overlay.querySelector(".cancel-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (overlay._interval) clearInterval(overlay._interval);
       removeNextEpisodeCountdown();
     });
   }
@@ -1000,6 +1137,7 @@ function showRatingDialog(badge, slug) {
       <span class="rating-star" data-value="4" tabindex="0" role="button" aria-label="4 Stars">★</span>
       <span class="rating-star" data-value="5" tabindex="0" role="button" aria-label="5 Stars">★</span>
     </div>
+    <div class="rating-dialog-tooltip"></div>
   `;
   
   document.body.appendChild(dialog);
@@ -1011,11 +1149,27 @@ function showRatingDialog(badge, slug) {
   const stars = dialog.querySelectorAll(".rating-star");
   const userRatingKey = `user_rating_${slug}`;
   const currentVal = parseInt(localStorage.getItem(userRatingKey)) || 0;
+
+  const tooltips = {
+    1: { en: "Boring", km: "គួរឱ្យធុញ" },
+    2: { en: "Average", km: "ធម្មតា" },
+    3: { en: "Good", km: "ល្អ" },
+    4: { en: "Great", km: "អស្ចារ្យ" },
+    5: { en: "Masterpiece", km: "រឿងកំពូល" }
+  };
   
   const highlightStars = (val) => {
     stars.forEach((star, idx) => {
       star.classList.toggle("active", idx < val);
     });
+    const tooltipEl = dialog.querySelector(".rating-dialog-tooltip");
+    if (tooltipEl) {
+      if (tooltips[val]) {
+        tooltipEl.textContent = `${val} - ${tooltips[val][LANG]}`;
+      } else {
+        tooltipEl.textContent = "";
+      }
+    }
   };
   
   highlightStars(currentVal);
@@ -1093,19 +1247,50 @@ function triggerStarExplosion(el) {
   }
 }
 
+function triggerDialRipple(dial) {
+  if (!dial) return;
+  dial.classList.remove("ripple-effect");
+  void dial.offsetWidth;
+  dial.classList.add("ripple-effect");
+  if (dial._rippleTimeout) clearTimeout(dial._rippleTimeout);
+  dial._rippleTimeout = setTimeout(() => {
+    dial.classList.remove("ripple-effect");
+  }, 400);
+}
+
 function setupChannelKnob(movie) {
   const dial = document.getElementById("channelDial");
   if (!dial) return;
 
+  const updateChannelHud = () => {
+    const chHud = document.getElementById("channelDialHud");
+    if (!chHud || !currentMovie) return;
+    const epButtons = Array.from(document.querySelectorAll("#episodes .ep-btn"));
+    if (epButtons.length === 0) {
+      chHud.textContent = "CH --";
+      return;
+    }
+    const activeIdx = epButtons.findIndex(btn => btn.classList.contains("active"));
+    if (activeIdx === -1) {
+      chHud.textContent = "CH --";
+      return;
+    }
+    const epNum = movie.episodes[activeIdx] ? movie.episodes[activeIdx].ep : (activeIdx + 1);
+    const chLabel = String(epNum).padStart(2, '0');
+    chHud.textContent = `CH ${LANG === "km" ? toKhmerNumerals(chLabel) : chLabel}`;
+  };
+
   if (dial.dataset.bound) {
     let rotation = parseInt(localStorage.getItem(`channel_dial_rot_${movie.slug}`)) || 0;
     dial.style.setProperty("--channel-rotate", `${rotation}deg`);
+    updateChannelHud();
     return;
   }
   dial.dataset.bound = 'true';
 
   let rotation = parseInt(localStorage.getItem(`channel_dial_rot_${movie.slug}`)) || 0;
   dial.style.setProperty("--channel-rotate", `${rotation}deg`);
+  updateChannelHud();
 
   const rotateDial = (direction) => {
     if (!currentMovie) return;
@@ -1122,6 +1307,7 @@ function setupChannelKnob(movie) {
       localStorage.setItem(`channel_dial_rot_${currentMovie.slug}`, rot);
       dial.style.setProperty("--channel-rotate", `${rot}deg`);
       epButtons[targetIdx].click();
+      updateChannelHud();
     }
   };
 
@@ -1129,6 +1315,7 @@ function setupChannelKnob(movie) {
     e.preventDefault();
     const direction = e.deltaY > 0 ? 1 : -1;
     rotateDial(direction);
+    triggerDialRipple(dial);
   }, { passive: false });
 
   let isDragging = false;
@@ -1136,6 +1323,8 @@ function setupChannelKnob(movie) {
 
   dial.addEventListener("mousedown", (e) => {
     isDragging = true;
+    dial.parentElement.classList.add("hud-active");
+    triggerDialRipple(dial);
     const rect = dial.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -1158,16 +1347,21 @@ function setupChannelKnob(movie) {
   });
 
   document.addEventListener("mouseup", () => {
-    isDragging = false;
+    if (isDragging) {
+      isDragging = false;
+      dial.parentElement.classList.remove("hud-active");
+    }
   });
 
   dial.addEventListener("keydown", (e) => {
     if (e.key === "ArrowUp" || e.key === "ArrowRight") {
       e.preventDefault();
       rotateDial(1);
+      triggerDialRipple(dial);
     } else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
       e.preventDefault();
       rotateDial(-1);
+      triggerDialRipple(dial);
     }
   });
 }

@@ -265,11 +265,14 @@ export function startHomeMode() {
                   }
                 }
                 
+                const isCompleted = watchedCount === totalEpisodes && totalEpisodes > 0;
+
                 return {
                   ...item,
                   progress: Math.min(progress || (entry && entry.positions && entry.positions[String(item.lastEpisode)] ? 35 : 0), 100),
                   watchedCount,
-                  totalEpisodes
+                  totalEpisodes,
+                  isCompleted
                 };
               });
               return;

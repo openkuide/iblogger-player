@@ -167,13 +167,13 @@
                   </div>
                 </div>
                 <!-- Zeigarnik Effect: progress bar shows how far user got — compels completion -->
-                <div class="history-progress-bar" v-if="item.progress">
+                <div class="history-progress-bar" :class="{ completed: item.isCompleted }" v-if="item.progress">
                   <div class="history-progress-fill" :style="{ width: Math.min(item.progress, 100) + '%' }"></div>
                 </div>
               </div>
               <div class="history-info">
                 <div class="history-title">{{ title(item) }}</div>
-                <div class="history-episode">{{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(item.lastEpisode) : 'Episode ' + item.lastEpisode }}</div>
+                <div class="history-episode">{{ item.isCompleted ? (lang === 'km' ? '✓ បញ្ចប់' : '✓ Completed') : (lang === 'km' ? 'ភាគ ' + toKhmerNumerals(item.lastEpisode) : 'Episode ' + item.lastEpisode) }}</div>
               </div>
             </a>
           </div>
@@ -538,17 +538,20 @@
         <span class="tv-led" role="button" tabindex="0" aria-label="ចាក់/ផ្អាក / Toggle Play/Pause" title="ចាក់/ផ្អាក / Toggle Play/Pause"></span>
         <span class="tv-power" role="button" tabindex="0" aria-label="ចាក់/ផ្អាក / Toggle Play/Pause" title="ចាក់/ផ្អាក / Toggle Play/Pause">Power</span>
         <button id="theaterToggle" class="tv-theater-btn" title="របៀបពន្លឺ / Theater Mode">Theater</button>
+        <button id="glowToggle" class="tv-glow-btn" title="ពន្លឺជុំវិញ / Ambient Glow">Glow</button>
         <span class="tv-grille"><span></span><span></span><span></span><span></span></span>
         
         <!-- Skeuomorphic Knobs (Visual Gamification & Delight) -->
         <div class="tv-dial-group">
           <div class="tv-dial-wrapper">
+            <div class="tv-dial-hud" id="channelDialHud">CH --</div>
             <div id="channelDial" class="tv-dial" role="slider" tabindex="0" aria-label="ជ្រើសរើសភាគ / Channel Selector" title="រំកិលឬអូសដើម្បីផ្លាស់ប្ដូរភាគ / Scroll or Drag to change episodes">
               <span class="tv-dial-line"></span>
             </div>
             <span class="tv-dial-label">CH</span>
           </div>
           <div class="tv-dial-wrapper">
+            <div class="tv-dial-hud" id="volumeDialHud">--%</div>
             <div id="volumeDial" class="tv-dial" role="slider" tabindex="0" aria-label="គ្រប់គ្រងសំឡេង / Volume Control" title="រំកិលឬអូសដើម្បីកែសំឡេង / Scroll or Drag to adjust volume">
               <span class="tv-dial-line"></span>
             </div>
@@ -625,11 +628,119 @@
       <div class="related" id="related"></div>
     </div>
 
-    <div class="hint" id="hint">
-      <span class="lang-km-block"><strong>របៀបប្រើ:</strong> បើកទំព័រនេះដោយប្រើ <code>?id=</code> (រឿង) ឬ <code>?src=</code> (ចាក់ផ្សាយ <code>.m3u8</code> ដោយផ្ទាល់)។<br />
-      ឧទាហរណ៍: <code>?id=land-of-the-condors&amp;ep=5</code> · <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code></span>
-      <span class="lang-en-block"><strong>How to use:</strong> open this page with an <code>?id=</code> (movie) or <code>?src=</code> (direct <code>.m3u8</code>) parameter.<br />
-      Examples: <code>?id=land-of-the-condors&amp;ep=5</code> · <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code></span>
+    <!-- Player Keyboard Shortcuts Panel -->
+    <div id="playerKeyboardPanel" class="player-keyboard-panel">
+      <div class="player-keyboard-content">
+        <div class="player-keyboard-header">
+          <h3>
+            <span class="lang-km-block">គ្រាប់ចុចផ្លូវកាត់សម្រាប់ការចាក់វីដេអូ</span>
+            <span class="lang-en-block">Player Keyboard Shortcuts</span>
+          </h3>
+          <button id="closePlayerKeyboardBtn" class="player-keyboard-close" aria-label="Close Shortcuts">✕</button>
+        </div>
+        <div class="player-keyboard-body">
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">Space</span>
+              <span class="keyboard-desc">or</span>
+              <span class="keyboard-key">K</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">ចាក់ / ផ្អាក</span>
+              <span class="lang-en-block">Play / Pause</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">F</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">ពេញអេក្រង់</span>
+              <span class="lang-en-block">Toggle Fullscreen</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">M</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">បិទ / បើកសំឡេង</span>
+              <span class="lang-en-block">Mute / Unmute</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">←</span>
+              <span class="keyboard-desc">/</span>
+              <span class="keyboard-key">→</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">ថយក្រោយ / ទៅមុខ ១០វិនាទី</span>
+              <span class="lang-en-block">Seek 10s Back / Forward</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">↑</span>
+              <span class="keyboard-desc">/</span>
+              <span class="keyboard-key">↓</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">បង្កើន / បន្ថយសំឡេង ១០%</span>
+              <span class="lang-en-block">Volume Up / Down 10%</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">&lt;</span>
+              <span class="keyboard-desc">/</span>
+              <span class="keyboard-key">&gt;</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">បន្ថយ / បង្កើនល្បឿនចាក់</span>
+              <span class="lang-en-block">Slow Down / Speed Up Playback</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">0</span>
+              <span class="keyboard-desc">-</span>
+              <span class="keyboard-key">9</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">ឆ្ពោះទៅ ០% - ៩០% នៃវីដេអូ</span>
+              <span class="lang-en-block">Seek to 0% - 90% of Video</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">T</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">បើក / បិទរបៀបពន្លឺ</span>
+              <span class="lang-en-block">Toggle Theater Mode</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">?</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">បើក / បិទម៉ឺនុយជំនួយនេះ</span>
+              <span class="lang-en-block">Toggle This Help Menu</span>
+            </span>
+          </div>
+          <div class="keyboard-row">
+            <div class="keyboard-keys-group">
+              <span class="keyboard-key">Esc</span>
+            </div>
+            <span class="keyboard-desc">
+              <span class="lang-km-block">ត្រឡប់ទៅទំព័រដើម</span>
+              <span class="lang-en-block">Back to Browse</span>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
     </div><!-- /#playerView -->
 

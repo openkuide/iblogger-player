@@ -1370,6 +1370,10 @@ video { width:100%; height:100%; display:block; background:#000; }
   font-family:var(--font);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: ep-btn-fade-in 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: calc(var(--btn-idx, 0) * 15ms);
 }
 .ep-btn:hover { 
   color:var(--fg); 
@@ -5357,6 +5361,197 @@ button[class*="ndm-"],
 @keyframes svg-appear {
   0%, 100% { opacity: 0.15; }
   50% { opacity: 0.85; }
+}
+
+@keyframes ep-btn-fade-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Glow Toggle Button ── */
+.tv-glow-btn {
+  background: #252528;
+  border: 1px solid #3c3c40;
+  border-radius: 6px;
+  color: #8a8a93;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+  font-family: var(--font);
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.tv-glow-btn:hover {
+  color: #fff;
+  background: #323236;
+  border-color: #555;
+}
+.tv-glow-btn.active {
+  color: #9f5afd;
+  background: #111;
+  border-color: #9f5afd;
+  box-shadow: 0 0 8px rgba(159, 90, 253, 0.5);
+}
+
+/* ── Dial HUD and Ripple Effects ── */
+.tv-dial-wrapper {
+  position: relative;
+}
+.tv-dial-hud {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px) scale(0.85);
+  background: var(--accent-grad);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+.tv-dial-wrapper:hover .tv-dial-hud,
+.tv-dial-wrapper:focus-within .tv-dial-hud,
+.tv-dial-wrapper.hud-active .tv-dial-hud {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.tv-dial::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  transform: scale(1);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  pointer-events: none;
+}
+.tv-dial:active::after {
+  transform: scale(1.3);
+  opacity: 1;
+  transition: 0s;
+}
+.tv-dial.ripple-effect::after {
+  animation: dial-ripple-anim 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes dial-ripple-anim {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ── Player Keyboard Shortcuts Panel ── */
+.player-keyboard-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+.player-keyboard-panel.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.player-keyboard-content {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  color: var(--fg);
+  font-family: var(--font, sans-serif);
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.player-keyboard-panel.active .player-keyboard-content {
+  transform: scale(1);
+}
+.player-keyboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+.player-keyboard-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.player-keyboard-close {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s;
+}
+.player-keyboard-close:hover {
+  background: var(--bg-elev-2);
+}
+.player-keyboard-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── History Card Completed State ── */
+.history-progress-bar.completed .history-progress-fill {
+  background: linear-gradient(90deg, #ffd700, #ffb700) !important;
+}
+
+/* ── Rating Dialog Tooltip ── */
+.rating-dialog-tooltip {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  color: var(--fg-2);
+  min-height: 16px;
+  transition: color 0.15s ease;
+}
+
+/* ── Theater Mode Max Width Transition ── */
+header, .info, #episodesWrap, #relatedWrap, .ad, footer, .hint, .wrap {
+  transition: opacity 0.45s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.45s ease-in-out, max-width 0.45s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+body.theater-mode .wrap {
+  max-width: 1350px !important;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 

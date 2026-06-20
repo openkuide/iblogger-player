@@ -322,6 +322,65 @@ function initializeVideoPlayer(videoEl) {
       ambientCtx.fillRect(0, 0, ambientCanvas.width, ambientCanvas.height);
     });
   }
+  // ── Glow Toggle Button Logic ──
+  const glowBtn = document.getElementById("glowToggle");
+  if (glowBtn && !glowBtn.dataset.bound) {
+    glowBtn.dataset.bound = 'true';
+    let glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
+
+    const applyGlowLevel = (level) => {
+      let opacity = 0.55;
+      if (level === "off") opacity = 0;
+      else if (level === "low") opacity = 0.25;
+      else if (level === "medium") opacity = 0.55;
+      else if (level === "high") opacity = 0.85;
+
+      const ambientCanvas = document.getElementById("ambientGlowCanvas");
+      if (ambientCanvas) {
+        ambientCanvas.style.setProperty("--glow-opacity", opacity);
+        if (!player.paused()) {
+          const tv = document.querySelector('.tv');
+          if (tv && tv.classList.contains("playing")) {
+            ambientCanvas.style.opacity = opacity;
+          }
+        }
+      }
+
+      if (level === "off") {
+        glowBtn.classList.remove("active");
+        glowBtn.style.color = "";
+        glowBtn.style.borderColor = "";
+      } else {
+        glowBtn.classList.add("active");
+        if (level === "low") {
+          glowBtn.style.color = "rgba(159, 90, 253, 0.6)";
+          glowBtn.style.borderColor = "rgba(159, 90, 253, 0.6)";
+        } else if (level === "medium") {
+          glowBtn.style.color = "#9f5afd";
+          glowBtn.style.borderColor = "#9f5afd";
+        } else {
+          glowBtn.style.color = "#00f2fe";
+          glowBtn.style.borderColor = "#00f2fe";
+        }
+      }
+      localStorage.setItem("ambient_glow_level", level);
+    };
+
+    applyGlowLevel(glowLevel);
+
+    glowBtn.addEventListener("click", () => {
+      glowLevel = localStorage.getItem("ambient_glow_level") || "medium";
+      let nextLevel = "medium";
+      if (glowLevel === "off") nextLevel = "low";
+      else if (glowLevel === "low") nextLevel = "medium";
+      else if (glowLevel === "medium") nextLevel = "high";
+      else if (glowLevel === "high") nextLevel = "off";
+
+      applyGlowLevel(nextLevel);
+      playPopSound();
+      showToast(`${LANG === "km" ? "កម្រិតពន្លឺជុំវិញ" : "Ambient Glow"}: ${nextLevel.toUpperCase()}`);
+    });
+  }
 
   setupVolumeDial(player);
   return player;
@@ -413,6 +472,26 @@ let globalKeydownHandler = null;
 
 export function bindPlayerKeys() {
   if (globalKeydownHandler) return;
+
+  const panel = document.getElementById("playerKeyboardPanel");
+  const closeBtn = document.getElementById("closePlayerKeyboardBtn");
+  if (panel && !panel.dataset.bound) {
+    panel.dataset.bound = 'true';
+    panel.addEventListener("click", (ev) => {
+      if (ev.target === panel) {
+        panel.classList.remove("active");
+        playPopSound();
+      }
+    });
+  }
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = 'true';
+    closeBtn.addEventListener("click", () => {
+      panel.classList.remove("active");
+      playPopSound();
+    });
+  }
+
   globalKeydownHandler = (e) => {
     if (!window.player) return;
 
@@ -456,11 +535,28 @@ export function bindPlayerKeys() {
       showToast(`${LANG === "km" ? "កម្រិតសំឡេង" : "Volume"}: ${percent}%`);
     } else if (e.key === "Escape") {
       e.preventDefault();
+      if (panel && panel.classList.contains("active")) {
+        panel.classList.remove("active");
+        playPopSound();
+        return;
+      }
       const params = new URLSearchParams(location.search);
       const lang = params.get("lang");
       location.href = lang ? `./?lang=${lang}` : `./`;
     } else if (e.key === "k" || e.key === "K" || e.key === " ") {
       e.preventDefault();
+      // Check if countdown overlay is active
+      const countdownOverlay = document.querySelector(".vjs-countdown-overlay");
+      if (countdownOverlay && !countdownOverlay.classList.contains("vjs-completion-overlay")) {
+        // Delegate to countdown pause event
+        const cancelBtn = countdownOverlay.querySelector(".cancel-btn");
+        if (cancelBtn) {
+          // Trigger click to pause/cancel or pause countdown directly
+          const clickEvt = new MouseEvent("click", { bubbles: true, cancelable: true });
+          countdownOverlay.dispatchEvent(clickEvt);
+        }
+        return;
+      }
       if (window.player.paused()) {
         window.player.play();
       } else {
@@ -480,6 +576,12 @@ export function bindPlayerKeys() {
       e.preventDefault();
       const theaterBtn = document.getElementById("theaterToggle");
       if (theaterBtn) theaterBtn.click();
+    } else if (e.key === "?") {
+      e.preventDefault();
+      if (panel) {
+        panel.classList.toggle("active");
+        playPopSound();
+      }
     } else if (e.key >= "0" && e.key <= "9") {
       e.preventDefault();
       const percent = parseInt(e.key) / 10;
@@ -572,11 +674,27 @@ function showSpeedOverlay(rate) {
   }, 600);
 }
 
+function triggerDialRipple(dial) {
+  if (!dial) return;
+  dial.classList.remove("ripple-effect");
+  void dial.offsetWidth;
+  dial.classList.add("ripple-effect");
+  if (dial._rippleTimeout) clearTimeout(dial._rippleTimeout);
+  dial._rippleTimeout = setTimeout(() => {
+    dial.classList.remove("ripple-effect");
+  }, 400);
+}
+
 function updateVolumeDial(volume) {
   const dial = document.getElementById("volumeDial");
   if (!dial) return;
   const degrees = (volume * 240) - 120;
   dial.style.setProperty("--volume-rotate", `${degrees}deg`);
+
+  const volHud = document.getElementById("volumeDialHud");
+  if (volHud) {
+    volHud.textContent = `${Math.round(volume * 100)}%`;
+  }
 }
 
 function setupVolumeDial(player) {
@@ -610,6 +728,7 @@ function setupVolumeDial(player) {
     e.preventDefault();
     const delta = e.deltaY < 0 ? 0.05 : -0.05;
     adjustVolume(delta);
+    triggerDialRipple(dial);
   }, { passive: false });
 
   let isDragging = false;
@@ -618,6 +737,8 @@ function setupVolumeDial(player) {
 
   dial.addEventListener("mousedown", (e) => {
     isDragging = true;
+    dial.parentElement.classList.add("hud-active");
+    triggerDialRipple(dial);
     startVolume = player.volume();
     const rect = dial.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
@@ -642,16 +763,21 @@ function setupVolumeDial(player) {
   });
 
   document.addEventListener("mouseup", () => {
-    isDragging = false;
+    if (isDragging) {
+      isDragging = false;
+      dial.parentElement.classList.remove("hud-active");
+    }
   });
 
   dial.addEventListener("keydown", (e) => {
     if (e.key === "ArrowUp" || e.key === "ArrowRight") {
       e.preventDefault();
       adjustVolume(0.05);
+      triggerDialRipple(dial);
     } else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
       e.preventDefault();
       adjustVolume(-0.05);
+      triggerDialRipple(dial);
     }
   });
 }

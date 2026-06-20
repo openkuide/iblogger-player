@@ -1,6 +1,5 @@
 # Claude Code / local tooling — never publish to GitHub Pages
 .remember/
-CLAUDE.md
 .claude/settings.local.json
 
 # Source data export (input to build-db.py); db/ is the published output

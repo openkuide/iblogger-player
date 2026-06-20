@@ -143,21 +143,8 @@ function completeQuest(pageParam, config, hud) {
   // Play sparkle sound
   playSparkleSound();
 
-  // Spawn full-screen confetti Lottie overlay
-  const confetti = document.createElement('dotlottie-player');
-  confetti.setAttribute('src', 'https://lottie.host/e285a86a-733d-4c3c-83c7-9be7f61be6b5/O65Y9xKuxR.lottie');
-  confetti.setAttribute('background', 'transparent');
-  confetti.setAttribute('speed', '1');
-  confetti.style.position = 'fixed';
-  confetti.style.inset = '0';
-  confetti.style.zIndex = '9999';
-  confetti.style.pointerEvents = 'none';
-  confetti.setAttribute('autoplay', '');
-  document.body.appendChild(confetti);
-
-  setTimeout(() => {
-    confetti.remove();
-  }, 4000);
+  // Spawn full-screen canvas-based confetti particles (Offline & CDN independent)
+  spawnCanvasConfetti();
   
   // Spawn notification overlay
   let notif = document.createElement('div');
@@ -477,4 +464,44 @@ function cleanupAboutTimers() {
     breathingTimeoutId = null;
   }
   currentBreathingState = 'idle';
+}
+
+function spawnCanvasConfetti() {
+  const canvas = document.createElement('canvas');
+  Object.assign(canvas.style, { position: 'fixed', inset: '0', zIndex: '9999', pointerEvents: 'none' });
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  const colors = ['#9f5afd', '#ff007f', '#00f2fe', '#ff9f0a', '#34c759'];
+  const particles = Array.from({ length: 100 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -20 - 10,
+    r: Math.random() * 5 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: Math.random() * 4 - 2,
+    vy: Math.random() * 5 + 3,
+    rot: Math.random() * 360,
+    vRot: Math.random() * 4 - 2
+  }));
+
+  const start = performance.now();
+  requestAnimationFrame(function animate(t) {
+    const elapsed = t - start;
+    if (elapsed > 3500) return canvas.remove();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const opacity = elapsed > 2800 ? 1 - (elapsed - 2800) / 700 : 1;
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vRot;
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rot * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+      ctx.restore();
+    });
+    requestAnimationFrame(animate);
+  });
 }

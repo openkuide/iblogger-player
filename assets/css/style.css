@@ -5316,5 +5316,48 @@ button[class*="ndm-"],
   animation: slideInUpNext 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
+/* Custom Animated SVG Empty State Illustration */
+.empty-state-illustration {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-svg {
+  width: 72px;
+  height: 72px;
+  color: var(--accent);
+}
+.svg-glass {
+  animation: svg-scan 4s ease-in-out infinite;
+  transform-origin: 11px 11px;
+}
+.svg-handle {
+  animation: svg-wobble 4s ease-in-out infinite;
+  transform-origin: 21px 21px;
+}
+.svg-dash-1 {
+  animation: svg-appear 4s ease-in-out infinite;
+}
+.svg-dash-2 {
+  animation: svg-appear 4s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+@keyframes svg-scan {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.15) translate(-1.5px, -1.5px); }
+}
+@keyframes svg-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+}
+@keyframes svg-appear {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.85; }
+}
+
 
 

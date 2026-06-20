@@ -22,12 +22,18 @@ case "$file_path" in
     fi
 
     # 2. No console.log in production code (SonarQube rule — use console.error/warn)
-    #    Skips commented-out lines (starting with optional whitespace then //)
-    if grep -En '^[^/]*console\.log' "$file_path" | grep -q .; then
-      echo "BLOCKED: console.log found in $file_path. Use console.error / console.warn instead:" >&2
-      grep -En '^[^/]*console\.log' "$file_path" >&2
-      exit 2
-    fi
+    #    Skips commented-out lines and test files (tests/ dir uses console.log intentionally)
+    case "$file_path" in
+      */tests/*)
+        ;;  # test runner output — console.log is correct here
+      *)
+        if grep -En '^[^/]*console\.log' "$file_path" | grep -q .; then
+          echo "BLOCKED: console.log found in $file_path. Use console.error / console.warn instead:" >&2
+          grep -En '^[^/]*console\.log' "$file_path" >&2
+          exit 2
+        fi
+        ;;
+    esac
 
     # 3. No var declarations (use const / let)
     if grep -En '(^|[;{(,])\s*var\s' "$file_path" | grep -q .; then

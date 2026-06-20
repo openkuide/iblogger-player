@@ -36,9 +36,9 @@ async function verifyInitialMovieCards(page) {
 
 async function testGridViewToggle(page) {
   console.log('[TEST CATALOG] Toggling to List View...');
-  await page.waitForSelector('.view-toggle button[title="List"]');
+  await page.waitForSelector('.view-toggle button[data-view="list"]');
   await page.evaluate(() => {
-    const btn = document.querySelector('.view-toggle button[title="List"]');
+    const btn = document.querySelector('.view-toggle button[data-view="list"]');
     if (btn) btn.click();
   });
   

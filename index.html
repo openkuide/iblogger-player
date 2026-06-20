@@ -46,7 +46,7 @@
         <a href="?mode=shorts" class="pill" id="shortsToggle" style="text-decoration:none; position:relative; overflow:visible;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;margin-top:-2px;"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 8l6 4-6 4V8z" fill="currentColor"/></svg>Shorts<span class="shorts-hot-badge">🔥</span>
         </a>
-        <button id="langToggle" class="lang-toggle-btn" aria-label="Switch language" title="Switch language">
+        <button id="langToggle" class="lang-toggle-btn" aria-label="ប្តូរភាសា / Switch language" title="ប្តូរភាសា / Switch language">
           <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -54,7 +54,7 @@
           </svg>
           <span class="lang-label">EN</span>
         </button>
-        <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <button id="themeToggle" class="theme-toggle-btn" aria-label="ប្តូររូបរាងពន្លឺ/ងងឹត / Toggle theme" title="ប្តូររូបរាងពន្លឺ/ងងឹត / Toggle theme">
           <!-- Sun icon -->
           <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
@@ -148,7 +148,7 @@
                class="history-card" 
                :href="'?id=' + encodeURIComponent(item.slug) + '&ep=' + encodeURIComponent(item.lastEpisode)">
               <div class="history-poster-wrap">
-                <button class="history-delete-btn" @click.prevent.stop="deleteHistoryItem(item.slug)" aria-label="Remove from History" title="Remove from History">✕</button>
+                <button class="history-delete-btn" @click.prevent.stop="deleteHistoryItem(item.slug)" :aria-label="lang === 'km' ? 'ដកចេញពីប្រវត្តិ' : 'Remove from History'" :title="lang === 'km' ? 'ដកចេញពីប្រវត្តិ' : 'Remove from History'">✕</button>
                 <!-- Fallback poster if broken or missing -->
                 <div v-if="!item.poster || item.imgFailed" class="history-fallback-poster">
                   <svg class="fallback-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -187,7 +187,7 @@
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <button v-if="search" @click="search = ''" class="search-clear-btn" aria-label="Clear Search">✕</button>
+            <button v-if="search" @click="search = ''" class="search-clear-btn" :aria-label="lang === 'km' ? 'សម្អាតការស្វែងរក' : 'Clear Search'">✕</button>
 
             <!-- Search Suggestions Dropdown (Recognition over Recall) -->
             <div class="search-suggestions" v-if="searchFocused && (recentSearches.length > 0 || trendingSuggestions.length > 0)" @mousedown.prevent>
@@ -201,7 +201,7 @@
                   <button v-for="query in recentSearches" :key="query" class="ss-chip recent" @click="selectSearchSuggestion(query)">
                     <span class="ss-chip-icon">🕒</span>
                     <span class="ss-chip-text">{{ query }}</span>
-                    <span class="ss-chip-delete" @click.stop="deleteRecentSearch(query)" aria-label="Remove search history">✕</span>
+                    <span class="ss-chip-delete" @click.stop="deleteRecentSearch(query)" :aria-label="lang === 'km' ? 'ដកចេញពីប្រវត្តិស្វែងរក' : 'Remove search history'">✕</span>
                   </button>
                 </div>
               </div>
@@ -235,20 +235,20 @@
           </div>
           <div class="toolbar-actions">
             <!-- Surprise Me Button (Hick's Law / Friction Reduction) -->
-            <button class="surprise-btn" :class="{ 'nudge-active': nudgeSurprise }" @click="surpriseMe" aria-label="Surprise Me (Random Movie)" title="Surprise Me (Random Movie)">
+            <button class="surprise-btn" :class="{ 'nudge-active': nudgeSurprise }" @click="surpriseMe" :aria-label="lang === 'km' ? 'ជ្រើសរើសរឿងចៃដន្យ' : 'Surprise Me (Random Movie)'" :title="lang === 'km' ? 'ជ្រើសរើសរឿងចៃដន្យ' : 'Surprise Me (Random Movie)'">
               <span class="surprise-dice">🎲</span>
               <span>{{ lang === 'km' ? 'ចៃដន្យ' : 'Surprise' }}</span>
             </button>
-            <button class="filter-toggle" :class="{active: showFilters}" @click="showFilters = !showFilters" aria-label="Toggle filters">
+            <button class="filter-toggle" :class="{active: showFilters}" @click="showFilters = !showFilters" :aria-label="lang === 'km' ? 'បើក/បិទតម្រង' : 'Toggle filters'">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
               <span>តម្រង</span>
               <span v-if="activeFilterCount > 0" class="filter-badge">{{ activeFilterCount }}</span>
             </button>
-            <div class="view-toggle" aria-label="View mode">
-              <button :class="{on:!listView}" @click="listView=false" title="Grid">&#x229E;</button>
-              <button :class="{on:listView}"  @click="listView=true"  title="List">&#x2630;</button>
+            <div class="view-toggle" :aria-label="lang === 'km' ? 'របៀបមើល' : 'View mode'">
+              <button :class="{on:!listView}" @click="listView=false" :title="lang === 'km' ? 'ក្រឡា' : 'Grid'" data-view="grid">&#x229E;</button>
+              <button :class="{on:listView}"  @click="listView=true"  :title="lang === 'km' ? 'បញ្ជី' : 'List'" data-view="list">&#x2630;</button>
             </div>
           </div>
         </div>
@@ -477,7 +477,7 @@
         <!-- Pager -->
         <div class="pager" v-if="!loading && pages>1">
           <!-- Prev button -->
-          <button :disabled="page<=1" @click="gotoPage(page-1)" aria-label="Previous Page">
+          <button :disabled="page<=1" @click="gotoPage(page-1)" :aria-label="lang === 'km' ? 'ទំព័រមុន' : 'Previous Page'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
@@ -492,7 +492,7 @@
           </template>
 
           <!-- Next button -->
-          <button :disabled="page>=pages" @click="gotoPage(page+1)" aria-label="Next Page">
+          <button :disabled="page>=pages" @click="gotoPage(page+1)" :aria-label="lang === 'km' ? 'ទំព័របន្ទាប់' : 'Next Page'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
@@ -503,7 +503,7 @@
             <span class="jump-label">ទៅទំព័រ</span>
             <input type="number" :min="1" :max="pages" :value="page"
                    @change="gotoPage(+$event.target.value)"
-                   aria-label="Page number input" />
+                   :aria-label="lang === 'km' ? 'លេខទំព័រ' : 'Page number input'" />
           </div>
         </div>
 
@@ -535,21 +535,21 @@
           </div>
         </div>
       <div class="tv-strip">
-        <span class="tv-led" role="button" tabindex="0" aria-label="Toggle Play/Pause" title="Toggle Play/Pause"></span>
-        <span class="tv-power" role="button" tabindex="0" aria-label="Toggle Play/Pause" title="Toggle Play/Pause">Power</span>
-        <button id="theaterToggle" class="tv-theater-btn" title="Theater Mode (Dim Page)">Theater</button>
+        <span class="tv-led" role="button" tabindex="0" aria-label="ចាក់/ផ្អាក / Toggle Play/Pause" title="ចាក់/ផ្អាក / Toggle Play/Pause"></span>
+        <span class="tv-power" role="button" tabindex="0" aria-label="ចាក់/ផ្អាក / Toggle Play/Pause" title="ចាក់/ផ្អាក / Toggle Play/Pause">Power</span>
+        <button id="theaterToggle" class="tv-theater-btn" title="របៀបពន្លឺ / Theater Mode">Theater</button>
         <span class="tv-grille"><span></span><span></span><span></span><span></span></span>
         
         <!-- Skeuomorphic Knobs (Visual Gamification & Delight) -->
         <div class="tv-dial-group">
           <div class="tv-dial-wrapper">
-            <div id="channelDial" class="tv-dial" role="slider" tabindex="0" aria-label="Channel Selector (Episodes)" title="Scroll or Drag to change episodes">
+            <div id="channelDial" class="tv-dial" role="slider" tabindex="0" aria-label="ជ្រើសរើសភាគ / Channel Selector" title="រំកិលឬអូសដើម្បីផ្លាស់ប្ដូរភាគ / Scroll or Drag to change episodes">
               <span class="tv-dial-line"></span>
             </div>
             <span class="tv-dial-label">CH</span>
           </div>
           <div class="tv-dial-wrapper">
-            <div id="volumeDial" class="tv-dial" role="slider" tabindex="0" aria-label="Volume Control" title="Scroll or Drag to adjust volume">
+            <div id="volumeDial" class="tv-dial" role="slider" tabindex="0" aria-label="គ្រប់គ្រងសំឡេង / Volume Control" title="រំកិលឬអូសដើម្បីកែសំឡេង / Scroll or Drag to adjust volume">
               <span class="tv-dial-line"></span>
             </div>
             <span class="tv-dial-label">VOL</span>
@@ -626,10 +626,10 @@
     </div>
 
     <div class="hint" id="hint">
-      <strong>How to use:</strong> open this page with an <code>?id=</code> (movie) or
-      <code>?src=</code> (direct <code>.m3u8</code>) parameter.<br />
-      Examples: <code>?id=land-of-the-condors&amp;ep=5</code> ·
-      <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code>
+      <span class="lang-km-block"><strong>របៀបប្រើ:</strong> បើកទំព័រនេះដោយប្រើ <code>?id=</code> (រឿង) ឬ <code>?src=</code> (ចាក់ផ្សាយ <code>.m3u8</code> ដោយផ្ទាល់)។<br />
+      ឧទាហរណ៍: <code>?id=land-of-the-condors&amp;ep=5</code> · <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code></span>
+      <span class="lang-en-block"><strong>How to use:</strong> open this page with an <code>?id=</code> (movie) or <code>?src=</code> (direct <code>.m3u8</code>) parameter.<br />
+      Examples: <code>?id=land-of-the-condors&amp;ep=5</code> · <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code></span>
     </div>
     </div><!-- /#playerView -->
 

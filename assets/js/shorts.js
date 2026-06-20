@@ -120,15 +120,15 @@ const Templates = {
           </div>
         </div>
         <div class="short-reactions-bar">
-          <button class="short-reaction-btn-emoji" data-emoji="❤️" aria-label="Reaction Heart">❤️</button>
-          <button class="short-reaction-btn-emoji" data-emoji="😂" aria-label="Reaction Laugh">😂</button>
-          <button class="short-reaction-btn-emoji" data-emoji="😮" aria-label="Reaction Wow">😮</button>
-          <button class="short-reaction-btn-emoji" data-emoji="😢" aria-label="Reaction Sad">😢</button>
+          <button class="short-reaction-btn-emoji" data-emoji="❤️" aria-label="${LANG === 'km' ? 'ប្រតិកម្មចូលចិត្ត' : 'Reaction Heart'}">❤️</button>
+          <button class="short-reaction-btn-emoji" data-emoji="😂" aria-label="${LANG === 'km' ? 'ប្រតិកម្មសើច' : 'Reaction Laugh'}">😂</button>
+          <button class="short-reaction-btn-emoji" data-emoji="😮" aria-label="${LANG === 'km' ? 'ប្រតិកម្មភ្ញាក់ផ្អើល' : 'Reaction Wow'}">😮</button>
+          <button class="short-reaction-btn-emoji" data-emoji="😢" aria-label="${LANG === 'km' ? 'ប្រតិកម្មសោក' : 'Reaction Sad'}">😢</button>
         </div>
         <div class="short-audio-track">
           <svg class="short-audio-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
           <div style="overflow:hidden; flex:1;">
-            <div class="short-audio-marquee">Original Sound - iblogger</div>
+            <div class="short-audio-marquee">${LANG === 'km' ? 'សំឡេងដើម - iblogger' : 'Original Sound - iblogger'}</div>
           </div>
         </div>
       </div>
@@ -146,19 +146,19 @@ const Templates = {
           </button>
         </div>
         <div class="short-action-item">
-          <button class="short-action-btn like-btn" aria-label="Like" title="Like">
+          <button class="short-action-btn like-btn" aria-label="${LANG === 'km' ? 'ចូលចិត្ត' : 'Like'}" title="${LANG === 'km' ? 'ចូលចិត្ត' : 'Like'}">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
           <span class="short-action-label like-count">${formatStat(stats.likes)}</span>
         </div>
         <div class="short-action-item">
-          <button class="short-action-btn comment-btn" aria-label="Comment">
+          <button class="short-action-btn comment-btn" aria-label="${LANG === 'km' ? 'មតិយោបល់' : 'Comment'}">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
           </button>
           <span class="short-action-label">${formatStat(stats.comments)}</span>
         </div>
         <div class="short-action-item">
-          <button class="short-action-btn share-btn" aria-label="Share">
+          <button class="short-action-btn share-btn" aria-label="${LANG === 'km' ? 'ចែករំលែក' : 'Share'}">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
           </button>
           <span class="short-action-label">${formatStat(stats.shares)}</span>
@@ -170,7 +170,7 @@ const Templates = {
           <span class="short-action-label sound-label">${soundUi.label}</span>
         </div>
         <div class="short-action-item">
-          <button class="short-action-btn keyboard-btn" aria-label="Keyboard Shortcuts" title="Keyboard Shortcuts">
+          <button class="short-action-btn keyboard-btn" aria-label="${LANG === 'km' ? 'ផ្លូវកាត់ក្តារចុច' : 'Keyboard Shortcuts'}" title="${LANG === 'km' ? 'ផ្លូវកាត់ក្តារចុច' : 'Keyboard Shortcuts'}">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="10" y1="12" x2="10" y2="12"></line><line x1="14" y1="12" x2="14" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
           </button>
           <span class="short-action-label lang-km-block">គ្រាប់ចុច</span>

@@ -137,7 +137,7 @@ function initializeVideoPlayer(videoEl) {
     if (led) led.classList.remove('playing-state');
   });
   player.on("waiting", () => {
-    showLoader("Buffering…");
+    showLoader(LANG === "km" ? "កំពុងបង្កើនល្បឿន..." : "Buffering…");
     const tv = document.querySelector('.tv');
     if (tv) tv.classList.remove('playing');
   });
@@ -153,8 +153,10 @@ function initializeVideoPlayer(videoEl) {
     if (onProgressCallback) onProgressCallback(player.currentTime(), player.duration());
   });
   player.on("error", () => {
-    showStatus("⚠️ Could not load this stream.<br>This is usually a " +
-      "<strong>CORS</strong> restriction on the source server, or the link is offline.", true);
+    showStatus(LANG === "km"
+      ? "⚠️ មិនអាចទាញយកការផ្សាយនេះបានទេ។<br>ជាទូទៅបណ្តាលមកពីការដាក់កម្រិត <strong>CORS</strong> នៅម៉ាស៊ីនមេប្រភព ឬតំណភ្ជាប់ Off-line។"
+      : "⚠️ Could not load this stream.<br>This is usually a <strong>CORS</strong> restriction on the source server, or the link is offline.",
+      true);
   });
 
   const qualityLevels = player.qualityLevels();
@@ -328,7 +330,7 @@ function initializeVideoPlayer(videoEl) {
 export function playSource(url, videoEl) {
   const statusEl = document.getElementById("status");
   if (statusEl) statusEl.style.display = "none";
-  showLoader("Loading…");
+  showLoader(LANG === "km" ? "កំពុងផ្ទុក..." : "Loading…");
 
   const isHls = /\.m3u8(\?|$)/i.test(url) || /index\.single$/i.test(url) || true;
 

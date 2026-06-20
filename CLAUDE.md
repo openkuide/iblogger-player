@@ -112,6 +112,14 @@ Before making any changes or pushing to remote, follow this strict loop to refin
 - `/add-movie <url> <title> <hints>` — add a Douyin short or multi-episode drama to `db/` and register in `db/index.json`.
 - `/enrich-movie <slug>` or `/enrich-movie --all` — refresh metadata from web research (dramas) or rewrite description (Douyin shorts); generate SVG poster if missing.
 - `/suggest` — audit UI/UX/code/a11y across 7 lenses, present numbered options, implement what you pick, then commit and push.
+- `/validate-catalog` — full integrity audit: missing fields, count mismatches, orphan files, dead streams; auto-fix safe issues.
+- `/fix-genres <slug>` or `/fix-genres --all` — infer and correct genre tags from title/description; shows diff before writing.
+- `/sync-episodes <slug>` — append new episodes to a still-airing drama (auto-detects cN URL pattern).
+- `/add-season <slug> <first-ep-url> <count>` — append a full new season with continuous episode numbering.
+- `/generate-poster <slug>` or `/generate-poster --missing` — generate genre-themed SVG poster (300×450) into `db/posters/`.
+- `/find-duplicates` — detect same content under different slugs (exact title, fuzzy match, same URL); merge or delete.
+- `/translate-desc <slug>` or `/translate-desc --all` — fill missing EN or KM side of title/description.
+- `/audit-links` or `/audit-links <slug>` — curl HEAD each HLS URL; report live/CORS/dead with optional cleanup.
 - `.claude/settings.local.json`, `.remember/`, and this file are gitignored on purpose (everything in the repo root is published to GitHub Pages).
 
 ## Diagnosing `index.html` issues

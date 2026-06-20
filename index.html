@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iblogger Player</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23ff007f'/><stop offset='50%' stop-color='%237b2cbf'/><stop offset='100%' stop-color='%2300f2fe'/></linearGradient></defs><circle cx='13' cy='16' r='10' stroke='url(%23g)' stroke-width='2.5' fill='none'/><path d='M11 11L18 16L11 21V11Z' fill='url(%23g)'/><path d='M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z' transform='translate(13.5,13.5) scale(0.55)' fill='%23ffffff' stroke='url(%23g)' stroke-width='1.8' stroke-linejoin='round'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kantumruy+Pro:wght@400;500;600;700&display=swap" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css"
+    integrity="sha512-7ygWwJCkEsI7sNqXtHyZv+W9eCZwAgNcYwaV7tdLvWtDxTmASJLyigHOhufdziF812S99GnAM8JuDIc2+Ppkiw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div id="scrollProgress" class="scroll-progress"></div>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="./" style="text-decoration:none;color:inherit;">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff007f"/>
+                <stop offset="50%" stop-color="#7b2cbf"/>
+                <stop offset="100%" stop-color="#00f2fe"/>
+              </linearGradient>
+            </defs>
+            <!-- Play circle -->
+            <circle cx="13" cy="16" r="10" stroke="url(#logoGrad)" stroke-width="2.5" fill="none"/>
+            <!-- Play triangle -->
+            <path d="M11 11L18 16L11 21V11Z" fill="url(#logoGrad)"/>
+            <!-- Custom Mouse Cursor -->
+            <path class="logo-cursor" d="M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z" fill="#ffffff" stroke="url(#logoGrad)" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>iblogger <span class="sub">player</span></span>
+      </a>
+      <div class="header-actions" style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+        <a href="?mode=shorts" class="pill" id="shortsToggle" style="text-decoration:none; position:relative; overflow:visible;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;margin-top:-2px;"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 8l6 4-6 4V8z" fill="currentColor"/></svg>Shorts<span class="shorts-hot-badge">🔥</span>
+        </a>
+        <button id="langToggle" class="lang-toggle-btn" aria-label="Switch language" title="Switch language">
+          <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span class="lang-label">EN</span>
+        </button>
+        <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle light/dark theme" title="Toggle theme">
+          <!-- Sun icon -->
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- Moon icon -->
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <span class="pill">HLS</span>
+      </div>
+    </header>
+
+    <!-- Home / browse view (shown when no ?id= or ?src=) -->
+    <div id="homeView" style="display:none;">
+      <div id="homeApp">
+
+        <!-- Featured Movies Hero Carousel -->
+        <div v-if="!loading && featuredMovies.length > 0" class="hero-carousel">
+          <div class="hc-slides">
+            <div v-for="(m, idx) in featuredMovies" :key="m.slug" 
+                 class="hc-slide" :class="{ active: currentSlide === idx }">
+              
+              <!-- Backdrop blurred image of the poster for a premium cinema effect -->
+              <div class="slide-backdrop" :style="{ backgroundImage: 'url(' + m.poster + ')' }"></div>
+              
+              <!-- Slide contents -->
+              <div class="slide-content">
+                <div class="slide-badges">
+                  <span class="slide-badge rating">★ {{ m.rating || 'N/A' }}</span>
+                  <span v-if="m.year" class="slide-badge year">{{ m.year }}</span>
+                  <span v-if="m.episodeCount" class="slide-badge eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
+                  <span class="slide-badge country">{{ m.country === 'Korea' ? 'កូរ៉េ' : (m.country === 'Hong Kong' ? 'ហុងកុង' : (m.country === 'China' ? 'ចិន' : 'ផ្សេងៗ')) }}</span>
+                </div>
+                <h2 class="slide-title-km">{{ m.title.km || m.title.en }}</h2>
+                <h3 v-if="m.title.km && m.title.en" class="slide-title-en">{{ m.title.en }}</h3>
+                <p class="slide-desc" v-if="m.genres && m.genres.length">
+                  {{ lang === 'km' ? 'ប្រភេទ៖' : 'Genres:' }} {{ m.genres.slice(0, 3).map(translateGenre).join(', ') }}
+                </p>
+                <a :href="'?id=' + encodeURIComponent(m.slug)" class="slide-btn">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  <span>ទស្សនាឥឡូវនេះ (Watch Now)</span>
+                </a>
+              </div>
+              
+              <!-- Left poster display -->
+              <div class="slide-poster-wrap">
+                <img :src="m.poster" class="slide-poster" :alt="title(m)" />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Carousel Navigation Dots -->
+          <div class="hc-dots">
+            <button v-for="(m, idx) in featuredMovies" :key="idx" 
+                    :class="{ active: currentSlide === idx }" 
+                    @click="setSlide(idx)" 
+                    :aria-label="'Go to slide ' + (idx + 1)"></button>
+          </div>
+
+          <!-- Jakob's Law: Carousel prev/next arrows (users expect these) -->
+          <button class="hc-arrow prev" @click="setSlide(currentSlide > 0 ? currentSlide - 1 : featuredMovies.length - 1)" aria-label="Previous slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="hc-arrow next" @click="setSlide(currentSlide < featuredMovies.length - 1 ? currentSlide + 1 : 0)" aria-label="Next slide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+
+        <!-- Continue Watching (Recently Watched) -->
+        <div v-if="!loading && watchHistory.length > 0" class="history-section">
+          <h3 class="section-title-home">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            បន្តទស្សនា (Continue Watching)
+          </h3>
+          <div class="history-scroll-row">
+            <a v-for="item in watchHistory" :key="item.slug" 
+               class="history-card" 
+               :href="'?id=' + encodeURIComponent(item.slug) + '&ep=' + encodeURIComponent(item.lastEpisode)">
+              <div class="history-poster-wrap">
+                <button class="history-delete-btn" @click.prevent.stop="deleteHistoryItem(item.slug)" aria-label="Remove from History" title="Remove from History">✕</button>
+                <!-- Fallback poster if broken or missing -->
+                <div v-if="!item.poster || item.imgFailed" class="history-fallback-poster">
+                  <svg class="fallback-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                  </svg>
+                </div>
+                <img v-else class="history-poster" :src="item.poster" :alt="title(item)" @error="item.imgFailed = true" />
+                <div class="history-overlay">
+                  <div class="play-btn-circle-sm">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                </div>
+                <!-- Zeigarnik Effect: progress bar shows how far user got — compels completion -->
+                <div class="history-progress-bar" v-if="item.progress">
+                  <div class="history-progress-fill" :style="{ width: Math.min(item.progress, 100) + '%' }"></div>
+                </div>
+              </div>
+              <div class="history-info">
+                <div class="history-title">{{ title(item) }}</div>
+                <div class="history-episode">{{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(item.lastEpisode) : 'Episode ' + item.lastEpisode }}</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Toolbar: search + toggle filters + view toggle -->
+        <div class="home-toolbar">
+          <div class="search" :class="{ 'nudge-active': nudgeSearch }">
+            <input v-model="search" type="search" :placeholder="searchPlaceholder" autocomplete="off" id="searchInput" title="Press / or Ctrl+K to search" accesskey="/" @focus="searchFocused = true" @blur="searchFocused = false" @keydown.enter="saveSearchQuery(search)" />
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <button v-if="search" @click="search = ''" class="search-clear-btn" aria-label="Clear Search">✕</button>
+
+            <!-- Search Suggestions Dropdown (Recognition over Recall) -->
+            <div class="search-suggestions" v-if="searchFocused && (recentSearches.length > 0 || trendingSuggestions.length > 0)" @mousedown.prevent>
+              <!-- Recent Searches Section -->
+              <div class="ss-section" v-if="recentSearches.length > 0">
+                <div class="ss-title">
+                  <span>{{ lang === 'km' ? 'ស្វែងរកថ្មីៗ' : 'Recent Searches' }}</span>
+                  <button class="ss-clear-all" @click="clearRecentSearches">{{ lang === 'km' ? 'លុបទាំងអស់' : 'Clear All' }}</button>
+                </div>
+                <div class="ss-chips">
+                  <button v-for="query in recentSearches" :key="query" class="ss-chip recent" @click="selectSearchSuggestion(query)">
+                    <span class="ss-chip-icon">🕒</span>
+                    <span class="ss-chip-text">{{ query }}</span>
+                    <span class="ss-chip-delete" @click.stop="deleteRecentSearch(query)" aria-label="Remove search history">✕</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Mood-Based Suggestions Section (Hick's Law / Choice Reduction) -->
+              <div class="ss-section">
+                <div class="ss-title">
+                  <span>{{ lang === 'km' ? 'ស្វែងរកតាមអារម្មណ៍' : 'Search by Mood' }}</span>
+                </div>
+                <div class="ss-chips mood-chips">
+                  <button v-for="mood in MOODS" :key="mood.label.en" class="ss-chip mood" @click="selectMood(mood)">
+                    <span class="ss-chip-icon">{{ mood.icon }}</span>
+                    <span class="ss-chip-text">{{ lang === 'km' ? mood.label.km : mood.label.en }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Trending / Suggested Section -->
+              <div class="ss-section" v-if="trendingSuggestions.length > 0">
+                <div class="ss-title">
+                  <span>{{ lang === 'km' ? 'ប្រភេទ និងរឿងពេញនិយម' : 'Trending Genres & Movies' }}</span>
+                </div>
+                <div class="ss-chips">
+                  <button v-for="tag in trendingSuggestions" :key="tag" class="ss-chip trending" @click="selectSearchSuggestion(tag)">
+                    <span class="ss-chip-icon">🔥</span>
+                    <span class="ss-chip-text">{{ tag }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="toolbar-actions">
+            <!-- Surprise Me Button (Hick's Law / Friction Reduction) -->
+            <button class="surprise-btn" :class="{ 'nudge-active': nudgeSurprise }" @click="surpriseMe" aria-label="Surprise Me (Random Movie)" title="Surprise Me (Random Movie)">
+              <span class="surprise-dice">🎲</span>
+              <span>{{ lang === 'km' ? 'ចៃដន្យ' : 'Surprise' }}</span>
+            </button>
+            <button class="filter-toggle" :class="{active: showFilters}" @click="showFilters = !showFilters" aria-label="Toggle filters">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <span>តម្រង</span>
+              <span v-if="activeFilterCount > 0" class="filter-badge">{{ activeFilterCount }}</span>
+            </button>
+            <div class="view-toggle" aria-label="View mode">
+              <button :class="{on:!listView}" @click="listView=false" title="Grid">&#x229E;</button>
+              <button :class="{on:listView}"  @click="listView=true"  title="List">&#x2630;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick tags: Von Restorff Effect — each has unique class for color coding -->
+        <div v-if="!loading" class="quick-tags">
+          <button class="quick-tag tag-trending" :class="{ active: currentQuickTag === 'trending', 'nudge-active': nudgeTrending }" @click="toggleQuickTag('trending')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            <span>ពេញនិយម (Trending)</span>
+          </button>
+          <button class="quick-tag tag-latest" :class="{ active: currentQuickTag === 'latest' }" @click="toggleQuickTag('latest')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>រឿងថ្មីៗ 2024-2025</span>
+          </button>
+          <button class="quick-tag tag-classic" :class="{ active: currentQuickTag === 'classic' }" @click="toggleQuickTag('classic')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><path d="M2 8h20"/><path d="m6 2 4 6"/><path d="m14 2 4 6"/></svg>
+            <span>រឿងបុរាណ / ក្បាច់គុន</span>
+          </button>
+          <button class="quick-tag tag-top" :class="{ active: currentQuickTag === 'top' }" @click="toggleQuickTag('top')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"/><path d="M12 2a5 5 0 0 0-5 5v3c0 2.76 2.24 5 5 5s5-2.24 5-5V7a5 5 0 0 0-5-5z"/></svg>
+            <span>Rating ខ្ពស់ (★ 8+)</span>
+          </button>
+        </div>
+
+        <!-- Collapsible Filter Panel -->
+        <div class="filter-panel" :class="{open: showFilters}">
+          <div class="filter-panel-inner">
+            <!-- Sort pills -->
+            <div class="filter-section">
+              <div class="filter-section-title">តម្រៀបតាម</div>
+              <div class="scroll-row">
+                <button v-for="s in SORTS" :key="s.value"
+                  class="sort-pill" :class="{active:sort===s.value}"
+                  @click="sort=s.value">{{ s.label }}</button>
+              </div>
+            </div>
+
+            <!-- Year + Rating + Country quick filters -->
+            <div class="filter-rows-wrapper">
+              <div class="filter-row">
+                <span class="filter-row-label">ឆ្នាំ</span>
+                <div class="scroll-row" style="display:flex; align-items:center; gap:8px;">
+                  <button v-for="y in YEARS" :key="y.value"
+                    class="sort-pill" :class="{active:yearFilter===y.value}"
+                    @click="yearFilter=y.value">{{ y.label }}</button>
+                  
+                  <!-- Dropdown select for specific years -->
+                  <div class="select-wrapper" :class="{ active: yearFilter && !['', '2020+', '2010', 'old'].includes(yearFilter) }">
+                    <select v-model="yearFilter" class="year-select" :class="{ active: yearFilter && !['', '2020+', '2010', 'old'].includes(yearFilter) }">
+                      <option value="">-- ឆ្នាំជាក់លាក់ (Select Year) --</option>
+                      <option v-for="yr in allYears" :key="yr" :value="String(yr)">{{ yr }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-row">
+                <span class="filter-row-label">Rating</span>
+                <div class="scroll-row">
+                  <button v-for="r in RATINGS" :key="r.value"
+                    class="sort-pill" :class="{active:minRating===r.value}"
+                    @click="minRating=r.value">{{ r.label }}</button>
+                </div>
+              </div>
+              <div class="filter-row">
+                <span class="filter-row-label">ប្រទេស</span>
+                <div class="scroll-row">
+                  <button v-for="c in COUNTRIES" :key="c.value"
+                    class="sort-pill" :class="{active:countryFilter===c.value}"
+                    @click="countryFilter=c.value">{{ c.label }}</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Genre chips (multi-select) -->
+            <div class="filter-section">
+              <div class="filter-section-title">ប្រភេទ</div>
+              <div class="genres-bar scroll-row">
+                <button class="genre-chip" :class="{active:activeGenres.length===0}" @click="activeGenres=[]">ទាំងអស់</button>
+                <button v-for="g in allGenres" :key="g"
+                  class="genre-chip" :class="{active:activeGenres.includes(g)}"
+                  @click="toggleGenre(g)">{{ translateGenre(g) }}</button>
+              </div>
+            </div>
+            
+            <div v-if="hasFilters" class="filter-clear-wrapper">
+              <button class="clear-chip" @click="clearAll">✕ សំអាតទាំងអស់ (Clear All)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Count line -->
+        <div class="home-count" v-if="!loading">
+          {{ lang === 'km' ? toKhmerNumerals(filtered.length) : filtered.length }} រឿង<template v-if="pages>1"> · {{ lang === 'km' ? 'ទំព័រ ' + toKhmerNumerals(page) + '/' + toKhmerNumerals(pages) : 'Page ' + page + '/' + pages }}</template>
+        </div>
+
+        <!-- Skeleton while loading -->
+        <div v-if="loading" class="home-grid">
+          <div v-for="n in 12" :key="n">
+            <div class="skeleton skeleton-poster"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+          </div>
+        </div>
+
+        <!-- Movie grid / list -->
+        <div v-else-if="pageSlice.length" class="home-grid" :class="{'list-mode':listView}">
+          <a v-for="m in pageSlice" :key="m.slug"
+             class="home-card"
+             :data-slug="m.slug"
+             :class="{ 'nudge-active': nudgedCardSlug === m.slug }"
+             :href="'?id='+encodeURIComponent(m.slug)"
+             @mouseenter="onCardMouseEnter(m.slug)"
+             @mouseleave="onCardMouseLeave(m.slug)">
+
+            <!-- Grid mode -->
+            <template v-if="!listView">
+              <div class="hc-poster-wrap" :class="{ 'img-loading': !m.imgLoaded && !m.imgFailed && m.poster, 'img-failed': m.imgFailed || !m.poster }">
+                <!-- Fallback poster if failed/missing -->
+                <div v-if="m.imgFailed || !m.poster" class="hc-fallback-poster">
+                  <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                  <span class="fallback-title">{{ title(m) }}</span>
+                </div>
+                <!-- Main image with smooth load transition -->
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                     @load="m.imgLoaded = true" @error="m.imgFailed = true" />
+                <div class="hc-overlay">
+                  <div class="play-btn-circle">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                </div>
+                <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
+                <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
+                <span v-if="getMovieProgress(m.slug)" class="hc-progress-badge">
+                  ✓ {{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(getMovieProgress(m.slug).lastEpisode) : 'Ep ' + getMovieProgress(m.slug).lastEpisode }}
+                </span>
+              </div>
+              <div class="hc-title">{{ title(m) }}</div>
+              <div v-if="m.year" class="hc-year">{{ m.year }}</div>
+            </template>
+
+            <!-- List mode -->
+            <template v-else>
+              <div class="hc-poster-wrap" :class="{ 'img-loading': !m.imgLoaded && !m.imgFailed && m.poster, 'img-failed': m.imgFailed || !m.poster }">
+                <!-- Fallback poster if failed/missing -->
+                <div v-if="m.imgFailed || !m.poster" class="hc-fallback-poster">
+                  <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                </div>
+                <!-- Main image with smooth load transition -->
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                     @load="m.imgLoaded = true" @error="m.imgFailed = true" />
+                <div class="hc-overlay">
+                  <div class="play-btn-circle">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="hc-body">
+                <div class="hc-title">{{ title(m) }}</div>
+                <div class="hc-meta">
+                  <span v-if="m.rating"       class="hc-rating">&#x2605; {{ m.rating }}</span>
+                  <span v-if="m.year"         class="hc-year">{{ m.year }}</span>
+                  <span v-if="m.episodeCount" class="hc-eps">{{ lang === 'km' ? toKhmerNumerals(m.episodeCount) : m.episodeCount }} ភាគ</span>
+                  <span v-if="getMovieProgress(m.slug)" class="hc-progress-badge-list">
+                    ✓ {{ lang === 'km' ? 'ភាគ ' + toKhmerNumerals(getMovieProgress(m.slug).lastEpisode) : 'Ep ' + getMovieProgress(m.slug).lastEpisode }}
+                  </span>
+                </div>
+              </div>
+            </template>
+          </a>
+        </div>
+
+        <!-- Empty state: actionable, not just decorative (Don Norman: affordances) -->
+        <div v-else class="home-empty">
+          <dotlottie-player
+            src="https://lottie.host/742b781a-6415-46f9-8d76-e17f73c4f74d/5nZl38s8v0.lottie"
+            background="transparent"
+            speed="1"
+            style="width: 150px; height: 150px; margin: 0 auto 12px auto;"
+            loop
+            autoplay>
+          </dotlottie-player>
+          <p class="empty-title">រកមិនឃើញរឿងណាមួយ</p>
+          <p class="empty-sub">No results found. Try a different search or clear filters.</p>
+          <div class="empty-actions" style="display:flex; justify-content:center; gap:12px; margin-top:16px; flex-wrap:wrap;">
+            <button class="empty-clear-btn" @click="clearAll" v-if="hasFilters" style="margin-top:0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>{{ lang === 'km' ? 'សំអាតតម្រងទាំងអស់' : 'Clear All Filters' }}</span>
+            </button>
+            <button class="surprise-btn" @click="surpriseMe" style="padding:10px 18px; border-radius:10px; font-weight:700;">
+              <span class="surprise-dice">🎲</span>
+              <span>{{ lang === 'km' ? 'សាកល្បងរឿងចៃដន្យ' : 'Surprise Me' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pager -->
+        <div class="pager" v-if="!loading && pages>1">
+          <!-- Prev button -->
+          <button :disabled="page<=1" @click="gotoPage(page-1)" aria-label="Previous Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          
+          <!-- Sliding page numbers -->
+          <template v-for="item in pagerItems">
+            <span v-if="item.value === null" class="pager-ellipsis">{{ item.label }}</span>
+            <button v-else :class="{ active: page === item.value }" @click="gotoPage(item.value)">
+              {{ item.label }}
+            </button>
+          </template>
+
+          <!-- Next button -->
+          <button :disabled="page>=pages" @click="gotoPage(page+1)" aria-label="Next Page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+
+          <!-- Direct Page Jump -->
+          <div class="pager-jump">
+            <span class="jump-label">ទៅទំព័រ</span>
+            <input type="number" :min="1" :max="pages" :value="page"
+                   @change="gotoPage(+$event.target.value)"
+                   aria-label="Page number input" />
+          </div>
+        </div>
+
+      </div><!-- /#homeApp -->
+    </div>
+
+    <!-- Player view (shown for ?id= / ?src=) -->
+    <div id="playerView" style="display:none;">
+      <div id="detailBackdrop" class="detail-backdrop"></div>
+      <div class="player-nav">
+        <a href="./" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span class="lang-km-block">ត្រឡប់ទៅទំព័រដើម</span>
+          <span class="lang-en-block">Back to Browse</span>
+        </a>
+      </div>
+      <div class="tv">
+        <canvas id="ambientGlowCanvas" class="ambient-glow-canvas"></canvas>
+        <div class="player-box">
+          <div id="crtOsd" class="crt-osd"></div>
+          <div id="crtStatic" class="crt-static-noise"></div>
+          <video id="video" class="video-js vjs-default-skin" playsinline controlsList="nodownload"></video>
+          <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <div class="label">Loading…</div>
+          </div>
+        </div>
+      <div class="tv-strip">
+        <span class="tv-led" role="button" tabindex="0" aria-label="Toggle Play/Pause" title="Toggle Play/Pause"></span>
+        <span class="tv-power" role="button" tabindex="0" aria-label="Toggle Play/Pause" title="Toggle Play/Pause">Power</span>
+        <button id="theaterToggle" class="tv-theater-btn" title="Theater Mode (Dim Page)">Theater</button>
+        <span class="tv-grille"><span></span><span></span><span></span><span></span></span>
+        
+        <!-- Skeuomorphic Knobs (Visual Gamification & Delight) -->
+        <div class="tv-dial-group">
+          <div class="tv-dial-wrapper">
+            <div id="channelDial" class="tv-dial" role="slider" tabindex="0" aria-label="Channel Selector (Episodes)" title="Scroll or Drag to change episodes">
+              <span class="tv-dial-line"></span>
+            </div>
+            <span class="tv-dial-label">CH</span>
+          </div>
+          <div class="tv-dial-wrapper">
+            <div id="volumeDial" class="tv-dial" role="slider" tabindex="0" aria-label="Volume Control" title="Scroll or Drag to adjust volume">
+              <span class="tv-dial-line"></span>
+            </div>
+            <span class="tv-dial-label">VOL</span>
+          </div>
+        </div>
+
+        <span class="tv-brand">IBLOGGER&nbsp;TV</span>
+      </div>
+    </div>
+    <div class="tv-feet"><span></span><span></span></div>
+
+    <!-- Up Next Episode Panel -->
+    <div id="nextEpPanel" class="next-ep-panel" style="display:none;">
+      <div class="next-ep-label">បន្ទាប់ (Up Next)</div>
+      <div class="next-ep-content">
+        <span class="next-ep-title" id="nextEpTitle"></span>
+        <button class="next-ep-btn" id="nextEpBtn">
+          <span>មើលភាគបន្ត (Play Next)</span>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M5 4l12 8-12 8V4zM19 4h2v16h-2V4z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="ad" id="ad">
+      <span class="ad-tag">Ad</span>
+      <span class="ad-text"><span id="adText" class="ad-text-inner"></span></span>
+      <button class="ad-close" id="adClose" aria-label="Close ad" title="បិទ">✕</button>
+    </div>
+
+    <!-- Floating Resume Banner (Zeigarnik Effect) -->
+    <div id="resumeBanner" class="resume-banner" style="display:none;"></div>
+
+    <!-- Movie detail (shown for ?id= mode) -->
+    <div class="info" id="info" style="display:none;">
+      <img class="poster" id="poster" alt="" />
+      <div class="info-body">
+        <h1 id="infoTitle"></h1>
+        <p class="subtitle" id="infoSubtitle"></p>
+        <div class="badges" id="infoBadges"></div>
+        <div class="desc" id="infoDesc"></div>
+        <div class="info-actions">
+          <button id="copyLinkBtn" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span id="copyLinkText">ចម្លងតំណភ្ជាប់ (Copy Link)</span>
+          </button>
+          <button id="copyLinkTimeBtn" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="copyLinkTimeText">ចម្លងតំណភ្ជាប់នៅទីនេះ (Copy at Current Time)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Episodes (shown for ?id= mode) -->
+    <div id="episodesWrap" style="display:none;">
+      <div class="section-title">ភាគ <span class="count" id="epCount"></span></div>
+      <div class="episodes" id="episodes"></div>
+    </div>
+
+    <!-- Simple meta (shown for ?src= mode only) -->
+    <div class="meta" id="meta">
+      <h1 id="title">Loading…</h1>
+      <details class="source" id="source" style="display:none;">
+        <summary>Source</summary>
+        <div class="src" id="srcline"></div>
+      </details>
+      <div id="status" class="msg" style="display:none;"></div>
+    </div>
+
+    <!-- Related (shown for ?id= mode) -->
+    <div id="relatedWrap" style="display:none;">
+      <div class="section-title">រឿងដែលទាក់ទង</div>
+      <div class="related" id="related"></div>
+    </div>
+
+    <div class="hint" id="hint">
+      <strong>How to use:</strong> open this page with an <code>?id=</code> (movie) or
+      <code>?src=</code> (direct <code>.m3u8</code>) parameter.<br />
+      Examples: <code>?id=land-of-the-condors&amp;ep=5</code> ·
+      <code>?src=https://example.com/index.m3u8&amp;title=Episode%201</code>
+    </div>
+    </div><!-- /#playerView -->
+
+    <!-- Legal disclaimer view -->
+    <div id="legalView" style="display:none;">
+      <div class="meta">
+        <h1 style="border-bottom:1px solid var(--hairline);padding-bottom:10px;margin-bottom:12px;">Privacy Policy &amp; DMCA Disclaimer</h1>
+
+        <div class="legal-meta-bar">
+          <span><strong>Effective Date:</strong> 1 January 2025</span>
+          <span><strong>Last Updated:</strong> 20 June 2026</span>
+          <span><strong>Applies to:</strong> openkuide / iblogger player</span>
+        </div>
+
+        <div class="legal-card-grid">
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <h2>1. Disclaimer (ការបដិសេធ)</h2>
+            </div>
+            <p class="lang-en-block">This player does not host, store, or upload any media files, videos, or HLS streams on its servers. All content shown is sourced directly from external, public third-party servers and CDNs. We do not control and are not responsible for the content, privacy policies, or copyright practices of any third-party links.</p>
+            <p class="lang-km-block">កម្មវិធីចាក់ផ្សាយនេះមិនមានផ្ទុក រក្សាទុក ឬបង្ហោះឯកសារមេឌៀ វីដេអូ ឬការផ្សាយ HLS ណាមួយនៅលើម៉ាស៊ីនមេរបស់យើងឡើយ។ រាល់មាតិកាដែលបានបង្ហាញគឺត្រូវបានដកស្រង់ចេញពីគេហទំព័រ ឬម៉ាស៊ីនមេភាគីទីបីជាសាធារណៈ។ យើងខ្ញុំមិនគ្រប់គ្រង និងមិនទទួលខុសត្រូវចំពោះខ្លឹមសារ គោលការណ៍ឯកជនភាព ឬកម្មសិទ្ធិបញ្ញារបស់ភាគីទីបីឡើយ។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Stoic Truth: You cannot control the CDN sources, only your own reaction to the stream.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ អ្នកមិនអាចគ្រប់គ្រងប្រភព CDN បានទេ ក្រៅតែពីប្រតិកម្មផ្ទាល់ខ្លួនរបស់អ្នកចំពោះការចាក់ផ្សាយ។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              <h2>2. DMCA Copyright Notice (ការជូនដំណឹង DMCA)</h2>
+            </div>
+            <p class="lang-en-block">We respect the intellectual property rights of others. If you believe your copyrighted content is linked here without authorization, please contact the hosting service directly that serves the media stream. Since we do not host any content, we cannot delete files from external servers. However, copyright holders can request removal of links from our catalog index by contacting <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">legal@iblogger855.github.io</code>.</p>
+            <p class="lang-km-block">យើងខ្ញុំគោរពសិទ្ធិកម្មសិទ្ធិបញ្ញារបស់អ្នកដទៃ។ ប្រសិនបើលោកអ្នកជឿថាមាតិកាដែលមានរក្សាសិទ្ធិរបស់លោកអ្នកត្រូវបានភ្ជាប់មកទីនេះដោយគ្មានការអនុញ្ញាត សូមទាក់ទងទៅសេវាកម្មម៉ាស៊ីនមេដែលផ្តល់ប្រភពមេឌៀនោះដោយផ្ទាល់។ ដោយសារយើងខ្ញុំមិនបង្ហោះខ្លឹមសារណាមួយឡើយ យើងខ្ញុំមិនអាចលុបឯកសារពីម៉ាស៊ីនមេខាងក្រៅបានទេ។ ទោះជាយ៉ាងណាក៏ដោយ ម្ចាស់កម្មសិទ្ធិអាចស្នើសុំលុបតំណភ្ជាប់ចេញពីបញ្ជីកាតាឡុករបស់យើងខ្ញុំបានដោយទាក់ទងមកកាន់ <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">legal@iblogger855.github.io</code>។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Existential Truth: We point the way, but you must choose which paths to walk.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ យើងគ្រាន់តែបង្ហាញផ្លូវ ប៉ុន្តែអ្នកត្រូវតែជ្រើសរើសផ្លូវដើរដោយខ្លួនឯង។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <h2>3. Privacy Policy (គោលការណ៍ឯកជនភាព)</h2>
+            </div>
+            <p class="lang-en-block">We do not track, collect, or store any personal user information. Local configuration preferences (such as list/grid view toggle or language selection) may be saved on your browser local storage to optimize your experience.</p>
+            <p class="lang-km-block">យើងខ្ញុំមិនតាមដាន ប្រមូល ឬរក្សាទុកព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកប្រើប្រាស់ឡើយ។ ការកំណត់ចំណង់ចំណូលចិត្តក្នុងតំបន់ (ដូចជាការប្តូរទិដ្ឋភាពបញ្ជី/ក្រឡាចត្រង្គ ឬការជ្រើសរើសភាសា) អាចនឹងត្រូវបានរក្សាទុកនៅលើកម្មវិធីរុករករបស់អ្នកដើម្បីបង្កើនបទពិសោធន៍ប្រើប្រាស់។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Stoic Truth: True privacy is keeping your soul untouched by the noise of the digital world.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ ឯកជនភាពពិតប្រាកដ គឺការរក្សាព្រលឹងរបស់អ្នកមិនឱ្យប៉ះពាល់ដោយសំឡេងរំខាននៃពិភពឌីជីថល។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <h2>4. Cookie Policy (គោលការណ៍ខូគី)</h2>
+            </div>
+            <p class="lang-en-block">This application uses <strong>no cookies</strong> of any kind. We do not set tracking cookies, analytics cookies, advertising cookies, or any other persistent cross-site identifiers. The only browser storage used is <code>localStorage</code> for on-device preferences (language selection, watch progress, view mode) that never leave your device.</p>
+            <p class="lang-km-block">កម្មវិធីនេះ<strong>មិនប្រើខូគីណាមួយឡើយ</strong>។ យើងខ្ញុំមិនដំឡើងខូគីតាមដាន ខូគីវិភាគ ខូគីផ្សាយពាណិជ្ជកម្ម ឬអ្នកកំណត់អត្តសញ្ញាណឆ្លងគេហទំព័រណាមួយឡើយ។ ការផ្ទុកតែមួយគត់ដែលប្រើគឺ <code>localStorage</code> សម្រាប់ចំណូលចំណង់ក្នុងឧបករណ៍ (ការជ្រើសភាសា ដំណើរការទស្សនា របៀបមើល) ដែលមិនចាកចេញពីឧបករណ៍របស់អ្នកឡើយ។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Stoic Truth: What you do not track, you cannot lose. Simplicity is its own security.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ អ្វីដែលអ្នកមិនតាមដាន អ្នកមិនអាចបាត់វាបានទេ។ ភាពសាមញ្ញគឺជាការការពារដោយខ្លួនឯង។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <h2>5. DMCA Safe Harbor — 17 U.S.C. § 512 (ការការពារ DMCA)</h2>
+            </div>
+            <p class="lang-en-block">openkuide / iblogger player operates as an <strong>index-only linking service</strong> and qualifies for safe-harbor protection under the Digital Millennium Copyright Act (17 U.S.C. § 512(d)) as a provider of information location tools. We do not store, transmit, or cache any infringing content.</p>
+            <p class="lang-en-block">To submit a valid DMCA takedown request to remove a catalog link, your notice must include: (1) identification of the copyrighted work, (2) identification of the specific catalog link, (3) your contact information, (4) a statement of good faith belief, and (5) a statement of accuracy under penalty of perjury. Send notices to: <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">legal@iblogger855.github.io</code>.</p>
+            <p class="lang-km-block">openkuide / iblogger player ដំណើរការជា<strong>សេវាតំណភ្ជាប់តែប៉ុណ្ណោះ</strong> ហើយមានសិទ្ធិទទួលបានការការពារ Safe Harbor ក្រោមច្បាប់ DMCA (17 U.S.C. § 512(d)) ជាអ្នកផ្តល់ឧបករណ៍ស្វែងរកព័ត៌មាន។ យើងមិនរក្សាទុក បញ្ជូន ឬឃ្លាំងផ្ទុកមាតិការំលោភណាមួយឡើយ។</p>
+            <p class="lang-km-block">ដើម្បីដាក់ពាក្យបណ្តឹង DMCA ត្រឹមត្រូវ ការជូនដំណឹងរបស់លោកអ្នកត្រូវតែរួមបញ្ចូល: (1) ការកំណត់អត្តសញ្ញាណស្នាដៃការពារ (2) តំណភ្ជាប់ជាក់លាក់ (3) ព័ត៌មានទំនាក់ទំនងរបស់លោកអ្នក (4) សេចក្តីថ្លែងការអំពីជំនឿស្មោះ (5) សេចក្តីថ្លែងការភាពត្រឹមត្រូវក្រោមការផាកពិន័យចំពោះការបំពានដោយចេតនា។ ផ្ញើការជូនដំណឹងទៅ: <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">legal@iblogger855.github.io</code>។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Existential Truth: Rights are defined by those who assert them with clarity and good faith.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ សិទ្ធិត្រូវបានកំណត់ដោយអ្នកដែលអះអាងវាដោយភាពច្បាស់លាស់ និងការជឿស្មោះ។</span>
+            </div>
+          </section>
+        </div>
+
+        <div style="margin-top:28px;">
+          <a class="clear-chip" href="./" style="text-decoration:none;display:inline-block;">✕ ត្រឡប់ទៅទំព័រដើម (Back to Home)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Us view -->
+    <div id="aboutView" style="display:none;">
+      <div class="meta">
+        <h1 style="border-bottom:1px solid var(--hairline);padding-bottom:10px;margin-bottom:12px;">About Us</h1>
+
+        <div class="legal-meta-bar">
+          <span><strong>Project:</strong> openkuide / iblogger player</span>
+          <span><strong>Version:</strong> 2026</span>
+          <span><strong>Last Updated:</strong> 20 June 2026</span>
+        </div>
+
+        <!-- Philosophical Path Selector -->
+        <div class="philosophical-path-container">
+          <div class="path-label lang-en-block">Choose your philosophical lens:</div>
+          <div class="path-label lang-km-block">ជ្រើសរើសវិថីទស្សនវិជ្ជារបស់អ្នក៖</div>
+          <div class="path-options">
+            <button class="path-btn active" data-path="all" id="pathBtnAll">
+              <span class="lang-en-block">Dualism</span>
+              <span class="lang-km-block">ទ្វេនិយម</span>
+            </button>
+            <button class="path-btn" data-path="stoic" id="pathBtnStoic">
+              <span class="lang-en-block">Stoicism</span>
+              <span class="lang-km-block">ស្តូកនិយម</span>
+            </button>
+            <button class="path-btn" data-path="existential" id="pathBtnExistential">
+              <span class="lang-en-block">Existentialism</span>
+              <span class="lang-km-block">អត្ថិភាពនិយម</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="legal-card-grid">
+          <section class="legal-section-card expandable-card" id="aboutCardPlatform" tabindex="0">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <h2>Our Platform (កម្មវិធីរបស់យើង)</h2>
+              <span class="expand-indicator">↓</span>
+            </div>
+            <div class="card-intro">
+              <p class="lang-en-block">iblogger player is a clean, modern, and lightweight HLS video catalog player. Inspired by modern minimalist design, it combines smooth Video.js media playback with a reactive Vue.js search and filtering catalog.</p>
+              <p class="lang-km-block">iblogger player គឺជាកម្មវិធីចាក់វីដេអូ HLS និងកាតាឡុកវីដេអូដែលស្រាល ស្អាត និងទំនើប។ បំផុសគំនិតដោយការរចនាបែបទំនើបដ៏សាមញ្ញ វារួមបញ្ចូលគ្នានូវកម្មវិធី Video.js សម្រាប់ការចាក់ផ្សាយយ៉ាងរលូន និង Vue.js សម្រាប់ស្វែងរក និងចម្រោះក្នុងកាតាឡុក។</p>
+            </div>
+            <div class="card-details">
+              <p class="lang-en-block"><strong>Why Existentialism?</strong> In a digital landscape designed to exploit user attention via algorithms, we choose to build a blank canvas. Here, there are no algorithmic feeds pushing recommendations to control you. You choose what to watch, when to watch, and how to watch. You construct your own experience.</p>
+              <p class="lang-km-block"><strong>ហេតុអ្វីជាអត្ថិភាពនិយម?</strong> នៅក្នុងប្រព័ន្ធឌីជីថលដែលរចនាឡើងដើម្បីទាញយកផលប្រយោជន៍ពីចំណាប់អារម្មណ៍របស់អ្នកប្រើប្រាស់តាមរយៈក្បួនដោះស្រាយ (algorithms) យើងជ្រើសរើសបង្កើតផ្ទាំងគំនូរទទេរមួយ។ នៅទីនេះ គ្មានការបញ្ជ្រាបវីដេអូដើម្បីគ្រប់គ្រងអ្នកឡើយ។ អ្នកជាអ្នកជ្រើសរើសអ្វីដែលត្រូវមើល ពេលណាត្រូវមើល និងមើលដោយរបៀបណា។ អ្នកជាអ្នកបង្កើតបទពិសោធន៍ផ្ទាល់ខ្លួនរបស់អ្នក។</p>
+            </div>
+            <div class="quest-philosophy-subtext" data-philosophy="existential">
+              <span class="lang-en-block">Existential Truth: Crafting code is our way of playing with the universe.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ ការបង្កើតកូដ គឺជាវិធីរបស់យើងក្នុងការលេងជាមួយសកលលោក។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card expandable-card" id="aboutCardGoal" tabindex="0">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              <h2>Our Goal (គោលដៅរបស់យើង)</h2>
+              <span class="expand-indicator">↓</span>
+            </div>
+            <div class="card-intro">
+              <p class="lang-en-block">Our mission is to deliver the absolute best browser playback experience without bloat, trackers, or intrusive scripts. All features are fully optimized for both desktop and mobile platforms.</p>
+              <p class="lang-km-block">បេសកកម្មរបស់យើងគឺផ្តល់នូវបទពិសោធន៍ចាក់ផ្សាយដ៏ល្អបំផុតនៅក្នុងកម្មវិធីរុករកដោយគ្មានការរំខាន កម្មវិធីតាមដាន ឬស្គ្រីបដែលរំខាន។ មុខងារទាំងអស់ត្រូវបានបង្កើនប្រសិទ្ធភាពទាំងស្រុងសម្រាប់ទាំងកុំព្យូទ័រ និងទូរស័ព្ទដៃ។</p>
+            </div>
+            <div class="card-details">
+              <p class="lang-en-block"><strong>Why Stoicism?</strong> Marcus Aurelius wrote: <em>"Constantly regard the universe as one living being."</em> We apply this by treating the browser as a clean sanctuary. By refusing to inject track scripts, cookies, or heavy libraries, we keep the player lightweight and unburdened, allowing you to enjoy media in a state of calm, focused presence.</p>
+              <p class="lang-km-block"><strong>ហេتوىអ្វីជាស្តូកនិយម?</strong> ម៉ាកុស អូរេលីយូស (Marcus Aurelius) បានសរសេរថា៖ <em>"ចូរចាត់ទុកសកលលោកជានិច្ចជាកាលថាជាសភាវៈមានជីវិតតែមួយ។"</em> យើងអនុវត្តវាដោយចាត់ទុកកម្មវិធីរុករកជាកន្លែងដ៏ស្ងប់ស្ងាត់មួយ។ តាមរយៈការបដិសេធមិនដាក់ស្គ្រីបតាមដាន ឃុកឃី ឬបណ្ណាល័យធ្ងន់ៗ យើងរក្សាឱ្យកម្មវិធីនេះស្រាល និងគ្មានបន្ទុក ដែលអនុញ្ញាតឱ្យអ្នករីករាយនឹងប្រព័ន្ធផ្សព្វផ្សាយក្នុងស្ថានភាពស្ងប់ស្ងាត់ និងមានការផ្តោតអារម្មណ៍។</p>
+            </div>
+            <div class="quest-philosophy-subtext" data-philosophy="stoic">
+              <span class="lang-en-block">Stoic Truth: A clean space creates a calm mind; distraction is the enemy of focus.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ លំហដ៏ស្អាតស្អំបង្កើតឱ្យមានចិត្តស្ងប់ ការរំខានគឺជាសត្រូវនៃការផ្តោតអារម្មណ៍។</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- Interactive Philosophical Activity Widget Container -->
+        <div id="philosophicalActivityCard" class="legal-section-card interactive-activity-card" style="display:none; margin-top:20px;">
+        </div>
+
+        <div style="margin-top:28px;">
+          <a class="clear-chip" href="./" style="text-decoration:none;display:inline-block;">✕ ត្រឡប់ទៅទំព័រដើម (Back to Home)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Us view -->
+    <div id="contactView" style="display:none;">
+      <div class="meta">
+        <h1 style="border-bottom:1px solid var(--hairline);padding-bottom:10px;margin-bottom:12px;">Contact Us</h1>
+
+        <div class="legal-meta-bar">
+          <span><strong>Response Time:</strong> Within 48 business hours</span>
+          <span><strong>General:</strong> contact@iblogger855.github.io</span>
+          <span><strong>Legal / DMCA:</strong> legal@iblogger855.github.io</span>
+        </div>
+
+        <div class="legal-card-grid">
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <h2>Get in Touch (ទាក់ទងមកយើងខ្ញុំ)</h2>
+            </div>
+            <p class="lang-en-block">Have any feedback, general inquiries, or layout suggestions? Feel free to contact our support team directly. We are always striving to improve the player!</p>
+            <p class="lang-km-block">មានមតិយោបល់ ការសាកសួរទូទៅ ឬការផ្ដល់យោបល់លើការរចនាប្លង់មែនទេ? សូមទាក់ទងមកក្រុមការងារគាំទ្ររបស់យើងដោយផ្ទាល់។ យើងខ្ញុំតែងតែខិតខំកែលម្អកម្មវិធីឱ្យកាន់តែប្រសើរឡើង!</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Existential Truth: Connections are the threads that bind our subjective realities together.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ ការភ្ជាប់ទំនាក់ទំនង គឺជាសរសៃអំបោះដែលចងភ្ជាប់ការពិតនៃប្រធានបទរបស់យើងចូលគ្នា។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <h2>Email Support (គាំទ្រតាមអ៊ីមែល)</h2>
+            </div>
+            <p class="lang-en-block">For all general inquiries, copyright questions, or suggestions, please write to us at: <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">contact@iblogger855.github.io</code>. We aim to respond to all emails within 48 business hours.</p>
+            <p class="lang-km-block">សម្រាប់ការសាកសួរទូទៅ សំណួររក្សាសិទ្ធិ ឬការផ្ដល់យោបល់ផ្សេងៗ សូមផ្ញើអ៊ីមែលមកយើងខ្ញុំតាមរយៈ: <code class="clickable-copy-email" title="Click to copy / ចុចដើម្បីចម្លង">contact@iblogger855.github.io</code>។ យើងខ្ញុំនឹងព្យាយាមឆ្លើយតបរាល់អ៊ីមែលក្នុងរយៈពេល 48 ម៉ោងនៃម៉ោងធ្វើការ។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Stoic Truth: Patience with response times is the practice of enduring time's flow.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ ការអត់ធ្មត់នឹងរយៈពេលឆ្លើយតប គឺជាការអនុវត្តនៃការអត់ធ្មត់នឹងលំហូរនៃពេលវេលា។</span>
+            </div>
+          </section>
+        </div>
+
+        <div style="margin-top:28px;">
+          <a class="clear-chip" href="./" style="text-decoration:none;display:inline-block;">✕ ត្រឡប់ទៅទំព័រដើម (Back to Home)</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms of Service view -->
+    <div id="termsView" style="display:none;">
+      <div class="meta">
+        <h1 style="border-bottom:1px solid var(--hairline);padding-bottom:10px;margin-bottom:12px;">Terms of Service</h1>
+
+        <div class="legal-meta-bar">
+          <span><strong>Effective Date:</strong> 1 January 2025</span>
+          <span><strong>Last Updated:</strong> 20 June 2026</span>
+          <span><strong>Jurisdiction:</strong> Kingdom of Cambodia</span>
+        </div>
+
+        <div class="legal-card-grid">
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <h2>1. Acceptance of Terms (ការយល់ព្រមលើលក្ខខណ្ឌ)</h2>
+            </div>
+            <p class="lang-en-block">By accessing and using this player website, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please close this page immediately.</p>
+            <p class="lang-km-block">ដោយការចូលប្រើប្រាស់ និងប្រើប្រាស់គេហទំព័រកម្មវិធីចាក់ផ្សាយនេះ លោកអ្នកយល់ព្រមអនុវត្ត និងគោរពតាមលក្ខខណ្ឌប្រើប្រាស់ទាំងនេះ។ ប្រសិនបើលោកអ្នកមិនយល់ព្រមនឹងលក្ខខណ្ឌទាំងនេះទេ សូមចាកចេញពីទំព័រនេះជាបន្ទាន់។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Existential Truth: Freedom is absolute, but rules guide the play.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ សេរីភាពគឺដាច់ខាត ប៉ុន្តែច្បាប់ជួយតម្រង់ទិសដៅនៃការលេង។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <h2>2. Sourced Catalog Index (លិបិក្រមកាតាឡុកប្រភពក្រៅ)</h2>
+            </div>
+            <p class="lang-en-block">We provide a curated index pointing to public third-party media sources. Uptime, stream quality, subtitle language, and compatibility are determined solely by the external servers hosting the video, over which we have no control.</p>
+            <p class="lang-km-block">យើងខ្ញុំផ្តល់ជូននូវលិបិក្រមដែលចង្អុលទៅប្រភពមេឌៀភាគីទីបីជាសាធារណៈ។ ពេលវេលាដំណើរការ គុណភាពស្ទ្រីម ភាសានៃអក្សររត់ក្រោម និងភាពស៊ីគ្នា គឺត្រូវបានកំណត់ដោយម៉ាស៊ីនមេខាងក្រៅដែលបង្ហោះវីដេអូតែប៉ុណ្ណោះ ដែលយើងខ្ញុំមិនមានការគ្រប់គ្រងលើចំណុចទាំងនោះឡើយ។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Stoic Truth: Do not grieve the loss of an external link; nothing external is truly ours.</span>
+              <span class="lang-km-block">សច្ចភាពស្តូក៖ កុំកើតទុក្ខនឹងការបាត់បង់តំណភ្ជាប់ខាងក្រៅ គ្មានអ្វីដែលនៅខាងក្រៅជារបស់យើងពិតប្រាកដឡើយ។</span>
+            </div>
+          </section>
+
+          <section class="legal-section-card">
+            <div class="legal-section-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="section-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11 11 13 15 9"/></svg>
+              <h2>3. Acceptable Use (ការប្រើប្រាស់ដែលអាចទទួលយកបាន)</h2>
+            </div>
+            <p class="lang-en-block">You agree to use the player only for personal, non-commercial, and lawful purposes. You agree not to attempt to scrape, reverse-engineer, or disrupt the operation of this application.</p>
+            <p class="lang-km-block">លោកអ្នកយល់ព្រមប្រើប្រាស់កម្មវិធីចាក់ផ្សាយសម្រាប់តែគោលបំណងផ្ទាល់ខ្លួន មិនមែនពាណិជ្ជកម្ម និងស្របច្បាប់ប៉ុណ្ណោះ។ លោកអ្នកយល់ព្រមថាមិនព្យាយាមទាញយកទិន្នន័យ (scraping) វិភាគបកត្រឡប់ (reverse-engineer) ឬរំខានដល់ប្រតិបត្តិការរបស់កម្មវិធីនេះឡើយ។</p>
+            <div class="quest-philosophy-subtext">
+              <span class="lang-en-block">Existential Truth: To act with integrity online is to define your essence in the machine.</span>
+              <span class="lang-km-block">សច្ចភាពអត្ថិភាព៖ ការធ្វើសកម្មភាពដោយសុចរិតភាពតាមអ៊ីនធឺណិត គឺការកំណត់អត្តសញ្ញាណពិតរបស់អ្នកនៅក្នុងម៉ាស៊ីន។</span>
+            </div>
+          </section>
+        </div>
+
+        <div style="margin-top:28px;">
+          <a class="clear-chip" href="./" style="text-decoration:none;display:inline-block;">✕ ត្រឡប់ទៅទំព័រដើម (Back to Home)</a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Built with <a href="https://videojs.com" target="_blank" rel="noopener">Video.js</a> ·
+      <a href="?page=about" id="aboutLink">About Us</a> ·
+      <a href="?page=contact" id="contactLink">Contact Us</a> ·
+      <a href="?page=terms" id="termsLink">Terms of Service</a> ·
+      <a href="?page=legal" id="legalLink">Privacy & DMCA</a>
+    </footer>
+  </div>
+
+  <!-- Shorts view (Full screen overlay) -->
+  <div id="shortsView" class="shorts-overlay" style="display:none;">
+    <a href="./" id="closeShortsBtn" class="shorts-close" aria-label="Close Shorts">✕</a>
+    
+    <!-- Shorts Navigation Arrows (Desktop overlay) -->
+    <button id="shortsPrevBtn" class="shorts-nav-arrow prev" aria-label="Previous Short">▲</button>
+    <button id="shortsNextBtn" class="shorts-nav-arrow next" aria-label="Next Short">▼</button>
+
+    <div id="shortsContainer" class="shorts-container"></div>
+    
+    <!-- Shorts Comment Panel -->
+    <div id="shortsCommentPanel" class="shorts-comment-panel">
+      <div class="shorts-comment-handle"></div>
+      <div class="shorts-comment-header">
+        <h3>
+          <span class="lang-km-block">មតិយោបល់</span>
+          <span class="lang-en-block">Comments</span>
+        </h3>
+        <button id="closeShortsCommentBtn" class="shorts-comment-close" aria-label="Close Comments">✕</button>
+      </div>
+      <div class="shorts-comment-body">
+        <div class="mock-comment">
+          <div class="mock-avatar" style="background: #ff453a;">U</div>
+          <div class="mock-comment-content">
+            <div class="mock-author">user855 <span class="mock-timestamp"><span class="lang-km-block">2ម៉ោងមុន</span><span class="lang-en-block">2h ago</span></span></div>
+            <div class="mock-text">រឿងផ្អែមល្ហែមណាស់ (So sweet!)</div>
+            <div class="mock-comment-actions">
+              <button class="comment-action-btn reply-btn"><span class="lang-km-block">ឆ្លើយតប</span><span class="lang-en-block">Reply</span></button>
+              <button class="comment-action-btn comment-like-btn" aria-label="Like comment">
+                <svg class="heart-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span class="comment-like-count">5</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mock-comment">
+          <div class="mock-avatar" style="background: #30d158;">C</div>
+          <div class="mock-comment-content">
+            <div class="mock-author">cinema_fan <span class="mock-timestamp"><span class="lang-km-block">4ម៉ោងមុន</span><span class="lang-en-block">4h ago</span></span></div>
+            <div class="mock-text">វាយគ្នាឡូយណាស់! (The action is awesome!)</div>
+            <div class="mock-comment-actions">
+              <button class="comment-action-btn reply-btn"><span class="lang-km-block">ឆ្លើយតប</span><span class="lang-en-block">Reply</span></button>
+              <button class="comment-action-btn comment-like-btn" aria-label="Like comment">
+                <svg class="heart-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span class="comment-like-count">12</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mock-comment">
+          <div class="mock-avatar" style="background: #0a84ff;">M</div>
+          <div class="mock-comment-content">
+            <div class="mock-author">movie_lover_99 <span class="mock-timestamp"><span class="lang-km-block">6ម៉ោងមុន</span><span class="lang-en-block">6h ago</span></span></div>
+            <div class="mock-text">មិនហ៊ានមើលម្នាក់ឯងទេ (Don't dare to watch alone)</div>
+            <div class="mock-comment-actions">
+              <button class="comment-action-btn reply-btn"><span class="lang-km-block">ឆ្លើយតប</span><span class="lang-en-block">Reply</span></button>
+              <button class="comment-action-btn comment-like-btn" aria-label="Like comment">
+                <svg class="heart-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <span class="comment-like-count">8</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick comment emoji & text chips -->
+      <div class="shorts-comment-chips">
+        <button class="comment-chip" data-emoji="😂">😂</button>
+        <button class="comment-chip" data-emoji="❤️">❤️</button>
+        <button class="comment-chip" data-emoji="🔥">🔥</button>
+        <button class="comment-chip" data-emoji="👍">👍</button>
+        <button class="comment-chip" data-text-km="ល្អមើលណាស់! 🔥" data-text-en="So good! 🔥">
+          <span class="lang-km-block">ល្អមើលណាស់! 🔥</span>
+          <span class="lang-en-block">So good! 🔥</span>
+        </button>
+        <button class="comment-chip" data-text-km="រង់ចាំភាគបន្ត 🎬" data-text-en="Waiting for next 🎬">
+          <span class="lang-km-block">រង់ចាំភាគបន្ត 🎬</span>
+          <span class="lang-en-block">Waiting for next 🎬</span>
+        </button>
+        <button class="comment-chip" data-text-km="សាហាវខ្លាំង 😱" data-text-en="Insane! 😱">
+          <span class="lang-km-block">សាហាវខ្លាំង 😱</span>
+          <span class="lang-en-block">Insane! 😱</span>
+        </button>
+      </div>
+      
+      <div class="shorts-comment-input-area">
+        <input type="text" id="shortsCommentInput" placeholder="បញ្ចូលមតិយោបល់..." />
+        <button id="shortsCommentSubmit">ផ្ញើ</button>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Panel -->
+    <div id="shortsKeyboardPanel" class="shorts-keyboard-panel">
+      <div class="shorts-keyboard-handle"></div>
+      <div class="shorts-keyboard-header">
+        <h3>
+          <span class="lang-km-block">គ្រាប់ចុចផ្លូវកាត់</span>
+          <span class="lang-en-block">Keyboard Shortcuts</span>
+        </h3>
+        <button id="closeShortsKeyboardBtn" class="shorts-keyboard-close" aria-label="Close Shortcuts">✕</button>
+      </div>
+      <div class="shorts-keyboard-body">
+        <div class="keyboard-row">
+          <div class="keyboard-keys-group">
+            <span class="keyboard-key">Space</span>
+            <span class="keyboard-desc">or</span>
+            <span class="keyboard-key">K</span>
+          </div>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">លេង / ផ្អាក</span>
+            <span class="lang-en-block">Play / Pause</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <div class="keyboard-keys-group">
+            <span class="keyboard-key">↑</span>
+            <span class="keyboard-desc">/</span>
+            <span class="keyboard-key">↓</span>
+          </div>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">វីដេអូ បន្ទាប់ / មុន</span>
+            <span class="lang-en-block">Next / Prev Short</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <div class="keyboard-keys-group">
+            <span class="keyboard-key">←</span>
+            <span class="keyboard-desc">/</span>
+            <span class="keyboard-key">→</span>
+          </div>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">សារទៅក្រោយ / ទៅមុខ ១០វិនាទី</span>
+            <span class="lang-en-block">Seek 10s Back / Forward</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <span class="keyboard-key">L</span>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">ចូលចិត្ត</span>
+            <span class="lang-en-block">Like Short</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <span class="keyboard-key">M</span>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">បិទ / បើកសំឡេង</span>
+            <span class="lang-en-block">Mute / Unmute</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <span class="keyboard-key">C</span>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">បើក / បិទមតិយោបល់</span>
+            <span class="lang-en-block">Toggle Comments</span>
+          </span>
+        </div>
+        <div class="keyboard-row">
+          <span class="keyboard-key">?</span>
+          <span class="keyboard-desc">
+            <span class="lang-km-block">គ្រាប់ចុចផ្លូវកាត់</span>
+            <span class="lang-en-block">Toggle Help Menu</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating rotating ad slider (built by JS, textContent only) -->
+  <aside class="adslide" id="adSlide" aria-label="Advertisement" hidden>
+    <span class="as-tag">Ad</span>
+    <button class="as-close" id="asClose" aria-label="Close ad" title="បិទ">✕</button>
+    <div class="track" id="asTrack"></div>
+    <div class="dots" id="asDots"></div>
+  </aside>
+
+  <!-- Non-Profit Disclaimer Overlay Modal -->
+  <div id="disclaimerOverlay" class="disclaimer-overlay" style="display:none;">
+    <div class="disclaimer-box">
+      <div class="disclaimer-header">
+        <span class="disclaimer-icon">⚠️</span>
+        <h2>
+          <span class="lang-km-block">ការបដិសេធ និង លក្ខខណ្ឌប្រើប្រាស់</span>
+          <span class="lang-en-block">Disclaimer & Terms of Use</span>
+        </h2>
+      </div>
+      <div class="disclaimer-body">
+        <div class="disclaimer-text">
+          <p class="lang-km-block">
+            <strong>កម្មវិធីនេះត្រូវបានបង្កើតឡើងសម្រាប់តែគោលបំណងពិសោធន៍ បទពិសោធន៍បច្ចេកវិទ្យា និងការកម្សាន្តតែប៉ុណ្ណោះ (មិនស្វែងរកប្រាក់ចំណេញឡើយ)។</strong>
+          </p>
+          <p class="lang-km-block">
+            រាល់ឯកសារវីដេអូ ឬការផ្សាយ HLS ទាំងអស់មិនត្រូវបានបង្ហោះ ឬរក្សាទុកនៅលើម៉ាស៊ីនមេរបស់យើងឡើយ។ ពួកវាត្រូវបានទាញយកពីប្រភពភាគីទីបីជាសាធារណៈ។ យើងខ្ញុំមិនទទួលខុសត្រូវចំពោះខ្លឹមសារទាំងនោះឡើយ។
+          </p>
+          <hr class="disclaimer-divider">
+          <p class="lang-en-block">
+            <strong>This website is developed solely for experimental, technology experience, and entertainment purposes (strictly non-profit).</strong>
+          </p>
+          <p class="lang-en-block">
+            We do not host, store, or upload any HLS stream or media files on our servers. All links and content are indexed from public external third-party sources. We do not control or take responsibility for external streams.
+          </p>
+        </div>
+      </div>
+      <div class="disclaimer-footer">
+        <button id="acceptDisclaimerBtn" class="disclaimer-accept-btn">
+          <span class="lang-km-block">យល់ព្រម និង បន្តទៅមុខ</span>
+          <span class="lang-en-block">I Agree & Proceed</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js" crossorigin="anonymous"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"
+    integrity="sha512-t2qFs5xQ9zghHZmMq6pKOKZfdN9XzliTKOo7SVUvpzX/20ugCr7M1OHPJ4Y9jtan+0TxM6WbqRFzMppgCP9OHQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script>
+    // Safeguard to prevent duplicate plugin registration warning for qualityLevels
+    if (typeof videojs !== 'undefined') {
+      const originalRegisterPlugin = videojs.registerPlugin;
+      videojs.registerPlugin = function(name, plugin) {
+        if (videojs.getPlugin(name)) {
+          return videojs.getPlugin(name);
+        }
+        return originalRegisterPlugin.apply(this, arguments);
+      };
+    }
+  </script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/4.1.0/videojs-contrib-quality-levels.min.js"
+    integrity="sha512-4g1DTVgyZD/SQCdZm9T6MorR+NLAdRl+Xw8NieiqPBPRNhRqstdt8rEerjgSZ9CZCGCL24PtzIVSPKzcUKU66w=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

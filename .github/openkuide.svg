@@ -1,0 +1,28 @@
+<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"></stop>
+      <stop offset="100%" stop-color="#06B6D4"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(40,40)">
+    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#brandGradient)" stroke-width="12"></circle>
+
+    <path d="M60 25
+             A35 35 0 1 1 35 95" fill="none" stroke="url(#brandGradient)" stroke-width="12" stroke-linecap="round"></path>
+
+    <circle cx="92" cy="92" r="8" fill="#06B6D4"></circle>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="170" y="118" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="72" font-weight="700" fill="#111827" letter-spacing="-1">
+    Open<tspan fill="url(#brandGradient)">Kuide</tspan>
+  </text>
+
+  <!-- Tagline (optional) -->
+  <text x="174" y="150" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" fill="#6B7280" letter-spacing="2">
+    OPEN • GUIDE • DISCOVER
+  </text>
+</svg>

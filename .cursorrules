@@ -123,3 +123,25 @@ Before staging or pushing code, run this strict loop to iteratively audit and im
 3. **Execute**: Make exactly ONE edit. Check syntax immediately with `node --check`.
 4. **Review**: Run `npm test` and review git diffs. If any issues are found or test coverage fails, return to step 1 and loop until 100% clean and correct.
 
+---
+
+## 🧩 Skills Reference
+Project skills live in `.claude/skills/` and `.agents/skills/`. Suggest using the relevant skill when the task matches:
+
+| Skill | Trigger | Description |
+|---|---|---|
+| `/refactor <file>` | Refactoring JS modules | Guided clean-code refactor following Uncle Bob rules and module boundaries |
+| `/clean-check [file]` | Auditing code quality | Read-only audit of a JS file against `docs/clean_code_guidelines.md` |
+| `/build-db` | Rebuilding catalog | Runs `python3 build-db.py` to regenerate `db/` from a catalog export |
+| `/reflect` | End of session | Captures session learnings and updates AI config files |
+| `/e2e-test` | Writing or extending tests | Puppeteer e2e suite authoring — structure, assertions, screenshots, wiring into `integration.test.js` |
+
+## 🤖 Subagents Reference
+Project subagents live in `.claude/agents/` and `.agents/agents/`. Invoke proactively when the task matches:
+
+| Agent | When to use |
+|---|---|
+| `clean-code-reviewer` | After writing or modifying any JS in `assets/js/` — reviews against clean code guidelines before committing |
+| `test-guardian` | After any code change — runs `npm test` and diagnoses failures down to file and line |
+| `meta-learner` | After a bug fix, user correction, or process improvement — permanently injects the lesson into AI config files |
+

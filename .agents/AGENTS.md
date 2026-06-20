@@ -169,3 +169,18 @@ You can expose custom external tools and services to Antigravity at the project 
 ### 4. Custom Subagents
 You can define, configure, and orchestrate specialized subagents using `define_subagent` and `invoke_subagent` tools to delegate parallel coding or research tasks.
 
+---
+
+## 🧩 Skills Reference
+
+Skills live in `.agents/skills/`. Invoke the relevant skill when the task matches:
+
+| Trigger | When to use | Description |
+|---|---|---|
+| `/refactor <file>` | Refactoring JS modules | Guided clean-code refactor following Uncle Bob rules and module boundaries |
+| `/clean-check [file]` | Auditing code quality | Read-only audit of a JS file against `docs/clean_code_guidelines.md` |
+| `/build-db` | Rebuilding catalog | Runs `python3 build-db.py` to regenerate `db/` from a catalog export |
+| `/reflect` | End of session | Captures session learnings and updates AI config files |
+| `/e2e-test` | Writing or extending tests | Puppeteer e2e suite authoring — structure, assertions, screenshots, wiring into `integration.test.js` |
+| `/add-movie <url> <title> <hints>` | Adding a movie to catalog | Writes `db/<slug>.json` and registers in `db/index.json` |
+

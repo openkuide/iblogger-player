@@ -61,20 +61,20 @@ export function startHomeMode() {
     setup() {
       const all           = ref([]);
       const loading       = ref(true);
-      const search        = ref("");
-      const activeGenres  = ref([]);
-      const sort          = ref("title");
+      const search        = ref(params.get("q") || "");
+      const activeGenres  = ref(params.get("genres") ? params.get("genres").split(",") : []);
+      const sort          = ref(params.get("sort") || "title");
       const yearFilter    = ref(params.get("year") || "");
-      const minRating     = ref(0);
-      const countryFilter = ref("");
-      const page          = ref(1);
+      const minRating     = ref(Number(params.get("rating")) || 0);
+      const countryFilter = ref(params.get("country") || "");
+      const page          = ref(Number(params.get("pg")) || 1);
       const listView      = ref(false);
-      const showFilters   = ref(!!params.get("year"));
+      const showFilters   = ref(!!(params.get("year") || params.get("rating") || params.get("country") || params.get("genres") || params.get("q")));
 
       // Carousel, history, and quick tags state
       const currentSlide     = ref(0);
       const watchHistory     = ref([]);
-      const currentQuickTag  = ref("");
+      const currentQuickTag  = ref(params.get("tag") || "");
 
       // Psychology-driven idle nudges state
       const nudgeSurprise    = ref(false);
@@ -567,9 +567,25 @@ export function startHomeMode() {
         return list;
       });
 
-      watch([search, activeGenres, sort, yearFilter, minRating, countryFilter], () => {
+      function syncToUrl() {
+        const p = new URLSearchParams();
+        if (search.value.trim())           p.set("q",       search.value.trim());
+        if (yearFilter.value)              p.set("year",    yearFilter.value);
+        if (minRating.value > 0)           p.set("rating",  String(minRating.value));
+        if (countryFilter.value)           p.set("country", countryFilter.value);
+        if (activeGenres.value.length > 0) p.set("genres",  activeGenres.value.join(","));
+        if (sort.value && sort.value !== "title") p.set("sort", sort.value);
+        if (currentQuickTag.value)         p.set("tag",     currentQuickTag.value);
+        if (page.value > 1)                p.set("pg",      String(page.value));
+        const qs = p.toString();
+        history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+      }
+
+      watch([search, activeGenres, sort, yearFilter, minRating, countryFilter, currentQuickTag], () => {
         page.value = 1;
+        syncToUrl();
       });
+      watch(page, syncToUrl);
 
       const pages = computed(() => {
         return Math.max(1, Math.ceil(filtered.value.length / PER_PAGE));

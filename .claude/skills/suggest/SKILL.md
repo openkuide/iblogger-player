@@ -5,149 +5,234 @@ description: Use when the user wants micro-improvement suggestions for UI, UX, c
 
 # suggest
 
-Audit the project across multiple lenses, surface a ranked list of micro-improvements, and implement only what the user approves.
+Audit the project like a senior product designer who has studied Netflix, TikTok, YouTube, and behavioral psychology. Think beyond pixels — ask how the user *feels*, what keeps them *coming back*, and what makes the experience *addictive without being manipulative*.
+
+Surface ranked improvements, wait for user selection, implement only what is approved.
 
 ---
 
 ## Step 1 — Audit
 
-Read the following files before generating suggestions:
+Read these files first:
 
 ```
-index.html                   ← view structure, accessibility, meta tags
-assets/css/style.css         ← design consistency, missing states, animations
+index.html                   ← structure, meta, accessibility
+assets/css/style.css         ← design system, states, animations
 assets/js/app.js             ← routing, error handling
-assets/js/home.js            ← catalog UX, search/filter behaviour
-assets/js/player.js          ← player UX, keyboard shortcuts, error states
-assets/js/shorts.js          ← shorts feed UX, gestures, idle states
-assets/js/watch-progress.js  ← resume logic
+assets/js/home.js            ← catalog UX, search/filter
+assets/js/player.js          ← player UX, keyboard, error states
+assets/js/shorts.js          ← shorts feed, gestures, idle
+assets/js/watch-progress.js  ← resume logic, history
 assets/js/utils.js           ← shared helpers
 ```
 
-Audit across these **seven lenses**:
+Audit across these **twelve lenses**:
+
+---
 
 ### 1. UI Polish
 - Inconsistent spacing, font sizes, border-radius
-- Missing hover/focus/active states on interactive elements
-- Colours that don't follow HSL harmony or `var(--accent)` token
+- Missing hover / focus / active states
+- Colours not following HSL harmony or `var(--accent)`
 - Elements that look unfinished or visually heavy
 - Dark-mode contrast issues
 
+---
+
 ### 2. UX Flow
-- Dead ends (no back button, no empty state message)
-- Actions that give no feedback (silent clicks, no loading indicator)
-- Anything that requires more than 2 taps/clicks to do something common
+- Dead ends — no back button, no empty state, no error message
+- Silent actions — click with no feedback
+- Anything requiring more than 2 taps to do something common
+- State that is lost unexpectedly (scroll position, filter, episode)
 - Missing keyboard shortcuts for power users
-- Progress/state that is lost unexpectedly
 
-### 3. Micro-animations
-- State transitions that are abrupt (instant show/hide)
-- List items that appear without stagger
-- Buttons that don't respond visually to press
-- Skeleton loaders missing while data fetches
+---
 
-### 4. Mobile & Touch
-- Touch targets smaller than 44×44px (Fitts's Law)
-- Horizontal overflow or cramped layouts on small screens
-- Swipe gestures that are missing or inconsistent with platform norms
-- Font sizes below 14px on mobile
+### 3. Micro-animations & Interaction Physics
+Ask: does it *feel* right physically?
 
-### 5. Accessibility
-- Interactive elements missing `aria-label` or `role`
-- Images missing `alt` text
-- No visible focus ring on keyboard navigation
-- Color-only information (no icon/text backup)
-- Missing `lang` attribute or bilingual `<title>` tag
+- Transitions that are instant (abrupt show/hide) — add `ease-out` or `spring`
+- Cards that appear all at once — add stagger (20–40ms per item)
+- Buttons with no press feedback — add `scale(0.96)` on `:active`
+- Drag/scrub without inertia — momentum should continue briefly after release
+- Page transitions that feel like teleporting — cross-fade or slide
 
-### 6. Code Quality (SonarQube rules)
-- Functions over 20 lines
-- Module boundary violations (logic in wrong file)
-- Repeated code that belongs in `utils.js`
-- Commented-out (zombie) code
-- `var` declarations, `==` comparisons, unhandled promises
+Reference: **Disney's 12 Principles of Animation** — squash/stretch, anticipation, follow-through. Apply subtly. The UI should feel *alive*, not robotic.
 
-### 7. Data & Content
-- Movies missing `km` translations
-- Posters pointing to broken URLs
-- Episode lists with wrong `final` flag
-- Missing or weak bilingual `<meta description>` / `<title>` tags in `index.html`
+---
+
+### 4. Rabbit Hole & Engagement Loops
+The best streaming platforms keep users in a *flow state* — no friction, always a next step.
+
+Ask for each view:
+- **What happens when content ends?** Is there a clear "next" action?
+- **Autoplay next episode** — does it exist? Should it? (player view)
+- **"Up Next" preview** — show the next episode thumbnail before current one ends
+- **"Because you watched X"** — related content based on `watch-progress.js` history
+- **Shorts rabbit hole** — does scrolling feel infinite and effortless?
+- **Continue Watching** — is resume progress surfaced prominently on the home page?
+- **Episode completion marker** — do watched episodes show a visual indicator?
+
+Reference: **Variable Reward** (B.F. Skinner) — unpredictable rewards (new content, discoveries) are more addictive than predictable ones. Surface content that feels *discovered*, not just listed.
+
+---
+
+### 5. Psychology & Behavioral Design
+Ask: what is the user *feeling* at each moment?
+
+- **Zeigarnik Effect** — unfinished episodes stay in memory. Show progress bars on cards (e.g. 47% watched) to pull users back.
+- **Loss Aversion** — users fear losing progress more than they value gaining it. Surface "resume from 23:14" prominently.
+- **Peak-End Rule** (Kahneman) — users judge an experience by its peak moment and how it ends. Make the episode-end state satisfying (completion animation, "What's next?").
+- **Mere Exposure Effect** — familiarity breeds preference. Consistent UI patterns reduce cognitive load and build trust.
+- **Social Proof** — ratings, episode counts, "Popular" badges signal value without requiring the user to decide.
+- **Endowed Progress** — a progress bar that starts at 10% feels more motivating than one starting at 0%. Consider showing series completion (e.g. "3 of 25 episodes watched").
+- **Autonomy Paradox** (Hick's Law) — too many choices cause paralysis. The catalog should surface *fewer, curated* options first, then let users drill in.
+
+---
+
+### 6. Emotional Design (Norman's 3 Levels)
+Every UI element operates on three levels simultaneously:
+
+| Level | Question | Example |
+|---|---|---|
+| **Visceral** | Does it look and feel premium on first glance? | Poster quality, dark theme depth, typography weight |
+| **Behavioural** | Does it work exactly as expected with no surprises? | Play button plays, back button goes back, progress saves |
+| **Reflective** | Does it make the user feel something about themselves? | Quest system giving XP, Khmer language feeling honored |
+
+Look for moments where the visceral or reflective level is missing.
+
+---
+
+### 7. Philosophy & Tone
+This project has a philosophical identity (Stoicism, Existentialism, Dualism in the About page, quest mechanics). Ask:
+
+- Does the UI *feel* like it has a soul, or does it feel generic?
+- **Wabi-Sabi** — is there authentic imperfection? Or does it feel corporate-polished?
+- **Shibui** — is anything unnecessarily decorative? Remove it.
+- **Zen Minimalism** — every element should justify its existence. Audit for clutter.
+- **Existential Agency** — does the user always feel *in control*? No dark patterns, no forced flows.
+- The quest system already gives the app a unique identity. Are there other places where this philosophical layer could surface naturally (not forced)?
+
+---
+
+### 8. Algorithm & Content Discovery
+Ask: how does the user find their next thing to watch?
+
+- **Cold start** — new user with no history: what do they see? Is it compelling?
+- **Recency bias** — are newer additions surfaced first? Should they be?
+- **Completion-weighted recommendations** — a user who finished a 25-ep drama should see similar series, not random content
+- **Genre affinity** — `watch-progress.js` stores history; can this drive a "For You" section?
+- **Search quality** — does search match on genres, descriptions, not just titles?
+- **Filter UX** — can a user narrow to "Chinese ancient drama, 2023, 20+ episodes" in 3 taps?
+
+---
+
+### 9. Shorts Feed Psychology (TikTok model)
+The shorts feed is a vertical rabbit hole. Apply these patterns:
+
+- **Immediate value** — first frame of video must hook. Is there a thumbnail/preview before play?
+- **Frictionless scroll** — swipe up must feel instant. Any lag breaks the trance.
+- **Sound design** — mute state should be visible and togglable in one tap (already exists — check if it's prominent enough)
+- **Loop without announcement** — short videos should loop silently. Does the current player loop?
+- **Progress bar scrubbing** — thin, always-visible, drag-to-seek (check sensitivity)
+- **"Float Like" badge** — the compliment mechanic. Is it visible during peak moments?
+- **Idle nudge** — 8-second nudge exists. Is the copy engaging or robotic?
+
+---
+
+### 10. Mobile & Touch
+- Touch targets < 44×44px (Fitts's Law)
+- Horizontal overflow on small screens
+- Font sizes < 14px
+- Swipe gestures inconsistent with platform (iOS/Android norms)
+- Tap delay (300ms) — should be eliminated with `touch-action: manipulation`
+
+---
+
+### 11. Accessibility
+- Missing `aria-label`, `role`, `alt`
+- No visible focus ring
+- Color-only information
+- Missing `lang` attribute
+- Screen reader order differs from visual order
+
+---
+
+### 12. Code Quality (SonarQube)
+- Functions > 20 lines
+- Module boundary violations
+- Repeated code not in `utils.js`
+- Zombie (commented-out) code
+- `var`, `==`, unhandled promises
 
 ---
 
 ## Step 2 — Present suggestions
 
-Format each suggestion exactly like this — clear, scannable, no fluff:
+Format with lens tag and *why it matters* — not just what to do:
 
 ```
-SUGGESTIONS — pick numbers to implement (e.g. "do 1 3 5"):
+SUGGESTIONS — pick numbers (e.g. "do 1 3 5" or "all"):
 
-  #  │ Lens        │ What                                           │ Effort
-─────┼─────────────┼────────────────────────────────────────────────┼────────
-  1  │ UX Flow     │ Show skeleton loader while catalog fetches     │ Small
-  2  │ UI Polish   │ Add hover lift effect to home-cards            │ Small
-  3  │ Animation   │ Fade-in stagger on catalog cards (CSS only)    │ Small
-  4  │ Mobile      │ Increase episode tab touch target to 44px      │ Small
-  5  │ A11y        │ Add aria-label to mute toggle in shorts        │ Small
-  6  │ Code        │ Extract duplicated fetch logic into utils.js   │ Medium
-  7  │ UI Polish   │ Add active state ring to filter pills          │ Small
-  8  │ UX Flow     │ Persist scroll position on Back from player    │ Medium
-  9  │ Content     │ Add <meta name="description"> bilingual tag    │ Small
- 10  │ Animation   │ Smooth height transition on episode list open  │ Small
+  #  │ Lens          │ What                                              │ Why it matters              │ Effort
+─────┼───────────────┼───────────────────────────────────────────────────┼─────────────────────────────┼────────
+  1  │ Rabbit Hole   │ Autoplay next episode after 3s countdown          │ Peak-End Rule + flow state  │ Medium
+  2  │ Psychology    │ Show % progress bar on home-card for started films│ Zeigarnik — pulls them back │ Small
+  3  │ Shorts        │ Loop short videos silently after completion        │ TikTok rabbit hole          │ Small
+  4  │ Animation     │ Stagger catalog cards on load (30ms per card)     │ Feels alive, not dumped     │ Small
+  5  │ UI Polish     │ Active scale(0.96) on all button :active states   │ Interaction physics         │ Small
+  6  │ Philosophy    │ Subtle Khmer decorative motif in page headers     │ Reflective design — identity│ Small
+  7  │ Discovery     │ "Continue Watching" row above catalog grid        │ Loss aversion + resume hook │ Medium
+  8  │ Mobile        │ touch-action: manipulation on all tap targets     │ Remove 300ms tap delay      │ Small
+  9  │ A11y          │ aria-label on poster images (title in KM + EN)    │ Screen reader parity        │ Small
+ 10  │ Psychology    │ "X of 25 episodes watched" on drama cards         │ Endowed progress effect     │ Small
 ```
 
-Show **8–12 items** per run. Order by: impact first, effort second (Small before Medium).
-Do not show items that are already implemented — check before listing.
+Show **8–12 items**. Order by impact. Add the *why* column — it makes the user feel informed, not just told.
 
 **Effort scale:**
-- `Small` — CSS change or 1–5 line JS tweak, no new abstraction
-- `Medium` — new function or refactor across 1–2 files
-- `Large` — architectural change (don't suggest unless critical)
+- `Small` — CSS or 1–5 line JS change
+- `Medium` — new function, across 1–2 files
+- `Large` — architectural (only suggest if critical)
 
 ---
 
-## Step 3 — Wait for user selection
+## Step 3 — Wait
 
-Stop after presenting the list. Do not implement anything yet.
-
-The user will reply with numbers: `"do 1 3 5"` or `"all"` or `"1"`.
+Stop. Do not implement. User selects: `"do 1 3"` / `"all"` / `"2"`.
 
 ---
 
-## Step 4 — Implement selected items
+## Step 4 — Implement
 
-For each selected item, in order:
+Per selected item:
+1. Smallest focused change — no scope creep
+2. `node --check` any touched JS
+3. JSON validate any touched `db/` files
 
-1. Make the change (smallest focused edit possible — no scope creep)
-2. Run `node --check assets/js/<file>.js` if any JS was touched
-3. Validate JSON if any `db/` file was touched
-4. Move to the next item
-
-After all items are done:
-
-5. Run `npm test` — fix any failures before continuing
-6. Confirm all changes with `git diff --stat`
+After all done:
+4. `npm test` — must pass before commit
 
 ---
 
 ## Step 5 — Commit and push
 
-Group all implemented items into one commit:
-
-```
-git add <only the files changed>
-git commit -m "ux: <concise summary of what was improved>"
+```bash
+git add <only changed files>
+git commit -m "ux: <summary>"
 git push
 ```
 
-Commit message format: `ux:`, `ui:`, `a11y:`, `refactor:`, or `fix:` prefix depending on dominant change type. If mixed, use `ux:`.
+Prefix: `ux:` `ui:` `a11y:` `refactor:` `fix:` — use dominant type.
 
 ---
 
 ## Rules
 
-- **One suggestion = one focused change.** No bundling unrelated improvements into one item.
-- **Never implement unrequested items.** If you notice something while implementing, add it to the next `/suggest` run — don't silently fix it now.
-- **Never break bilingual parity.** Any UI text added must have both `en` and `km` versions.
-- **Tests must pass before committing.** `npm test` green = prerequisite for push.
-- **Boy Scout Rule applies.** If the file you edit has a trivial nearby mess (wrong indent, zombie comment), clean it — but only that, nothing more.
-- **No speculative abstractions.** If the fix is 3 lines of CSS, write 3 lines of CSS — don't build a theme system.
+- **One suggestion = one focused change.** No bundling.
+- **Never implement unrequested items.** Log them for the next `/suggest` run.
+- **Bilingual parity always.** Any new UI text needs `en` + `km`.
+- **Tests green before commit.**
+- **No dark patterns.** Engagement mechanics must respect user autonomy — no manipulative loops, no artificial urgency, no deceptive UI.
+- **Philosophy first.** If a suggestion conflicts with the app's Zen/Stoic/Existential identity, skip it.
+- **No speculative abstractions.** 3 lines of CSS over a new system.

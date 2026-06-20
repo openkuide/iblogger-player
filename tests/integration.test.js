@@ -16,6 +16,9 @@ const __dirname = path.dirname(__filename);
 const PORT = 8899;
 let server;
 
+// Ensure screenshots/ exists before Puppeteer tries to write into it
+fs.mkdirSync(path.join(__dirname, '..', 'screenshots'), { recursive: true });
+
 // 1. Simple static file server to host the workspace files
 function startServer() {
   return new Promise((resolve) => {
@@ -154,8 +157,8 @@ async function runTests() {
   } catch (error) {
     console.error('[TEST RUNNER] FAIL: Test suite threw an unhandled exception:', error.message || error);
     try {
-      await page.screenshot({ path: 'test-failure.png' });
-      console.log('[TEST RUNNER] Saved screenshot of failure to test-failure.png');
+      await page.screenshot({ path: 'screenshots/test-failure.png' });
+      console.log('[TEST RUNNER] Saved screenshot of failure to screenshots/test-failure.png');
     } catch (se) {
       console.error('[TEST RUNNER] Failed to save screenshot:', se.message);
     }

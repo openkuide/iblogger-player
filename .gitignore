@@ -16,5 +16,4 @@ Thumbs.db
 node_modules/
 
 # Test debug screenshots (generated on failure by integration.test.js)
-test-failure.png
 screenshots/

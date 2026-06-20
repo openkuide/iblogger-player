@@ -1,15 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="120" height="120" fill="none" role="img" aria-label="iblogger player logo">
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none" role="img" aria-label="iblogger player logo">
   <defs>
+    <linearGradient id="markBg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1c1c28"/>
+      <stop offset="1" stop-color="#0d0d14"/>
+    </linearGradient>
     <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ff007f"/>
       <stop offset="50%" stop-color="#7b2cbf"/>
       <stop offset="100%" stop-color="#00f2fe"/>
     </linearGradient>
   </defs>
-  <!-- Play circle -->
-  <circle cx="13" cy="16" r="10" stroke="url(#logoGrad)" stroke-width="2.5" fill="none"/>
-  <!-- Play triangle -->
-  <path d="M11 11L18 16L11 21V11Z" fill="url(#logoGrad)"/>
-  <!-- Custom Mouse Cursor -->
-  <path d="M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z" fill="#ffffff" stroke="url(#logoGrad)" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- .mark container: dark rounded square with subtle border -->
+  <rect width="120" height="120" rx="28" fill="url(#markBg)"/>
+  <rect width="120" height="120" rx="28" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- inner highlight (box-shadow inset simulation) -->
+  <rect x="1" y="1" width="118" height="58" rx="27" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- icon scaled to fill the mark (32×32 → 82×82, centered at 19,19) -->
+  <g transform="translate(19 19) scale(2.5625)">
+    <!-- Play circle -->
+    <circle cx="13" cy="16" r="10" stroke="url(#logoGrad)" stroke-width="2.5" fill="none"/>
+    <!-- Play triangle -->
+    <path d="M11 11L18 16L11 21V11Z" fill="url(#logoGrad)"/>
+    <!-- Custom Mouse Cursor — CSS transform applied inline: translate(13.5,13.5) scale(0.55) -->
+    <path transform="translate(13.5,13.5) scale(0.55)"
+          d="M5.5 1.5v22.2l6.2-5.7 4.8 9.3 3.1-1.6-4.8-9.3 7.2-.1z"
+          fill="#ffffff" stroke="url(#logoGrad)" stroke-width="1.8" stroke-linejoin="round"/>
+  </g>
 </svg>

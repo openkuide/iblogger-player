@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="300" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="50%" stop-color="#1f0f24"/>
+      <stop offset="100%" stop-color="#2d0a1d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(255, 105, 180, 0.25)"/>
+      <stop offset="100%" stop-color="rgba(255, 105, 180, 0)"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="300" height="450" fill="url(#bg)"/>
+
+  <!-- Magic Circle / Glow Motif (Fantasy/Romance Theme) -->
+  <circle cx="150" cy="200" r="110" fill="url(#glow)"/>
+  <circle cx="150" cy="200" r="85" fill="none" stroke="rgba(255, 105, 180, 0.15)" stroke-width="1" stroke-dasharray="5, 5"/>
+  <circle cx="150" cy="200" r="95" fill="none" stroke="rgba(255, 105, 180, 0.1)" stroke-width="1.5"/>
+
+  <!-- SHORT Film Badge (Top Right) -->
+  <rect x="225" y="15" width="60" height="20" rx="6" fill="#00f2fe" opacity="0.95"/>
+  <text x="255" y="29" font-family="'Outfit', 'Inter', sans-serif" font-size="9" font-weight="900" fill="#0c1017" text-anchor="middle" letter-spacing="0.05em">SHORT</text>
+
+  <!-- Title Section -->
+  <text x="150" y="145" font-family="'Outfit', 'Inter', 'Kantumruy Pro', 'Khmer OS Battambang', sans-serif" font-size="22" font-weight="900" fill="#ffffff" text-anchor="middle">
+    <tspan x="150" dy="0">ឆ្លងភពមកសម័យបុរាណ</tspan>
+    <tspan x="150" dy="32">ក្លាយជាឧបករណ៍ផ្ដល់កម្ដៅ</tspan>
+    <tspan x="150" dy="32">ឪ្យបងថ្លៃ</tspan>
+  </text>
+  <text x="150" y="260" font-family="'Outfit', 'Inter', sans-serif" font-size="11" font-weight="600" fill="#a0aec0" text-anchor="middle" opacity="0.75">Transmigrated as My Brother-in-Law's Warmer</text>
+
+  <!-- Year Badge (Bottom Left) -->
+  <rect x="15" y="405" width="45" height="24" rx="6" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1"/>
+  <text x="37.5" y="421" font-family="'Outfit', 'Inter', sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">2024</text>
+
+  <!-- Watermark (Bottom Center) -->
+  <text x="150" y="421" font-family="'Outfit', 'Inter', sans-serif" font-size="9" font-weight="800" fill="#ffffff" opacity="0.2" text-anchor="middle" letter-spacing="0.2em">IBLOGGER</text>
+
+  <!-- Rating Badge (Bottom Right) -->
+  <rect x="220" y="405" width="65" height="24" rx="6" fill="rgba(255, 69, 58, 0.12)" stroke="rgba(255, 69, 58, 0.25)" stroke-width="1"/>
+  <text x="252.5" y="421" font-family="'Outfit', 'Inter', sans-serif" font-size="11" font-weight="700" fill="#ff453a" text-anchor="middle">★ 8.2</text>
+</svg>

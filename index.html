@@ -111,8 +111,8 @@
               </div>
               
               <!-- Left poster display -->
-              <div class="slide-poster-wrap">
-                <img :src="m.poster" class="slide-poster" :alt="title(m)" />
+              <div class="slide-poster-wrap" :class="{ 'img-loading': !m.imgLoaded && !m.imgFailed && m.poster }">
+                <img :src="m.poster" class="slide-poster" :alt="title(m)" @load="m.imgLoaded = true" @error="m.imgFailed = true" />
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@
             <a v-for="item in watchHistory" :key="item.slug" 
                class="history-card" 
                :href="'?id=' + encodeURIComponent(item.slug) + '&ep=' + encodeURIComponent(item.lastEpisode)">
-              <div class="history-poster-wrap">
+              <div class="history-poster-wrap" :class="{ 'img-loading': !item.imgLoaded && !item.imgFailed && item.poster }">
                 <button class="history-delete-btn" @click.prevent.stop="deleteHistoryItem(item.slug)" :aria-label="lang === 'km' ? 'ដកចេញពីប្រវត្តិ' : 'Remove from History'" :title="lang === 'km' ? 'ដកចេញពីប្រវត្តិ' : 'Remove from History'">✕</button>
                 <!-- Fallback poster if broken or missing -->
                 <div v-if="!item.poster || item.imgFailed" class="history-fallback-poster">
@@ -158,7 +158,7 @@
                     <line x1="2" y1="12" x2="22" y2="12"></line>
                   </svg>
                 </div>
-                <img v-else class="history-poster" :src="item.poster" :alt="title(item)" @error="item.imgFailed = true" />
+                <img v-else class="history-poster" :src="item.poster" :alt="title(item)" @load="item.imgLoaded = true" @error="item.imgFailed = true" />
                 <div class="history-overlay">
                   <div class="play-btn-circle-sm">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -384,7 +384,7 @@
                   <span class="fallback-title">{{ title(m) }}</span>
                 </div>
                 <!-- Main image with smooth load transition -->
-                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)" loading="lazy"
                      @load="m.imgLoaded = true" @error="m.imgFailed = true" />
                 <div class="hc-overlay">
                   <div class="play-btn-circle">
@@ -423,7 +423,7 @@
                   </svg>
                 </div>
                 <!-- Main image with smooth load transition -->
-                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)"
+                <img v-else class="hc-poster" :src="m.poster" :alt="title(m)" loading="lazy"
                      @load="m.imgLoaded = true" @error="m.imgFailed = true" />
                 <div class="hc-overlay">
                   <div class="play-btn-circle">

@@ -1356,6 +1356,28 @@ video { width:100%; height:100%; display:block; background:#000; }
 }
 .hc-poster-wrap.img-loading .hc-poster { opacity: 0; }
 
+.hc-poster-wrap.img-loading,
+.rel-poster-wrap.img-loading,
+.history-poster-wrap.img-loading,
+.slide-poster-wrap.img-loading {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-elev-2) !important;
+  animation: skeletonFade 2s ease-in-out infinite;
+}
+.hc-poster-wrap.img-loading::after,
+.rel-poster-wrap.img-loading::after,
+.history-poster-wrap.img-loading::after,
+.slide-poster-wrap.img-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.07) 50%, transparent 100%);
+  animation: travelShimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Fallback Poster (Gradients + SVG icon + Title) */
 .hc-fallback-poster {
   position: absolute; inset: 0;
@@ -1818,10 +1840,12 @@ video { width:100%; height:100%; display:block; background:#000; }
   position: relative; overflow: hidden; border-radius: 12px; background: var(--bg-elev-2); aspect-ratio: 2/3;
   transition: box-shadow .18s ease;
 }
+.rel-poster-wrap.img-loading .rel-poster { opacity: 0; }
 .rel-poster {
   width:100%; height:100%; object-fit:cover;
   border-radius:12px; display: block;
   border: 1px solid var(--hairline);
+  transition: opacity 0.25s ease;
 }
 .rel-fallback-poster {
   position: absolute; inset: 0;
@@ -2310,16 +2334,19 @@ body.dark-theme {
   border: 1px solid rgba(255, 255, 255, 0.15);
   display: none;
   z-index: 2;
+  background: var(--bg-elev-2);
 }
 @media (min-width: 768px) {
   .slide-poster-wrap {
     display: block;
   }
 }
+.slide-poster-wrap.img-loading .slide-poster { opacity: 0; }
 .slide-poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 0.25s ease;
 }
 .hc-dots {
   position: absolute;
@@ -2483,11 +2510,13 @@ body.dark-theme {
 .history-card:hover .history-poster-wrap {
   box-shadow: 0 10px 24px rgba(0,0,0,0.45);
 }
+.history-poster-wrap.img-loading .history-poster { opacity: 0; }
 .history-poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: opacity 0.25s ease;
 }
 .history-fallback-poster {
   position: absolute;

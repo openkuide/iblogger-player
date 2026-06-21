@@ -1112,6 +1112,7 @@ function buildRecommendationCard(m) {
   img.alt = t(m.title);
 
   const renderRelFallback = () => {
+    posterWrap.classList.remove("img-loading");
     posterWrap.classList.add("img-failed");
     const fb = document.createElement("div");
     fb.className = "rel-fallback-poster";
@@ -1132,8 +1133,12 @@ function buildRecommendationCard(m) {
   };
 
   if (m.poster) {
-    img.src = m.poster;
+    posterWrap.classList.add("img-loading");
+    img.onload = () => {
+      posterWrap.classList.remove("img-loading");
+    };
     img.onerror = renderRelFallback;
+    img.src = m.poster;
     posterWrap.appendChild(img);
   } else {
     renderRelFallback();

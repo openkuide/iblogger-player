@@ -192,4 +192,4 @@ Poster needed: ./assets/images/<slug>.png  ← add manually or link an image URL
 - **Descriptions must be compelling** — not a plot spoiler dump. Think movie trailer narration.
 - **`rating`** — use research source if available; default 8.2 for Douyin shorts, 8.0 for dramas.
 - **`language`** — always `"Khmer"` (all content is Khmer-dubbed on this platform).
-- **Poster** — if no URL available, use `"./assets/images/<slug>.png"` and remind user to add image.
+- **Poster** — For official dramas, if no URL is available, use `"./assets/images/<slug>.png"` and remind the user to add it. For Douyin Chinese short movies, always generate a high-quality cinematic PNG poster using the `generate_image` tool, save it locally to `assets/images/<slug>.png`, and reference it in the metadata. The prompt should specify a cinematic ancient/modern Chinese drama poster style with character actions, clothing, lighting, and palace settings.

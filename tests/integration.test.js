@@ -116,6 +116,8 @@ async function runTests() {
       const loggedError = fullText || msg.text() || 'Unknown console error';
       console.log(`[BROWSER CONSOLE ERROR] ${loggedError}`, msg.location());
       consoleErrors.push(loggedError);
+    } else {
+      console.log(`[BROWSER CONSOLE ${msg.type().toUpperCase()}] ${msg.text()}`);
     }
   });
 

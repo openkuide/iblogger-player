@@ -42,9 +42,10 @@ Read `db/<slug>.json`. Detect type:
 
 **Rewrite `description.km`** — not a word-for-word translation. Write it fresh in natural Khmer that flows the same way. Same energy, same structure.
 
-**Poster check** — if `poster` starts with `./assets/images/` and the file does not exist on disk:
-→ Generate SVG (see SVG template below), save to `assets/images/<slug>.svg`
-→ Update `poster` field to `./assets/images/<slug>.svg`
+**Poster check** — if `poster` is missing, is a `.svg` file/placeholder, or the referenced image file does not exist on disk:
+→ Generate a premium high-quality cinematic PNG poster using the `generate_image` tool.
+→ Save the generated PNG to `assets/images/<slug>.png`.
+→ Update `poster` field to `./assets/images/<slug>.png`.
 
 ---
 

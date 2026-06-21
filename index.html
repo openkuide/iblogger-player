@@ -333,8 +333,9 @@
               </div>
             </div>
             
-            <div v-if="hasFilters" class="filter-clear-wrapper">
-              <button class="clear-chip" @click="clearAll">✕ សំអាតទាំងអស់ (Clear All)</button>
+            <div class="filter-clear-wrapper">
+              <button v-if="hasFilters" class="clear-chip" @click="clearAll">✕ សំអាតទាំងអស់ (Clear All)</button>
+              <button class="copy-link-chip" @click="copyFilterLink" :title="lang === 'km' ? 'ចម្លងតំណភ្ជាប់' : 'Copy shareable link'">🔗 {{ lang === 'km' ? 'ចម្លងតំណភ្ជាប់' : 'Copy Link' }}</button>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // Catalog / Home Vue 3 application
 
-import { LANG, toKhmerNumerals, playPopSound, playSparkleSound, translateGenre } from './utils.js';
+import { LANG, toKhmerNumerals, playPopSound, playSparkleSound, translateGenre, showToast } from './utils.js';
 import { getResumePosition } from './watch-progress.js';
 
 let homeApp = null;
@@ -653,6 +653,16 @@ export function startHomeMode() {
         currentQuickTag.value = "";
       }
 
+      function copyFilterLink() {
+        navigator.clipboard.writeText(location.href)
+          .then(() => {
+            const msg = LANG_HOME === "km" ? "ចម្លងតំណភ្ជាប់ជោគជ័យ!" : "Link copied to clipboard!";
+            showToast(msg);
+            playPopSound();
+          })
+          .catch(() => showToast("Failed to copy link"));
+      }
+
       function toggleQuickTag(tag) {
         if (currentQuickTag.value === tag) {
           currentQuickTag.value = "";
@@ -727,7 +737,8 @@ export function startHomeMode() {
         toKhmerNumerals, lang: LANG_HOME,
         searchFocused, recentSearches, trendingSuggestions, MOODS,
         searchPlaceholder, saveSearchQuery, deleteRecentSearch,
-        clearRecentSearches, selectSearchSuggestion, selectMood
+        clearRecentSearches, selectSearchSuggestion, selectMood,
+        copyFilterLink
       };
     }
   });

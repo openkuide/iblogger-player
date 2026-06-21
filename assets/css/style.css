@@ -299,6 +299,80 @@ video { width:100%; height:100%; display:block; background:#000; }
 }
 .loader .label { font-size:13px; color:rgba(255,255,255,0.7); letter-spacing:0.01em; }
 
+/* Loading Steps - Modern Psychology & Operational Transparency */
+.loading-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+  width: 280px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: fadeInSteps 0.4s ease forwards;
+}
+
+@keyframes fadeInSteps {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: all 0.3s ease;
+}
+
+.loading-step.active {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.loading-step.completed {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.loading-step-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+}
+
+.loading-step-status .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.loading-step.active .loading-step-status .dot {
+  background: #00f2fe;
+  box-shadow: 0 0 8px #00f2fe;
+  animation: pulse-dot-loading 1.2s infinite ease-in-out;
+}
+
+.loading-step.completed .loading-step-status {
+  color: #10b981; /* Emerald Green */
+  font-weight: bold;
+}
+
+@keyframes pulse-dot-loading {
+  0%, 100% { transform: scale(0.85); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+
 /* ── Video.js custom styling ────────────────────────────────── */
 .player-box .video-js {
   width: 100% !important;
@@ -2932,18 +3006,44 @@ a, button, .ep-btn, .home-card, .sort-pill, .theme-toggle-btn, .lang-toggle-btn,
   top: 16px;
   right: 16px;
   z-index: 1010;
-  width: 36px;
+  min-width: 36px;
   height: 36px;
   background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 16px;
   text-decoration: none;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  padding: 0 10px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+.shorts-close .close-text {
+  display: none;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (min-width: 769px) {
+  .shorts-close:hover {
+    padding: 0 16px;
+    background: rgba(255, 45, 85, 0.2);
+    border-color: rgba(255, 45, 85, 0.4);
+    box-shadow: 0 0 15px rgba(255, 45, 85, 0.3);
+  }
+  .shorts-close:hover .close-text {
+    display: inline;
+  }
+}
+body.lang-en .lang-km-inline { display: none !important; }
+body.lang-km .lang-en-inline { display: none !important; }
 .shorts-container {
   height: 100vh;
   width: 100%;
@@ -3035,8 +3135,20 @@ a.short-title {
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 2px 10px rgba(10, 132, 255, 0.4);
-  transition: transform 0.2s, filter 0.2s;
+  box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.6);
+  animation: watch-pulse 2.2s infinite;
+  transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+}
+@keyframes watch-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(10, 132, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0);
+  }
 }
 .short-watch-btn:hover {
   transform: scale(1.04);
@@ -3077,7 +3189,14 @@ a.short-title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 8px 14px 8px;
+  border-radius: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 .short-action-item {
   display: flex;
@@ -3170,7 +3289,8 @@ a.short-title {
 .short-progress-filled {
   height: 100%;
   width: 0%;
-  background: #fff;
+  background: linear-gradient(90deg, #7b2cbf, #00f2fe);
+  box-shadow: 0 0 8px #00f2fe;
   transition: width 0.1s linear;
 }
 
@@ -3179,10 +3299,10 @@ a.short-title {
   bottom: 24px;
   left: 0%;
   transform: translateX(-50%) scale(0.85);
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 12, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   padding: 4px 10px;
   border-radius: 6px;
@@ -3194,10 +3314,86 @@ a.short-title {
   opacity: 0;
   z-index: 1030;
   transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.short-progress-container:hover .short-progress-filled {
+  box-shadow: 0 0 12px #00f2fe;
 }
 .short-progress-container.scrubbing .short-scrub-tooltip {
   opacity: 1;
   transform: translateX(-50%) scale(1);
+}
+
+/* ── Stoic / Existential Pause Quote Overlay ── */
+.short-stoic-quote {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: rgba(10, 10, 12, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px 24px;
+  border-radius: 16px;
+  max-width: 320px;
+  width: 80%;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 1003;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.short-stoic-quote.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.short-stoic-quote .quote-km {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.95);
+}
+.short-stoic-quote .quote-en {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+}
+.short-stoic-quote .quote-author {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 12px;
+  color: var(--accent, #0a84ff);
+  font-weight: bold;
+}
+
+/* ── Floating Music Note Animation ── */
+.short-music-note {
+  position: absolute;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  z-index: 1006;
+  animation: music-note-float 2.5s ease-out forwards;
+  filter: drop-shadow(0 0 4px rgba(10, 132, 255, 0.5));
+}
+@keyframes music-note-float {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--music-drift-x, -30px), -100px) scale(1.1) rotate(var(--music-rotation, -45deg));
+  }
 }
 
 /* ── Audio Disc Paused ── */
@@ -5464,15 +5660,15 @@ a.short-title {
 @keyframes emoji-float-fade {
   0% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(0.8);
+    transform: translate(-50%, 0) scale(0.8) rotate(0deg);
   }
   50% {
     opacity: 1;
-    transform: translate(calc(-50% + var(--drift-x, 0px) * 0.5), -50px) scale(1.2);
+    transform: translate(calc(-50% + var(--drift-x, 0px) * 0.5), -50px) scale(1.3) rotate(var(--rotation, 15deg));
   }
   100% {
     opacity: 0;
-    transform: translate(calc(-50% + var(--drift-x, 0px)), -120px) scale(0.8);
+    transform: translate(calc(-50% + var(--drift-x, 0px)), -130px) scale(0.7) rotate(var(--rotation, 15deg));
   }
 }
 

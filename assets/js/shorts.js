@@ -3,6 +3,7 @@ import { LANG, showToast, playPopSound, translateGenre, triggerOsd, toKhmerNumer
 let shortsScrollHandler = null;
 let shortsIdleTimer = null;
 let activeShortWrapper = null;
+let shortsWheelHandler = null;
 
 // Psychology & Philosophy: Unified State coordinator for better encapsulation and lifecycle clarity
 const ShortsState = {
@@ -78,6 +79,39 @@ const ShortsState = {
     }
   }
 };
+
+const STOIC_QUOTES = [
+  {
+    km: "សេចក្តីស្ងប់កើតចេញពីខាងក្នុង កុំស្វែងរកវាពីខាងក្រៅឡើយ។",
+    en: "Tranquility comes from within, do not seek it outside.",
+    author: "Marcus Aurelius"
+  },
+  {
+    km: "យើងរងទុក្ខដោយសារការគិតរបស់យើង ច្រើនជាងការពិត។",
+    en: "We suffer more often in imagination than in reality.",
+    author: "Seneca"
+  },
+  {
+    km: "ឧបសគ្គគឺជាផ្លូវ។ អ្វីដែលរារាំងសកម្មភាព ជំរុញឱ្យមានសកម្មភាព។",
+    en: "The impediment to action advances action. What stands in the way becomes the way.",
+    author: "Marcus Aurelius"
+  },
+  {
+    km: "ជីវិតមិនមែនជាការស្វែងរកខ្លួនឯងទេ គឺបង្កើតខ្លួនឯងឡើង។",
+    en: "Life isn't about finding yourself. Life is about creating yourself.",
+    author: "George Bernard Shaw"
+  },
+  {
+    km: "កុំប្រាថ្នាឱ្យរឿងរ៉ាវកើតឡើងតាមចិត្តចង់ ត្រូវទទួលយកអ្វីដែលកើតឡើង។",
+    en: "Do not seek for things to happen the way you want them to; rather, wish that what happens happens the way it happens.",
+    author: "Epictetus"
+  },
+  {
+    km: "ពេលវេលាដែលអ្នករីករាយក្នុងការខ្ជះខ្ជាយ មិនមែនជាពេលវេលាខ្ជះខ្ជាយឡើយ។",
+    en: "The time you enjoy wasting is not wasted time.",
+    author: "Bertrand Russell"
+  }
+];
 
 // Aesthetics & Maintenance: Separation of Concerns markup templates namespace
 const Templates = {
@@ -216,6 +250,11 @@ const Templates = {
       <div class="short-seek-overlay">
         <div class="short-seek-icon"></div>
       </div>
+      <div class="short-stoic-quote" id="stoicQuote_${movie.slug}">
+        <div class="quote-km"></div>
+        <div class="quote-en"></div>
+        <div class="quote-author"></div>
+      </div>
       <div class="short-gradient-bottom"></div>
       ${this.generateInfoContainerHtml(movie, title)}
       ${this.generateActionsContainerHtml(movie)}
@@ -340,9 +379,15 @@ export function stopShortsMode() {
   document.removeEventListener('keydown', handleShortsKeydown);
   
   const container = document.getElementById('shortsContainer');
-  if (container && shortsScrollHandler) {
-    container.removeEventListener('scroll', shortsScrollHandler);
-    shortsScrollHandler = null;
+  if (container) {
+    if (shortsScrollHandler) {
+      container.removeEventListener('scroll', shortsScrollHandler);
+      shortsScrollHandler = null;
+    }
+    if (shortsWheelHandler) {
+      container.removeEventListener('wheel', shortsWheelHandler);
+      shortsWheelHandler = null;
+    }
   }
   
   for (let [slug, player] of ShortsState.players.entries()) {
@@ -523,6 +568,27 @@ export async function startShortsMode() {
 
     container.addEventListener('scroll', shortsScrollHandler);
     setTimeout(shortsScrollHandler, 300);
+
+    // Snap-lock wheel triggers for trackpad Snapping comfort
+    if (shortsWheelHandler) {
+      container.removeEventListener('wheel', shortsWheelHandler);
+    }
+    let isTrackpadScrolling = false;
+    shortsWheelHandler = (e) => {
+      if (Math.abs(e.deltaY) < 15) return;
+      e.preventDefault();
+      if (isTrackpadScrolling) return;
+      
+      isTrackpadScrolling = true;
+      const scrollAmount = e.deltaY > 0 ? window.innerHeight : -window.innerHeight;
+      container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      
+      setTimeout(() => {
+        isTrackpadScrolling = false;
+      }, 700);
+    };
+    container.addEventListener('wheel', shortsWheelHandler, { passive: false });
+
     setupShortsNudgeListeners();
   } catch (err) {
     showErrorState(container);
@@ -640,12 +706,74 @@ function triggerEmojiFloatBadge(wrapper, button, emoji) {
   
   const drift = (Math.random() * 40 - 20) + "px";
   badge.style.setProperty("--drift-x", drift);
+  const rot = (Math.random() * 60 - 30) + "deg";
+  badge.style.setProperty("--rotation", rot);
   
   wrapper.appendChild(badge);
   
   setTimeout(() => {
     badge.remove();
   }, 1000);
+}
+
+// Low-level: Display dynamic Stoic/Existential quote on pause
+function showStoicQuote(wrapper, slug) {
+  const quoteEl = wrapper.querySelector('.short-stoic-quote');
+  if (!quoteEl) return;
+
+  const quote = STOIC_QUOTES[Math.floor(Math.random() * STOIC_QUOTES.length)];
+  const kmEl = quoteEl.querySelector('.quote-km');
+  const enEl = quoteEl.querySelector('.quote-en');
+  const authorEl = quoteEl.querySelector('.quote-author');
+
+  if (kmEl) kmEl.textContent = quote.km;
+  if (enEl) enEl.textContent = quote.en;
+  if (authorEl) authorEl.textContent = quote.author;
+
+  quoteEl.classList.add('active');
+}
+
+// Low-level: Hide pause quote overlay
+function hideStoicQuote(wrapper, slug) {
+  const quoteEl = wrapper.querySelector('.short-stoic-quote');
+  if (quoteEl) {
+    quoteEl.classList.remove('active');
+  }
+}
+
+// Low-level: Spawn drifting music notes from vinyl disc
+function triggerMusicNoteFloat(wrapper) {
+  const disc = wrapper.querySelector('.short-audio-disc');
+  if (!disc) return;
+
+  const notes = ['♫', '♪', '♬', '♩'];
+  const noteChar = notes[Math.floor(Math.random() * notes.length)];
+  const note = document.createElement('div');
+  note.className = 'short-music-note';
+  note.textContent = noteChar;
+
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const discRect = disc.getBoundingClientRect();
+
+  const top = (discRect.top - wrapperRect.top + discRect.height / 2) + 'px';
+  const left = (discRect.left - wrapperRect.left + discRect.width / 2) + 'px';
+
+  note.style.position = 'absolute';
+  note.style.top = top;
+  note.style.left = left;
+  note.style.transform = 'translate(-50%, -50%)';
+
+  const driftX = (Math.random() * 60 - 30) + 'px';
+  const rot = (Math.random() * 90 - 45) + 'deg';
+
+  note.style.setProperty('--music-drift-x', driftX);
+  note.style.setProperty('--music-rotation', rot);
+
+  wrapper.appendChild(note);
+
+  setTimeout(() => {
+    note.remove();
+  }, 2500);
 }
 
 function setupKeyboardHelpButton(wrapper) {
@@ -1224,12 +1352,21 @@ function setupPlayerEventHandlers(player, wrapper) {
   let lastTime = 0;
   let isScrubbing = false;
 
+  let musicNoteInterval = null;
+
   player.on('playing', () => {
     wrapper.classList.remove('error');
     wrapper.classList.add('playing');
     
     togglePlayOverlayVisibility(wrapper, false);
     if (audioDisc) audioDisc.classList.remove('paused');
+    hideStoicQuote(wrapper);
+    
+    if (!musicNoteInterval) {
+      musicNoteInterval = setInterval(() => {
+        triggerMusicNoteFloat(wrapper);
+      }, 1800);
+    }
     
     const hint = wrapper.querySelector('.shorts-rotation-hint');
     if (hint) hint.classList.remove('show');
@@ -1240,6 +1377,19 @@ function setupPlayerEventHandlers(player, wrapper) {
   player.on('pause', () => {
     togglePlayOverlayVisibility(wrapper, true);
     if (audioDisc) audioDisc.classList.add('paused');
+    showStoicQuote(wrapper);
+    
+    if (musicNoteInterval) {
+      clearInterval(musicNoteInterval);
+      musicNoteInterval = null;
+    }
+  });
+
+  player.on('dispose', () => {
+    if (musicNoteInterval) {
+      clearInterval(musicNoteInterval);
+      musicNoteInterval = null;
+    }
   });
 
   player.on('timeupdate', () => {

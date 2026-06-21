@@ -533,6 +533,7 @@
           <div class="loader" id="loader">
             <div class="spinner"></div>
             <div class="label">Loading…</div>
+            <div class="loading-steps-container" id="loadingStepsContainer" style="display: none;"></div>
           </div>
         </div>
       <div class="tv-strip">
@@ -1040,11 +1041,19 @@
 
   <!-- Shorts view (Full screen overlay) -->
   <div id="shortsView" class="shorts-overlay" style="display:none;">
-    <a href="./" id="closeShortsBtn" class="shorts-close" aria-label="Close Shorts">✕</a>
+    <a href="./" id="closeShortsBtn" class="shorts-close" aria-label="Close Shorts">
+      <span>✕</span>
+      <span class="close-text lang-km-inline">ចាកចេញ</span>
+      <span class="close-text lang-en-inline">Close</span>
+    </a>
     
     <!-- Shorts Navigation Arrows (Desktop overlay) -->
-    <button id="shortsPrevBtn" class="shorts-nav-arrow prev" aria-label="Previous Short">▲</button>
-    <button id="shortsNextBtn" class="shorts-nav-arrow next" aria-label="Next Short">▼</button>
+    <button id="shortsPrevBtn" class="shorts-nav-arrow prev" aria-label="Previous Short">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    </button>
+    <button id="shortsNextBtn" class="shorts-nav-arrow next" aria-label="Next Short">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
 
     <div id="shortsContainer" class="shorts-container"></div>
     

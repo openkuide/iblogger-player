@@ -29,8 +29,122 @@ export function translateGenre(genre) {
 const loader = document.getElementById("loader");
 const statusEl = document.getElementById("status");
 
+// Perceived Performance Loading Steps
+const STEPS_KM = [
+  "កំពុងភ្ជាប់ទៅកាន់ម៉ាស៊ីនមេ...",
+  "កំពុងផ្ទៀងផ្ទាត់ពិធីការស្ទ្រីម...",
+  "កំពុងទាញយកលិបិក្រមមេឌា...",
+  "កំពុងផ្ទុកកញ្ចប់ទិន្នន័យវីដេអូ...",
+  "កំពុងចាប់ផ្តើមចាក់..."
+];
+
+const STEPS_EN = [
+  "Connecting to server...",
+  "Verifying stream protocol...",
+  "Fetching media index...",
+  "Buffering video segments...",
+  "Starting playback..."
+];
+
+let loadingStepsInterval = null;
+let currentStepIndex = 0;
+
+// Low-level: Create a DOM element for a single step
+function createStepElement(text, idx) {
+  const stepEl = document.createElement("div");
+  stepEl.className = "loading-step";
+  stepEl.id = `loadingStep_${idx}`;
+
+  const statusEl = document.createElement("span");
+  statusEl.className = "loading-step-status";
+  const dot = document.createElement("span");
+  dot.className = "dot";
+  statusEl.appendChild(dot);
+
+  const textEl = document.createElement("span");
+  textEl.className = "loading-step-text";
+  textEl.textContent = text;
+
+  stepEl.appendChild(statusEl);
+  stepEl.appendChild(textEl);
+  return stepEl;
+}
+
+// Low-level: Populate the steps container with a list of steps
+function renderStepsList(stepsContainer, steps) {
+  stepsContainer.innerHTML = "";
+  steps.forEach((text, idx) => {
+    const el = createStepElement(text, idx);
+    stepsContainer.appendChild(el);
+  });
+}
+
+// Low-level: Update DOM classes and icons for steps
+function updateStepDOMState(idx, state) {
+  const el = document.getElementById(`loadingStep_${idx}`);
+  if (!el) return;
+
+  if (state === "active") {
+    el.classList.add("active");
+  } else if (state === "completed") {
+    el.classList.remove("active");
+    el.classList.add("completed");
+    const status = el.querySelector(".loading-step-status");
+    if (status) status.textContent = "✔";
+  }
+}
+
+// Mid-level: Start the timer loop to progress through the loading steps
+function scheduleNextStep(timings, stepsCount) {
+  if (currentStepIndex >= stepsCount - 1) return;
+
+  updateStepDOMState(currentStepIndex, "completed");
+  currentStepIndex++;
+  updateStepDOMState(currentStepIndex, "active");
+
+  const delay = timings[currentStepIndex - 1] || 600;
+  loadingStepsInterval = setTimeout(() => {
+    scheduleNextStep(timings, stepsCount);
+  }, delay);
+}
+
+// High-level orchestration: Initialize the progressive loading steps UI
+function startLoadingSteps() {
+  const stepsContainer = document.getElementById("loadingStepsContainer");
+  if (!stepsContainer) return;
+
+  if (loadingStepsInterval) clearTimeout(loadingStepsInterval);
+  
+  const steps = LANG === "km" ? STEPS_KM : STEPS_EN;
+  renderStepsList(stepsContainer, steps);
+  stepsContainer.style.display = "flex";
+
+  currentStepIndex = 0;
+  updateStepDOMState(0, "active");
+
+  const timings = [400, 500, 600, 800]; // Duration of step 0, 1, 2, 3
+  const firstDelay = timings[0];
+  loadingStepsInterval = setTimeout(() => {
+    scheduleNextStep(timings, steps.length);
+  }, firstDelay);
+}
+
+// High-level orchestration: Cleanup and hide the loading steps UI
+function stopLoadingSteps() {
+  if (loadingStepsInterval) {
+    clearTimeout(loadingStepsInterval);
+    loadingStepsInterval = null;
+  }
+  const stepsContainer = document.getElementById("loadingStepsContainer");
+  if (stepsContainer) {
+    stepsContainer.style.display = "none";
+    stepsContainer.innerHTML = "";
+  }
+}
+
 export function hideLoader() {
   if (loader) loader.classList.add("hide");
+  stopLoadingSteps();
 }
 
 export function showLoader(label) {
@@ -38,6 +152,11 @@ export function showLoader(label) {
   loader.classList.remove("hide");
   const l = loader.querySelector(".label");
   if (l && label) l.textContent = label;
+
+  const isInitialLoad = label && (label === "Loading…" || label === "កំពុងផ្ទុក...");
+  if (isInitialLoad) {
+    startLoadingSteps();
+  }
 }
 
 export function showStatus(html, isErr) {

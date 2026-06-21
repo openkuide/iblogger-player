@@ -572,6 +572,9 @@ export function startHomeMode() {
 
       function syncToUrl() {
         const p = new URLSearchParams();
+        const params = new URLSearchParams(location.search);
+        const lang = params.get("lang");
+        if (lang)                          p.set("lang",    lang);
         if (search.value.trim())           p.set("q",       search.value.trim());
         if (yearFilter.value)              p.set("year",    yearFilter.value);
         if (minRating.value > 0)           p.set("rating",  String(minRating.value));
@@ -639,8 +642,11 @@ export function startHomeMode() {
 
       function toggleGenre(g) {
         const i = activeGenres.value.indexOf(g);
-        if (i >= 0) activeGenres.value.splice(i, 1);
-        else activeGenres.value.push(g);
+        if (i >= 0) {
+          activeGenres.value = activeGenres.value.filter(x => x !== g);
+        } else {
+          activeGenres.value = [...activeGenres.value, g];
+        }
       }
 
       function clearAll() {

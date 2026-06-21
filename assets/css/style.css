@@ -336,78 +336,323 @@ video { width:100%; height:100%; display:block; background:#000; }
   display: none !important;
 }
 
-/* Control bar styling */
+/* Control bar — Floating Glassmorphic Pill bar with glow */
 .video-js .vjs-control-bar {
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)) !important;
-  height: 48px;
-  align-items: center;
-  padding: 0 10px;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-start !important;
+  align-content: space-between !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  background: rgba(10, 10, 14, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 12px !important;
+  height: 74px !important;
+  padding: 0 14px 8px 14px !important;
+  bottom: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  width: calc(100% - 24px) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.8), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 25px rgba(123, 44, 191, 0.15) !important; /* Subtle violet ambient glow */
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.35s !important;
 }
 
-/* Customize sliders and progress color */
+/* Hide control bar smoothly when user is inactive during playing */
+.video-js.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(10px) !important;
+}
+
+/* Force all buttons/controls on the bottom row to align correctly */
+.video-js .vjs-control-bar > *:not(.vjs-progress-control) {
+  position: relative !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: flex-end !important;
+  margin: 0 2px !important;
+}
+
+/* Time display styling — JW-style monospace */
+.video-js .vjs-time-control {
+  display: flex !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  font-family: var(--font-mono) !important;
+  letter-spacing: 0.02em !important;
+  align-items: center !important;
+  transition: color 0.2s ease !important;
+}
+.video-js .vjs-control-bar:hover .vjs-time-control {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+.video-js .vjs-current-time {
+  display: flex !important;
+  padding-right: 0 !important;
+}
+.video-js .vjs-duration {
+  display: flex !important;
+  padding-left: 0 !important;
+}
+.video-js .vjs-time-divider {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 4px !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Customize sliders and progress color — JW-style gradient accent */
 .video-js .vjs-play-progress {
-  background-color: var(--accent) !important;
+  background: linear-gradient(to right, #7b2cbf 0%, var(--accent) 60%, #c084fc 100%) !important;
+  border-radius: 4px !important;
+  transition: filter 0.2s ease !important;
+}
+.video-js .vjs-progress-control:hover .vjs-play-progress {
+  filter: drop-shadow(0 0 4px var(--accent)) !important;
 }
 .video-js .vjs-volume-level {
-  background-color: var(--accent) !important;
+  background: linear-gradient(to right, #7b2cbf, var(--accent)) !important;
+  border-radius: 4px !important;
 }
 .video-js .vjs-slider {
-  background-color: rgba(255, 255, 255, 0.18) !important;
-  border-radius: 4px;
-  height: 4px;
-}
-.video-js .vjs-progress-holder {
-  height: 4px;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 4px !important;
+  height: 4px !important;
+  transition: height 0.2s ease !important;
 }
 
-/* Make the mouse/hover scrub bar rounder */
-.video-js .vjs-load-progress {
-  border-radius: 4px;
+/* JW Player Style Row Layout: Force relative layout flow for progress bar */
+.video-js .vjs-progress-control {
+  position: relative !important;
+  width: 100% !important;
+  height: 24px !important;
+  order: 1 !important;
+  margin: 0 !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  display: flex !important;
+  align-items: center !important;
 }
-.video-js .vjs-load-progress div {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-radius: 4px;
+.video-js .vjs-progress-control .vjs-progress-holder {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 4px !important;
+  border-radius: 4px !important;
+  transition: height 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+.video-js .vjs-progress-control:hover .vjs-progress-holder {
+  height: 8px !important;
+}
+.video-js .vjs-progress-control:hover .vjs-play-progress,
+.video-js .vjs-progress-control:hover .vjs-load-progress,
+.video-js .vjs-progress-control:hover .vjs-load-progress div {
+  height: 8px !important;
 }
 
-/* Control bar buttons hover styling */
-.video-js .vjs-button:hover {
-  color: var(--accent);
+/* JW-style round scrubber handle — CSS circle with accent core & glow on hover */
+.video-js .vjs-play-progress::before {
+  content: '' !important;
+  font-size: 0 !important;
+  width: 14px !important;
+  height: 14px !important;
+  background: var(--accent) !important;
+  border: 3px solid #fff !important;
+  border-radius: 50% !important;
+  top: -5px !important;
+  right: -7px !important;
+  left: auto !important;
+  position: absolute !important;
+  display: block !important;
+  opacity: 1 !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.8), 0 0 8px var(--accent) !important;
+  transition: width 0.18s ease, height 0.18s ease, top 0.18s ease, right 0.18s ease, box-shadow 0.18s ease !important;
+}
+.video-js .vjs-progress-control:hover .vjs-play-progress::before {
+  width: 16px !important;
+  height: 16px !important;
+  top: -6px !important;
+  right: -8px !important;
+  box-shadow: 0 0 0 3px rgba(159, 90, 253, 0.35), 0 0 14px var(--accent), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+.video-js .vjs-progress-control:active .vjs-play-progress::before {
+  width: 18px !important;
+  height: 18px !important;
+  top: -7px !important;
+  right: -9px !important;
+  box-shadow: 0 0 0 4px rgba(159, 90, 253, 0.5), 0 0 22px var(--accent) !important;
+}
+
+/* Order other control elements to bottom row */
+.video-js .vjs-play-control { order: 2 !important; }
+.video-js .vjs-volume-panel { order: 3 !important; }
+.video-js .vjs-current-time { order: 4 !important; }
+.video-js .vjs-time-divider { order: 5 !important; }
+.video-js .vjs-duration { order: 6 !important; }
+.video-js .vjs-playback-rate {
+  order: 7 !important;
+  margin-left: auto !important; /* Push remaining buttons to the right row side */
+}
+.video-js .vjs-quality-button { order: 8 !important; }
+.video-js .vjs-picture-in-picture-control { order: 9 !important; }
+.video-js .vjs-fullscreen-control { order: 10 !important; }
+
+/* Control bar buttons — JW-style compact with white glow on hover */
+.video-js .vjs-control-bar .vjs-button,
+.video-js .vjs-control-bar .vjs-menu-button {
+  width: 36px !important;
+  height: 36px !important;
+  transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1), color 0.15s ease, filter 0.15s ease !important;
+}
+.video-js .vjs-control-bar .vjs-button:hover,
+.video-js .vjs-control-bar .vjs-menu-button:hover {
+  transform: scale(1.18) !important;
+  color: var(--accent) !important;
+  filter: drop-shadow(0 0 8px rgba(123, 44, 191, 0.7)) !important;
+}
+.video-js .vjs-control-bar .vjs-button:active,
+.video-js .vjs-control-bar .vjs-menu-button:active {
+  transform: scale(0.92) !important;
 }
 
 /* Styling for quality menu button and its popup list */
 .video-js .vjs-quality-button {
   cursor: pointer;
 }
+.video-js .vjs-menu {
+  display: block !important;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(0.96);
+  transition: opacity 0.25s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.25s !important;
+}
+.video-js .vjs-menu-button-popup:hover .vjs-menu,
+.video-js .vjs-menu-button-popup .vjs-menu.vjs-lock-showing {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+}
 .video-js .vjs-menu-button-popup .vjs-menu {
   left: -3em !important;
   width: 10em !important;
-  bottom: 1.5em !important;
+  bottom: 3.2em !important;
 }
 .video-js .vjs-menu-content {
-  background-color: rgba(28, 28, 32, 0.95) !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--hairline) !important;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  background-color: rgba(20, 20, 24, 0.9) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) saturate(180%);
   padding: 6px 0 !important;
-  box-shadow: var(--shadow);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
 }
 .video-js .vjs-menu-item {
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   margin: 2px 6px !important;
   padding: 6px 12px !important;
   font-size: 13px !important;
   text-transform: none !important;
   font-family: var(--font) !important;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 .video-js .vjs-menu-item:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
   color: #fff !important;
 }
 .video-js .vjs-menu-item.vjs-selected {
-  background-color: var(--accent) !important;
+  background: linear-gradient(135deg, var(--accent), #7b2cbf) !important;
   color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(123, 44, 191, 0.4) !important;
+}
+
+/* ── JW-style: Time Tooltip on Scrubber Hover ── */
+.video-js .vjs-time-tooltip {
+  background: rgba(6, 6, 8, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 6px !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  padding: 4px 9px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65) !important;
+  letter-spacing: 0.04em !important;
+  bottom: 14px !important;
+}
+.video-js .vjs-mouse-display {
+  background: rgba(255, 255, 255, 0.28) !important;
+  width: 1.5px !important;
+}
+.video-js .vjs-mouse-display .vjs-time-tooltip {
+  transform: translateX(-50%) !important;
+}
+
+/* ── JW-style: Playback Rate value badge in speed button ── */
+.video-js .vjs-playback-rate .vjs-playback-rate-value {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  font-family: var(--font-mono) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* ── JW-style: Volume panel horizontal slider refinement ── */
+.video-js .vjs-volume-bar.vjs-slider-horizontal {
+  margin: 0 !important;
+  height: 3px !important;
+  border-radius: 4px !important;
+}
+.video-js .vjs-volume-bar.vjs-slider-horizontal:hover {
+  height: 5px !important;
+}
+.video-js .vjs-volume-panel:hover .vjs-volume-bar.vjs-slider-horizontal {
+  height: 5px !important;
+}
+.video-js .vjs-volume-level.vjs-slider-bar {
+  border-radius: 4px !important;
+}
+.video-js .vjs-volume-level::before {
+  content: '' !important;
+  font-size: 0 !important;
+  width: 11px !important;
+  height: 11px !important;
+  background: var(--accent) !important;
+  border: 2.5px solid #fff !important;
+  border-radius: 50% !important;
+  top: -4px !important;
+  right: -5.5px !important;
+  left: auto !important;
+  position: absolute !important;
+  display: block !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 5px var(--accent) !important;
+}
+
+/* ── JW-style: Load progress buffer visibility ── */
+.video-js .vjs-load-progress {
+  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+.video-js .vjs-load-progress div {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-radius: 4px !important;
 }
 
 /* ── Funny ad banner ────────────────────────────────────────── */
@@ -1503,6 +1748,24 @@ video { width:100%; height:100%; display:block; background:#000; }
   background: linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev-3));
   border: 1px solid var(--hairline); border-radius: 12px;
   box-sizing: border-box;
+}
+.rel-year-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  background: rgba(20, 20, 24, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+  color: #fff !important;
+  font-family: var(--font) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 .rel-fallback-poster .fallback-icon {
   width: 24px; height: 24px; color: var(--accent); opacity: 0.6;
@@ -3663,30 +3926,32 @@ a.short-title {
 }
 
 /* ── TV Skip Intro Button ── */
+/* ── Skip Intro — JW-style bordered uppercase badge ── */
 .vjs-skip-intro-btn {
   position: absolute;
-  bottom: 56px;
+  bottom: 96px;
   right: 16px;
   z-index: 10;
-  background: rgba(20, 20, 25, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 18px;
-  padding: 8px 16px;
+  background: rgba(8, 8, 12, 0.60);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 4px;
+  padding: 7px 16px;
   color: #fff;
   font-family: var(--font);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   gap: 6px;
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(8px);
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s, border-color 0.2s;
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.15s, border-color 0.15s;
 }
 .vjs-skip-intro-btn.visible {
   opacity: 1;
@@ -3694,12 +3959,13 @@ a.short-title {
   pointer-events: auto;
 }
 .vjs-skip-intro-btn:hover {
-  background: rgba(20, 20, 25, 0.95);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: #fff;
+  transform: translateY(0) scale(1.03);
 }
 .vjs-skip-intro-btn:active {
-  transform: scale(0.97);
+  transform: translateY(0) scale(0.97);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 /* ── Dynamic Ambient Glow Canvas ── */

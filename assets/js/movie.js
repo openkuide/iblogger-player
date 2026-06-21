@@ -1044,13 +1044,129 @@ function renderResumeCTA(movie) {
   actionsContainer.insertBefore(btn, actionsContainer.firstChild);
 }
 
+function getBaseTitleEN(titleStr) {
+  if (!titleStr) return "";
+  return titleStr
+    .toLowerCase()
+    .replace(/\b(19|20)\d{2}\b/g, "")
+    .replace(/\b(i{1,3}|iv|v|vi{1,3}|ix|x)\b/g, "")
+    .replace(/\b(season\s+\d+|s\d+)\b/g, "")
+    .replace(/\bpart\s+(one|two|three|four|five|\d+)\b/g, "")
+    .replace(/[:\-(),]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getBaseTitleKM(titleStr) {
+  if (!titleStr) return "";
+  return titleStr
+    .replace(/[០-៩]/g, "")
+    .replace(/[0-9]/g, "")
+    .replace(/\b(i{1,3}|iv|v|vi{1,3}|ix|x)\b/gi, "")
+    .replace(/ភាគទី|វគ្គ|ជំនាន់ទី/g, "")
+    .replace(/[:\-(),]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isRelatedVersion(m1, m2) {
+  if (m1.slug === m2.slug) return false;
+  
+  // Custom manual group mapping for different adaptations/seasons of the same story
+  const twinsGroup = ['the-proud-twins', 'handsome-siblings', 'two-most-honorable-knights'];
+  if (twinsGroup.includes(m1.slug) && twinsGroup.includes(m2.slug)) return true;
+  
+  // Custom manual mappings for different titles of the same adaptation/story
+  const slugPairs = [
+    ['rosy-business-i', 'rosy-business-season-4-no-return'],
+    ['a-chinese-odyssey-part-one-pandora-s-box', 'a-chinese-odyssey-part-two-cinderella']
+  ];
+  const isMapped = slugPairs.some(pair => 
+    (m1.slug === pair[0] && m2.slug === pair[1]) || 
+    (m1.slug === pair[1] && m2.slug === pair[0])
+  );
+  if (isMapped) return true;
+  
+  const baseEn1 = getBaseTitleEN(m1.title?.en);
+  const baseEn2 = getBaseTitleEN(m2.title?.en);
+  if (baseEn1 && baseEn2 && baseEn1.length > 2 && baseEn1 === baseEn2) return true;
+  
+  const baseKm1 = getBaseTitleKM(m1.title?.km);
+  const baseKm2 = getBaseTitleKM(m2.title?.km);
+  if (baseKm1 && baseKm2 && baseKm1.length > 2 && baseKm1 === baseKm2) return true;
+  
+  return false;
+}
+
+function buildRecommendationCard(m) {
+  const card = document.createElement("a");
+  card.className = "rel-card";
+  card.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
+
+  const posterWrap = document.createElement("div");
+  posterWrap.className = "rel-poster-wrap";
+  
+  const img = document.createElement("img");
+  img.className = "rel-poster";
+  img.loading = "lazy";
+  img.alt = t(m.title);
+
+  const renderRelFallback = () => {
+    posterWrap.classList.add("img-failed");
+    const fb = document.createElement("div");
+    fb.className = "rel-fallback-poster";
+    fb.innerHTML = `
+      <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+        <line x1="7" y1="2" x2="7" y2="22"></line>
+        <line x1="17" y1="2" x2="17" y2="22"></line>
+        <line x1="2" y1="12" x2="22" y2="12"></line>
+        <line x1="2" y1="7" x2="7" y2="7"></line>
+        <line x1="2" y1="17" x2="7" y2="17"></line>
+        <line x1="17" y1="17" x2="22" y2="17"></line>
+        <line x1="17" y1="7" x2="22" y2="7"></line>
+      </svg>
+    `;
+    posterWrap.appendChild(fb);
+    img.remove();
+  };
+
+  if (m.poster) {
+    img.src = m.poster;
+    img.onerror = renderRelFallback;
+    posterWrap.appendChild(img);
+  } else {
+    renderRelFallback();
+  }
+
+  if (m.year) {
+    const yearBadge = document.createElement("span");
+    yearBadge.className = "rel-year-badge";
+    yearBadge.textContent = m.year;
+    posterWrap.appendChild(yearBadge);
+  }
+
+  const cap = document.createElement("div");
+  cap.className = "rel-title";
+  cap.textContent = t(m.title);
+
+  card.appendChild(posterWrap);
+  card.appendChild(cap);
+  return card;
+}
+
 function loadIndexAndRelated(movie) {
   fetch("db/index.json")
     .then(r => (r.ok ? r.json() : []))
     .then(all => {
+      // 1. Find other versions / sequels
+      const versions = all.filter(m => isRelatedVersion(movie, m));
+
+      // 2. Recommend related movies by genre overlap (excluding the current movie AND related versions)
+      const versionSlugs = new Set(versions.map(v => v.slug));
       const genres = new Set(movie.genres || []);
       const related = all
-        .filter(m => m.slug !== movie.slug)
+        .filter(m => m.slug !== movie.slug && !versionSlugs.has(m.slug))
         .map(m => {
           const overlap = (m.genres || []).filter(g => genres.has(g)).length;
           return { m: m, score: overlap };
@@ -1060,64 +1176,42 @@ function loadIndexAndRelated(movie) {
         .slice(0, 12)
         .map(x => x.m);
 
-      if (!related.length) return;
-
-      // Mimetic Desire: Social watching cues for related movies title
-      const relTitle = document.querySelector("#relatedWrap .section-title");
-      if (relTitle) {
-        relTitle.textContent = LANG === "km" ? "អ្នកទស្សនាបានមើល (Viewers also watched)" : "Viewers also watched";
+      // Render Versions Section
+      const versionsWrap = document.getElementById("versionsWrap");
+      const versionsList = document.getElementById("versionsList");
+      if (versionsWrap && versionsList) {
+        if (versions.length > 0) {
+          versionsList.replaceChildren();
+          versions.forEach(v => {
+            const card = buildRecommendationCard(v);
+            versionsList.appendChild(card);
+          });
+          versionsWrap.style.display = "block";
+        } else {
+          versionsWrap.style.display = "none";
+        }
       }
 
-      const wrap = document.getElementById("related");
-      wrap.textContent = "";
-      related.forEach(m => {
-        const a = document.createElement("a");
-        a.className = "rel-card";
-        a.href = "?id=" + encodeURIComponent(m.slug) + (LANG === "en" ? "&lang=en" : "");
-        const posterWrap = document.createElement("div");
-        posterWrap.className = "rel-poster-wrap";
-        
-        const img = document.createElement("img");
-        img.className = "rel-poster";
-        img.loading = "lazy";
-        img.alt = t(m.title);
-
-        function renderRelFallback() {
-          posterWrap.classList.add("img-failed");
-          const fb = document.createElement("div");
-          fb.className = "rel-fallback-poster";
-          fb.innerHTML = `
-            <svg class="fallback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-              <line x1="7" y1="2" x2="7" y2="22"></line>
-              <line x1="17" y1="2" x2="17" y2="22"></line>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <line x1="2" y1="7" x2="7" y2="7"></line>
-              <line x1="2" y1="17" x2="7" y2="17"></line>
-              <line x1="17" y1="17" x2="22" y2="17"></line>
-              <line x1="17" y1="7" x2="22" y2="7"></line>
-            </svg>
-          `;
-          posterWrap.appendChild(fb);
-          img.remove();
-        }
-
-        if (m.poster) {
-          img.src = m.poster;
-          img.onerror = () => renderRelFallback();
-          posterWrap.appendChild(img);
+      // Render Related Section
+      const relatedWrap = document.getElementById("relatedWrap");
+      const relatedList = document.getElementById("related");
+      if (relatedWrap && relatedList) {
+        if (related.length > 0) {
+          // Mimetic Desire: Social watching cues for related movies title
+          const relTitle = document.querySelector("#relatedWrap .section-title");
+          if (relTitle) {
+            relTitle.textContent = LANG === "km" ? "អ្នកទស្សនាបានមើល (Viewers also watched)" : "Viewers also watched";
+          }
+          relatedList.replaceChildren();
+          related.forEach(r => {
+            const card = buildRecommendationCard(r);
+            relatedList.appendChild(card);
+          });
+          relatedWrap.style.display = "block";
         } else {
-          renderRelFallback();
+          relatedWrap.style.display = "none";
         }
-
-        const cap = document.createElement("div");
-        cap.className = "rel-title";
-        cap.textContent = t(m.title);
-        a.appendChild(posterWrap);
-        a.appendChild(cap);
-        wrap.appendChild(a);
-      });
-      document.getElementById("relatedWrap").style.display = "block";
+      }
     })
     .catch(() => {});
 }

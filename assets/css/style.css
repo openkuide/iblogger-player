@@ -6052,5 +6052,331 @@ body.theater-mode .wrap {
   padding-bottom: 15px;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE: Mobile & Tablet — iblogger-player
+   Breakpoints used:
+     ≤480px  — small phones (iPhone SE, Galaxy A)
+     ≤560px  — medium phones (existing breakpoint, extended)
+     600–767px — tablet portrait (iPad mini, Galaxy Tab)
+     ≥768px  — tablet landscape / desktop (existing)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── #1: Toolbar on ≤480px
+   Stack search full-width on its own row; collapse Filter and View
+   buttons to icon-only to save horizontal space.
+   Fitts' Law: full-width search is the easiest tap target on mobile. */
+@media (max-width: 480px) {
+  .home-toolbar {
+    gap: 8px;
+  }
+  .search {
+    flex: 1 1 100%;
+    order: -1;
+  }
+  /* Icon-only Filter toggle — hide the text label */
+  .filter-toggle .filter-label {
+    display: none;
+  }
+  /* Tighten toolbar actions row */
+  .toolbar-actions {
+    gap: 6px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  /* Surprise Me button: icon + short label only */
+  .surprise-btn {
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+}
+
+/* ── #2: Video control bar on ≤480px
+   Slim the floating glassmorphic bar from 74px to 58px, hide the
+   volume slider panel and time divider to prevent overflow on narrow
+   screens. The play/pause + fullscreen remain dominant. */
+@media (max-width: 480px) {
+  .video-js .vjs-control-bar {
+    height: 58px !important;
+    padding: 0 8px 6px 8px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: calc(100% - 16px) !important;
+  }
+  /* Hide volume panel — mobile uses system volume */
+  .video-js .vjs-volume-panel {
+    display: none !important;
+  }
+  /* Hide the time separator " / " */
+  .video-js .vjs-time-divider {
+    display: none !important;
+  }
+  /* Tighten control buttons */
+  .video-js .vjs-control-bar .vjs-button,
+  .video-js .vjs-control-bar .vjs-menu-button {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  /* Shrink time display text slightly */
+  .video-js .vjs-time-control {
+    font-size: 10.5px !important;
+  }
+}
+
+/* ── #3: Hero carousel on ≤480px
+   Further tighten padding to 14px (was 24px at ≤560px), clamp the
+   Khmer title to 2 lines and description to 2 lines so nothing
+   overflows on a 375px screen. */
+@media (max-width: 480px) {
+  .hero-carousel {
+    height: 240px;
+  }
+  .hc-slide {
+    padding: 14px 20px;
+  }
+  .slide-title-km {
+    font-size: 18px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .slide-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 11.5px;
+    margin-bottom: 14px;
+  }
+  .slide-title-en {
+    display: none; /* hide subtitle on very small screens to free vertical space */
+  }
+  .slide-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .hc-dots {
+    left: 20px;
+    bottom: 12px;
+  }
+}
+
+/* ── #4: Tablet portrait breakpoint 600px–767px
+   Home grid, hero carousel height, slide padding, and overall
+   padding are tuned for 7-8 inch tablet form factor. */
+@media (min-width: 600px) and (max-width: 767px) {
+  .wrap {
+    padding: 32px 20px 48px;
+  }
+  .hero-carousel {
+    height: 300px;
+    margin-bottom: 24px;
+  }
+  .hc-slide {
+    padding: 32px 40px;
+  }
+  .slide-title-km {
+    font-size: 22px;
+  }
+  .home-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+  }
+  /* Slightly smaller toolbar gap on tablet portrait */
+  .home-toolbar {
+    gap: 10px;
+  }
+  /* Related grid tighter on tablet */
+  .related {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* ── #5: Episode grid on ≤480px
+   Reduce minmax from 58px to 52px so that more buttons fit per row
+   on 375px screens; maintain the 44px min-height for Fitts' Law. */
+@media (max-width: 480px) {
+  .episodes {
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 6px;
+  }
+}
+
+/* ── #6: TV frame decorations hidden on ≤560px
+   .tv-feet, .tv-grille, and .tv-dial-group are skeuomorphic desktop
+   delights — on mobile they waste precious vertical px and distract
+   from the video content. Hide them at phone widths. */
+@media (max-width: 560px) {
+  .tv-feet {
+    display: none;
+  }
+  .tv-grille {
+    display: none;
+  }
+  .tv-dial-group {
+    display: none;
+  }
+  /* Compensate: reduce tv-strip height without the dial group */
+  .tv-strip {
+    padding: 10px 6px 14px;
+  }
+}
+
+/* ── #7: Meta heading & genre chips on ≤480px
+   Reduce h1 to 18px (was 21px at ≤560px), add a 3-line clamp so
+   long Khmer movie titles don't push the layout. Genre chips and
+   quick-tags get horizontal scroll instead of wrapping. */
+@media (max-width: 480px) {
+  .meta h1 {
+    font-size: 18px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Genre chips: single-row horizontal scroll to avoid multi-line chaos */
+  .genres-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding-bottom: 6px;
+  }
+  .genre-chip {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  /* Quick filter tags: same horizontal scroll treatment */
+  .quick-tags {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .quick-tag {
+    flex-shrink: 0;
+  }
+}
+
+/* ── #8: Player info 2-column layout on 600–768px tablet
+   On iPad mini / landscape phone, stack meta card and related side
+   by side instead of vertically — reduces excessive scroll length. */
+@media (min-width: 600px) and (max-width: 768px) {
+  /* Wrap the info area into a 2-col flex when both meta and related exist */
+  .info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .meta {
+    flex: 1 1 55%;
+    min-width: 0;
+    margin-top: 0;
+  }
+  /* Related section shares the row */
+  #relatedWrap {
+    flex: 1 1 38%;
+    min-width: 0;
+  }
+  /* Episodes stay full width below */
+  #episodesWrap {
+    width: 100%;
+  }
+}
+
+/* ── #9: Shorts info stack on ≤480px
+   Reduce left/right padding and reduce the right reserve so short
+   titles don't get clipped behind the action button column on 375px. */
+@media (max-width: 480px) {
+  .short-info-container {
+    left: 12px;
+    right: 70px; /* was 80px — 10px recovered for text */
+    bottom: 16px;
+    gap: 6px;
+  }
+  .short-author {
+    font-size: 14px;
+  }
+  .short-title {
+    font-size: 13px;
+  }
+}
+
+/* ── #10: Toast notifications on ≤480px
+   Replace the translate(-50%) centering with a full-width bottom bar
+   so it never clips on 320px or 360px narrow phones. */
+@media (max-width: 480px) {
+  .toast-notification {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 20px !important;
+    transform: translateY(20px) !important;
+    max-width: none !important;
+    width: auto !important;
+    text-align: center;
+    justify-content: center;
+    border-radius: 14px !important;
+  }
+  .toast-notification.show {
+    transform: translateY(0) !important;
+  }
+}
+
+/* ── #11: Continue Watching rail — scroll-snap on ≤768px
+   The history-scroll-row already has overflow-x:auto. Adding
+   scroll-snap to child cards gives a tactile snap-to-card feel
+   on tablet/mobile — identical to Netflix's horizontal rail UX. */
+@media (max-width: 768px) {
+  .history-scroll-row {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .history-card {
+    scroll-snap-align: start;
+    /* Slightly larger card on tablet for Fitts' Law */
+    flex: 0 0 96px;
+  }
+}
+@media (max-width: 480px) {
+  .history-card {
+    flex: 0 0 86px;
+  }
+  .history-poster-wrap {
+    height: 129px; /* maintain 2:3 ratio at 86px width */
+  }
+}
+
+/* ── #12: Disclaimer modal on ≤480px
+   Reduce the overlay padding from 24px to 16px and ensure the box
+   never gets squeezed past its content on 375px phones. */
+@media (max-width: 480px) {
+  .disclaimer-overlay {
+    padding: 16px;
+    align-items: flex-end; /* sheet-style — rises from bottom */
+  }
+  .disclaimer-box {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .disclaimer-header {
+    padding: 20px 20px 14px;
+  }
+  .quest-complete-notification {
+    padding: 18px 20px;
+    max-width: calc(100% - 32px);
+    left: 16px;
+    right: 16px;
+    transform: translate(0, -50%) scale(0.9);
+  }
+  @keyframes quest-pop-in {
+    to { transform: translate(0, -50%) scale(1); }
+  }
+}
+
+
 
 

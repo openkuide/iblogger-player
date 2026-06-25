@@ -5,7 +5,7 @@ description: Use when generating SVG poster art for one or all movies. Triggered
 
 # generate-poster
 
-Generate a 300×450px SVG poster for a movie and wire it into the catalog. Note: For Chinese Douyin short movies (genres including SHORTFILM), prefer using the `generate_image` tool to create a premium, high-quality cinematic PNG poster (saved to `assets/images/<slug>.png` and referenced as `./assets/images/<slug>.png`) instead of an SVG.
+Generate a 300×450px SVG poster for a movie and wire it into the catalog. Note: For Chinese Douyin short movies (genres including SHORTFILM), prefer using the `generate_image` tool to create a premium, quality cinematic PNG poster (saved to `assets/images/<slug>.png` and referenced as `./assets/images/<slug>.png`) instead of an SVG. When using the `generate_image` tool, ensure the prompt explicitly asks to include the stylized English title of the movie written clearly on the poster (e.g. as a main title text overlay).
 
 ## Trigger
 

@@ -43,7 +43,7 @@ Read `db/<slug>.json`. Detect type:
 **Rewrite `description.km`** — not a word-for-word translation. Write it fresh in natural Khmer that flows the same way. Same energy, same structure.
 
 **Poster check** — if `poster` is missing, is a `.svg` file/placeholder, or the referenced image file does not exist on disk:
-→ Generate a premium high-quality cinematic PNG poster using the `generate_image` tool.
+→ Generate a premium high-quality cinematic PNG poster using the `generate_image` tool, ensuring the prompt explicitly asks to include the stylized English title of the movie written clearly on the poster (e.g. as a main title text overlay).
 → Save the generated PNG to `assets/images/<slug>.png`.
 → Update `poster` field to `./assets/images/<slug>.png`.
 

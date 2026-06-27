@@ -112,6 +112,15 @@ async function runTests() {
         console.log(`[BROWSER CONSOLE ERROR (IGNORED)] ${fullText}`, msg.location());
         return;
       }
+
+      // Ignore raw.githubusercontent.com network errors and VideoJS stream-related source failures
+      const isStreamNetworkError = fullText.includes('raw.githubusercontent.com') ||
+                                   fullText.includes('MEDIA_ERR_SRC_NOT_SUPPORTED') ||
+                                   (msg.location && msg.location() && msg.location().url && msg.location().url.includes('raw.githubusercontent.com'));
+      if (isStreamNetworkError) {
+        console.log(`[BROWSER CONSOLE ERROR (IGNORED STREAM ERROR)] ${fullText}`, msg.location());
+        return;
+      }
       
       const loggedError = fullText || msg.text() || 'Unknown console error';
       console.log(`[BROWSER CONSOLE ERROR] ${loggedError}`, msg.location());

@@ -56,6 +56,16 @@ async function testSoundToggle(page) {
   await page.waitForSelector('.short-video-wrapper video', { timeout: 35000 });
 
   const mutedBefore = await page.evaluate(() => {
+    // Stub player.play to prevent playback failures from resetting the sound state
+    const video = document.querySelector('.short-video-wrapper video');
+    if (video && window.videojs) {
+      try {
+        const player = window.videojs(video);
+        if (player) {
+          player.play = () => Promise.resolve();
+        }
+      } catch (err) {}
+    }
     return document.querySelector('.short-video-wrapper video').muted;
   });
 

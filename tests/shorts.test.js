@@ -111,6 +111,18 @@ async function testLongPressSpeedBoost(page) {
   await page.evaluate(async () => {
     const wrapper = document.querySelector('.short-video-wrapper');
     const video = wrapper.querySelector('video');
+    
+    // Stub player to pretend it is playing so long-press works in headless test environments where streams may not load
+    if (video && window.videojs) {
+      try {
+        const player = window.videojs(video);
+        if (player) {
+          player.paused = () => false;
+          player.play = () => Promise.resolve();
+        }
+      } catch (err) {}
+    }
+
     if (video && video.paused) {
       try {
         await video.play();

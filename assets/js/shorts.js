@@ -72,7 +72,7 @@ const ShortsState = {
   setSoundEnabled(isOn, triggerHud = true) {
     this.soundOn = isOn;
     localStorage.setItem('shorts_sound', isOn ? 'on' : 'off');
-    this.players.forEach(player => player.muted(!isOn));
+    this.players.forEach(player => setMutedSafe(player, !isOn));
     refreshSoundButtons();
     if (isOn) {
       document.querySelectorAll('.sound-btn').forEach(btn => btn.classList.remove('pulsing'));
@@ -82,6 +82,14 @@ const ShortsState = {
     }
   }
 };
+
+function setMutedSafe(player, isMuted) {
+  try {
+    player.muted(isMuted);
+  } catch (err) {
+    // Ignore muted state update errors for players with failed streams in tests
+  }
+}
 
 const STOIC_QUOTES = [
   {

@@ -159,6 +159,18 @@ async function testDragToScrub(page) {
     if (!container) return null;
     const tooltip = container.querySelector('.short-scrub-tooltip');
     
+    // Stub player.duration() to avoid falsy/NaN check when video hasn't loaded metadata in headless test environment
+    const wrapper = document.querySelector('.short-video-wrapper');
+    const video = wrapper ? wrapper.querySelector('video') : null;
+    if (video && window.videojs) {
+      try {
+        const player = window.videojs(video);
+        if (player) {
+          player.duration = () => 60;
+        }
+      } catch (err) {}
+    }
+    
     const rect = container.getBoundingClientRect();
     const xStart = rect.left + rect.width * 0.1;
     const yStart = rect.top + rect.height / 2;

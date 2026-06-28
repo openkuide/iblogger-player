@@ -29,6 +29,7 @@ export function startHomeMode() {
   const PER_PAGE = 24;
 
   const SORTS = [
+    { value: "recommended", label: "ណែនាំ" },
     { value: "title",    label: "ឈ្មោះ A-Z" },
     { value: "year",     label: "ឆ្នាំថ្មី" },
     { value: "rating",   label: "Rating ↓" },
@@ -63,7 +64,7 @@ export function startHomeMode() {
       const loading       = ref(true);
       const search        = ref(params.get("q") || "");
       const activeGenres  = ref(params.get("genres") ? params.get("genres").split(",") : []);
-      const sort          = ref(params.get("sort") || "title");
+      const sort          = ref(params.get("sort") || "recommended");
       const yearFilter    = ref(params.get("year") || "");
       const minRating     = ref(Number(params.get("rating")) || 0);
       const countryFilter = ref(params.get("country") || "");
@@ -561,11 +562,28 @@ export function startHomeMode() {
           if (countryFilter.value && m.country !== countryFilter.value) return false;
           return true;
         });
+
+        // Recommended Sorting: newly added at the top (first 6 items), and randomized discovery feed below
+        if (sort.value === "recommended") {
+          if (q || yearFilter.value || minRating.value > 0 || countryFilter.value || activeGenres.value.length > 0) {
+            return list;
+          }
+          const prefixCount = Math.min(6, list.length);
+          const prefix = list.slice(0, prefixCount);
+          const suffix = list.slice(prefixCount);
+          for (let i = suffix.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [suffix[i], suffix[j]] = [suffix[j], suffix[i]];
+          }
+          return [...prefix, ...suffix];
+        }
+
         list = list.slice().sort((a, b) => {
           if (sort.value === "year")     return (b.year || 0) - (a.year || 0);
           if (sort.value === "rating")   return (b.rating || 0) - (a.rating || 0);
           if (sort.value === "episodes") return (b.episodeCount || 0) - (a.episodeCount || 0);
-          return title(a).localeCompare(title(b));
+          if (sort.value === "title")    return title(a).localeCompare(title(b));
+          return 0;
         });
         return list;
       });
@@ -655,7 +673,7 @@ export function startHomeMode() {
         yearFilter.value    = "";
         minRating.value     = 0;
         countryFilter.value = "";
-        sort.value          = "title";
+        sort.value          = "recommended";
         currentQuickTag.value = "";
       }
 

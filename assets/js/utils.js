@@ -21,7 +21,9 @@ export function translateGenre(genre) {
     "DOCUMENTARY": LANG === "km" ? "ឯកសារ" : "Documentary",
     "SCI_FI": LANG === "km" ? "វិទ្យាសាស្ត្រ" : "Sci-Fi",
     "ANIMATION": LANG === "km" ? "គំនូរជីវចល" : "Animation",
-    "SHORTFILM": LANG === "km" ? "រឿងភាគខ្លី" : "Short Film"
+    "SHORTFILM": LANG === "km" ? "រឿងភាគខ្លី" : "Short Film",
+    "HISTORY": LANG === "km" ? "ប្រវត្តិសាស្ត្រ" : "History",
+    "WAR": LANG === "km" ? "សង្គ្រាម" : "War"
   };
   return genreMap[key] || genre;
 }

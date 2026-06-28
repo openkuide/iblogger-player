@@ -5,6 +5,9 @@ let shortsIdleTimer = null;
 let activeShortWrapper = null;
 let shortsWheelHandler = null;
 
+const movieDetailsCache = new Map();
+const playerInitPromises = new Map();
+
 // Psychology & Philosophy: Unified State coordinator for better encapsulation and lifecycle clarity
 const ShortsState = {
   db: [],
@@ -406,6 +409,13 @@ export async function startShortsMode() {
   
   document.removeEventListener('keydown', handleShortsKeydown);
   document.addEventListener('keydown', handleShortsKeydown);
+
+  // Parallel prefetching of target movie details if present in URL
+  const queryParams = new URLSearchParams(location.search);
+  const targetSlug = queryParams.get("id");
+  if (targetSlug) {
+    fetchMovieDetails(targetSlug).catch(e => console.warn(`Failed to prefetch target details:`, e));
+  }
   
   const closeKeyboardBtn = document.getElementById('closeShortsKeyboardBtn');
   if (closeKeyboardBtn && !closeKeyboardBtn.dataset.bound) {
@@ -529,6 +539,11 @@ export async function startShortsMode() {
         ShortsState.db.unshift(targetMovie);
       }
     }
+
+    // Prefetch details for the first 3 movies in the feed
+    ShortsState.db.slice(0, 3).forEach(movie => {
+      fetchMovieDetails(movie.slug).catch(e => console.warn(`Failed to prefetch details for ${movie.slug}:`, e));
+    });
 
     renderFeed(container);
 
@@ -989,6 +1004,9 @@ function setupPlayOverlay(wrapper, movie) {
 function handleShortsKeydown(e) {
   const shortsView = document.getElementById('shortsView');
   if (!shortsView || shortsView.style.display === 'none') return;
+
+  // Ignore keyboard shortcuts if modifier keys are pressed (e.g., Ctrl+1, Cmd+2, Alt+Left)
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
   
   if (e.key === 'Escape') {
     const panel = document.getElementById('shortsCommentPanel');
@@ -1099,7 +1117,7 @@ function handleShortsKeydown(e) {
         : `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3z"/></svg>`;
       showKeystrokeHUD(activeWrapper, keyText, actionText, iconSvg);
     }
-  } else if (e.key === 'l' || e.key === 'L') {
+  } else if ((e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey && !e.altKey) {
     e.preventDefault();
     if (activeWrapper) {
       const likeBtn = activeWrapper.querySelector('.like-btn');
@@ -1114,7 +1132,7 @@ function handleShortsKeydown(e) {
         );
       }
     }
-  } else if (e.key === 'c' || e.key === 'C') {
+  } else if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey && !e.altKey) {
     e.preventDefault();
     const panel = document.getElementById('shortsCommentPanel');
     if (panel) {
@@ -1161,6 +1179,7 @@ function disposeOldPlayers(currentSlug) {
       if (p) {
         p.dispose();
         ShortsState.players.delete(key);
+        playerInitPromises.delete(key);
         // Re-inject a fresh video container div for when we scroll back
         const wrapper = document.querySelector(`.short-video-wrapper[data-slug="${key}"]`);
         if (wrapper) {
@@ -1202,6 +1221,26 @@ function handleVideoInView(wrapper, slug) {
     const newUrl = `${location.pathname}?${urlParams.toString()}`;
     history.replaceState(null, '', newUrl);
   }
+
+  preloadNextShort(wrapper);
+}
+
+function preloadNextShort(wrapper) {
+  const nextWrapper = wrapper.nextElementSibling;
+  if (!nextWrapper || !nextWrapper.classList.contains('short-video-wrapper')) return;
+
+  const nextSlug = nextWrapper.dataset.slug;
+  if (!nextSlug) return;
+
+  fetchMovieDetails(nextSlug)
+    .then(() => {
+      initializePlayer(nextSlug, nextWrapper).catch(err => {
+        console.warn(`Failed to pre-initialize player for next short ${nextSlug}:`, err);
+      });
+    })
+    .catch(err => {
+      console.warn(`Failed to prefetch details for next short ${nextSlug}:`, err);
+    });
 }
 
 async function playVideoInWrapper(wrapper, slug) {
@@ -1266,56 +1305,89 @@ function showSoundHintOnce() {
 }
 
 async function initializePlayer(slug, wrapper) {
-  try {
-    const movieData = await fetchMovieDetails(slug);
-    const randomEp = getRandomEpisode(movieData.episodes);
-    if (!randomEp || !randomEp.url) return null;
+  if (playerInitPromises.has(slug)) {
+    return playerInitPromises.get(slug);
+  }
 
-    // Update watch links to target the loaded random episode
-    const watchLinks = wrapper.querySelectorAll('.watch-link');
-    watchLinks.forEach(link => {
-      link.href = `?id=${slug}&ep=${randomEp.ep}`;
-    });
+  const promise = (async () => {
+    try {
+      const movieData = await fetchMovieDetails(slug);
+      const randomEp = getRandomEpisode(movieData.episodes);
+      if (!randomEp || !randomEp.url) return null;
 
-    const videoEl = createVideoElement();
-    const vc = wrapper.querySelector('.video-container');
-    if (vc) vc.appendChild(videoEl);
+      updateWatchLinks(wrapper, slug, randomEp.ep);
 
-    const player = createVideoJsInstance(videoEl, randomEp.url);
-    ShortsState.players.set(slug, player);
-    setupPlayerEventHandlers(player, wrapper);
+      const videoEl = createVideoElement();
+      const vc = wrapper.querySelector('.video-container');
+      if (vc) vc.appendChild(videoEl);
 
-    player.on('error', () => {
-      wrapper.classList.remove('playing');
-      wrapper.classList.add('error');
-      
-      if (!wrapper.querySelector('.short-error-indicator')) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'short-error-indicator';
-        const errorMsg = LANG === 'km' ? 'វីដេអូមិនអាចលេងបានទេ' : 'Clip Unavailable';
-        errorDiv.innerHTML = `
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="error-icon">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          <span>${errorMsg}</span>
-        `;
-        wrapper.appendChild(errorDiv);
-      }
-    });
+      const queryParams = new URLSearchParams(location.search);
+      const targetSlug = queryParams.get("id");
+      const isActive = activeShortWrapper === wrapper || (!activeShortWrapper && slug === targetSlug);
 
-    return player;
-  } catch (e) {
-    console.error('Failed to initialize short video:', e);
-    return null;
+      const player = createVideoJsInstance(videoEl, randomEp.url, isActive);
+      ShortsState.players.set(slug, player);
+      setupPlayerEventHandlers(player, wrapper);
+
+      player.on('error', () => handlePlayerError(wrapper));
+
+      return player;
+    } catch (e) {
+      console.error('Failed to initialize short video:', e);
+      playerInitPromises.delete(slug);
+      return null;
+    }
+  })();
+
+  playerInitPromises.set(slug, promise);
+  return promise;
+}
+
+function updateWatchLinks(wrapper, slug, ep) {
+  const watchLinks = wrapper.querySelectorAll('.watch-link');
+  watchLinks.forEach(link => {
+    link.href = `?id=${slug}&ep=${ep}`;
+  });
+}
+
+function handlePlayerError(wrapper) {
+  wrapper.classList.remove('playing');
+  wrapper.classList.add('error');
+  
+  if (!wrapper.querySelector('.short-error-indicator')) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'short-error-indicator';
+    const errorMsg = LANG === 'km' ? 'វីដេអូមិនអាចលេងបានទេ' : 'Clip Unavailable';
+    errorDiv.innerHTML = `
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="error-icon">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <span>${errorMsg}</span>
+    `;
+    wrapper.appendChild(errorDiv);
   }
 }
 
 async function fetchMovieDetails(slug) {
-  const res = await fetch(`db/${slug}.json`);
-  if (!res.ok) throw new Error('Failed to fetch movie details');
-  return res.json();
+  if (movieDetailsCache.has(slug)) {
+    return movieDetailsCache.get(slug);
+  }
+  const promise = fetch(`db/${slug}.json`)
+    .then(res => {
+      if (!res.ok) {
+        movieDetailsCache.delete(slug);
+        throw new Error('Failed to fetch movie details');
+      }
+      return res.json();
+    })
+    .catch(err => {
+      movieDetailsCache.delete(slug);
+      throw err;
+    });
+  movieDetailsCache.set(slug, promise);
+  return promise;
 }
 
 function getRandomEpisode(episodes = []) {
@@ -1332,10 +1404,10 @@ function createVideoElement() {
   return videoEl;
 }
 
-function createVideoJsInstance(videoElement, url) {
+function createVideoJsInstance(videoElement, url, autoplay = true) {
   return videojs(videoElement, {
     controls: false,
-    autoplay: true,
+    autoplay: autoplay,
     preload: 'auto',
     fluid: false,
     fill: true,

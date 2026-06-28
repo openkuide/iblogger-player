@@ -506,6 +506,9 @@ export function bindPlayerKeys() {
     const playerView = document.getElementById("playerView");
     if (!playerView || playerView.style.display === "none") return;
 
+    // Ignore keyboard shortcuts if modifier keys are pressed (e.g., Ctrl+1, Cmd+2, Alt+Left)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
     // Ignore seeking when typing in form controls
     const active = document.activeElement;
     if (active && (
